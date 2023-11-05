@@ -1,0 +1,41 @@
+{
+  "name": "tuffscript-monorepo",
+  "version": "1.0.0",
+  "description": "Arminian Programming Language",
+  "main": "index.js",
+  "author": "Arman Takmazyan",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "yarn --cwd backend start",
+    "build": "yarn --cwd frontend build",
+    "lint": "eslint ./**/*.ts --fix",
+    "format": "yarn prettier --write \"**/*.ts\" \"**/*.json\" \"**/*.md\"",
+    "type_check": "yarn tsc --noEmit --project ./tsconfig.json"
+  },
+  "lint-staged": {
+    "*.{ts,json,md}": [
+      "yarn prettier --write"
+    ],
+    "*.{ts,json}": [
+      "yarn eslint"
+    ],
+    "*.{ts}": [
+      "yarn type_check"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.2",
+    "@typescript-eslint/eslint-plugin": "^6.9.1",
+    "@typescript-eslint/parser": "^6.9.1",
+    "eslint": "^8.53.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.2",
+    "prettier": "^3.0.3"
+  }
+}
