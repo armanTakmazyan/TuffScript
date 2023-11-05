@@ -8,9 +8,9 @@
 **//tests
 
 # production
-**//build
-**//dist
-**//lib
+**/build
+**/dist
+**/lib
 
 # misc
 .DS_Store
