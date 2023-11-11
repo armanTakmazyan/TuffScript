@@ -1,9 +1,9 @@
-import { isKeyword } from './token/helpers';
+// import { isKeyword } from './token/helpers';
 import { TokenKind } from './token/types';
 import { Token } from './token/token';
 import {
   TOKEN_PATTERNS_LIST,
-  KEYWORD_TOKEN_PATTERNS,
+  // KEYWORD_TOKEN_PATTERNS,
   PUNCTUATION_TOKEN_PATTERNS,
 } from './token/constants';
 
@@ -46,16 +46,18 @@ export class Lexer {
       const [matchedString] = match ?? [];
 
       if (matchedString) {
-        if (
-          tokenType.name === TokenKind.Identifier &&
-          isKeyword(matchedString)
-        ) {
-          return new Token({
-            type: KEYWORD_TOKEN_PATTERNS[matchedString],
-            value: matchedString,
-            position: this.pos - matchedString.length,
-          });
-        }
+        // I  think in our cases the order of patterns in our TOKEN_PATTERNS_LIST is defined correctly
+        // and we do not need to do this check
+        // if (
+        //   tokenType.name === TokenKind.Identifier &&
+        //   isKeyword(matchedString)
+        // ) {
+        //   return new Token({
+        //     type: KEYWORD_TOKEN_PATTERNS[matchedString],
+        //     value: matchedString,
+        //     position: this.pos - matchedString.length,
+        //   });
+        // }
 
         const token = new Token({
           type: tokenType,

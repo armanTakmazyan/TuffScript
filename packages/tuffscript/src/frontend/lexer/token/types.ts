@@ -11,9 +11,11 @@ export enum TokenKind {
   Function = 'Function',
   Store = 'Store',
   ContainmentSuffix = 'ContainmentSuffix',
+  True = 'True',
+  False = 'False',
   // Grouping * Operators
+  UnaryOperator = 'UnaryOperator',
   BinaryOperator = 'BinaryOperator',
-  Equals = 'Equals',
   Space = 'Space',
   Newline = 'Newline',
   Comma = 'Comma',
@@ -30,11 +32,3 @@ export enum TokenKind {
 }
 
 export type Keyword = (typeof KEYWORDS)[number];
-
-export enum BinaryOperators {
-  ADDITION_OPERATOR = '+',
-  SUBTRACTION_OPERATOR = '-',
-  MULTIPLICATION_OPERATOR = '*',
-  DIVISION_OPERATOR = '/',
-  MODULUS_OPERATOR = '%',
-}

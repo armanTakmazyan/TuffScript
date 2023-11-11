@@ -2,6 +2,7 @@ import { StatementNodeType, ExpressionNodeType } from '../types';
 import {
   AssignmentNode,
   FunctionDeclarationNode,
+  UnaryExpressionNode,
   BinaryExpressionNode,
   CallExpressionNode,
   MemberExpressionNode,
@@ -10,6 +11,8 @@ import {
   PropertyNode,
   ObjectLiteralNode,
   StringLiteralNode,
+  TrueLiteralNode,
+  FalseLiteralNode,
 } from './types';
 
 // Statements
@@ -28,6 +31,11 @@ export const functionDeclarationNode: FunctionDeclarationNode = ({
 // Expressions
 export const binaryExpressionNode: BinaryExpressionNode = ({ ...rest }) => ({
   type: ExpressionNodeType.BinaryExpression,
+  ...rest,
+});
+
+export const unaryExpressionNode: UnaryExpressionNode = ({ ...rest }) => ({
+  type: ExpressionNodeType.UnaryExpression,
   ...rest,
 });
 
@@ -53,6 +61,16 @@ export const numberLiteralNode: NumberLiteralNode = ({ ...rest }) => ({
 
 export const stringLiteralNode: StringLiteralNode = ({ ...rest }) => ({
   type: ExpressionNodeType.StringLiteral,
+  ...rest,
+});
+
+export const trueLiteralNode: TrueLiteralNode = ({ ...rest }) => ({
+  type: ExpressionNodeType.TrueLiteral,
+  ...rest,
+});
+
+export const falseLiteralNode: FalseLiteralNode = ({ ...rest }) => ({
+  type: ExpressionNodeType.FalseLiteral,
   ...rest,
 });
 

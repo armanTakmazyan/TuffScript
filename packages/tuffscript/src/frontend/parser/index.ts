@@ -1,5 +1,5 @@
 import { TokenType } from '../lexer/token/tokenType';
-import { BinaryOperators, TokenKind } from '../lexer/token/types';
+import { TokenKind } from '../lexer/token/types';
 import { Token } from '../lexer/token/token';
 import {
   Program,
@@ -19,10 +19,15 @@ import {
   memberExpressionNode,
   numberLiteralNode,
   stringLiteralNode,
+  trueLiteralNode,
+  falseLiteralNode,
   objectLiteralNode,
   propertyNode,
+  unaryExpressionNode,
 } from '../ast/nodes';
 import {
+  UnaryOperators,
+  BinaryOperators,
   IDENTIFIER_TOKEN_PATTERNS,
   KEYWORD_TOKEN_PATTERNS,
   PUNCTUATION_TOKEN_PATTERNS,
@@ -55,7 +60,6 @@ export class Parser {
   }
 
   isEOF(): boolean {
-    console.log('this.at()', this.at());
     return this.at().type.name === TokenKind.EOF;
   }
 
@@ -188,11 +192,11 @@ export class Parser {
   // պահել 5 իմ_զանգվատս -ում
   parseVariableAssignment(): Statement {
     this.eat(); // eat Store keyword
-    const primaryExpression = this.parsePrimaryExpression();
+    const primaryExpression = this.parseExpression();
 
     const identifier = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
-      message: 'Expected identifier name',
+      message: 'Incorrect Assignment Format. Expected identifier name',
     }).value;
 
     const declaration: Assignment = assignmentNode({
@@ -214,23 +218,10 @@ export class Parser {
     return this.parseObjectExpression();
   }
 
-  // TODO: We do not have assignment expressions
-  // private parse_assignment_expr(): Expr {
-  //   const left = this.parse_object_expr();
-
-  //   if (this.at().type == TokenType.Equals) {
-  //     this.eat(); // advance past equals
-  //     const value = this.parse_assignment_expr();
-  //     return { value, assigne: left, kind: 'AssignmentExpr' } as AssignmentExpr;
-  //   }
-
-  //   return left;
-  // }
-
   parseObjectExpression(): Expression {
     // { Prop[] }
     if (this.at().type.name !== TokenKind.OpenBrace) {
-      return this.parseAdditiveExpression();
+      return this.parseEqualityExpression();
     }
 
     this.eat(); // advance past open brace.
@@ -295,11 +286,49 @@ export class Parser {
     });
   }
 
+  parseEqualityExpression(): Expression {
+    let left: Expression = this.parseComparisonExpression();
+
+    while (this.at().value === BinaryOperators.EQUALS) {
+      const operator = this.eat().value;
+      const right = this.parseComparisonExpression();
+      left = binaryExpressionNode({
+        left,
+        right,
+        operator,
+      });
+    }
+
+    return left;
+  }
+
+  parseComparisonExpression(): Expression {
+    let left: Expression = this.parseAdditiveExpression();
+
+    while (
+      this.at().value == BinaryOperators.LESS_THAN ||
+      this.at().value == BinaryOperators.GREATER_THAN
+    ) {
+      const operator = this.eat().value;
+      const right = this.parseAdditiveExpression();
+      left = binaryExpressionNode({
+        left,
+        right,
+        operator,
+      });
+    }
+
+    return left;
+  }
+
   // Handle Addition & Subtraction Operations
   parseAdditiveExpression(): Expression {
     let left: Expression = this.parseMultiplicitaveExpression();
 
-    while (this.at().value == '+' || this.at().value == '-') {
+    while (
+      this.at().value == BinaryOperators.ADDITION ||
+      this.at().value == BinaryOperators.SUBTRACTION
+    ) {
       const operator = this.eat().value;
       const right = this.parseMultiplicitaveExpression();
       left = binaryExpressionNode({
@@ -317,9 +346,9 @@ export class Parser {
     let left: Expression = this.parseCallMemberExpression();
 
     while (
-      this.at().value === BinaryOperators.DIVISION_OPERATOR ||
-      this.at().value === BinaryOperators.MULTIPLICATION_OPERATOR ||
-      this.at().value === BinaryOperators.MODULUS_OPERATOR
+      this.at().value === BinaryOperators.DIVISION ||
+      this.at().value === BinaryOperators.MULTIPLICATION ||
+      this.at().value === BinaryOperators.MODULUS
     ) {
       const operator = this.eat().value;
       const right = this.parseCallMemberExpression();
@@ -331,6 +360,19 @@ export class Parser {
     }
 
     return left;
+  }
+
+  parseUnaryOperatorExpression(): Expression {
+    if (this.at().value === UnaryOperators.Not) {
+      const operator = this.eat().value;
+      const unaryOperatorExpression = this.parseUnaryOperatorExpression();
+      return unaryExpressionNode({
+        operator,
+        argument: unaryOperatorExpression,
+      });
+    }
+
+    return this.parseCallMemberExpression();
   }
 
   // foo.bar()()
@@ -441,6 +483,12 @@ export class Parser {
       }
       case TokenKind.String: {
         return stringLiteralNode({ value: `${this.eat().value}` });
+      }
+      case TokenKind.True: {
+        return trueLiteralNode({ value: `${this.eat().value}` });
+      }
+      case TokenKind.False: {
+        return falseLiteralNode({ value: `${this.eat().value}` });
       }
       case TokenKind.OpenParen: {
         this.eat(); // eat the opening paren

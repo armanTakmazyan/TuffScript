@@ -2,12 +2,15 @@ import {
   Expression,
   Assignment,
   FunctionDeclaration,
+  UnaryExpression,
   BinaryExpression,
   CallExpression,
   MemberExpression,
   Identifier,
   NumberLiteral,
   StringLiteral,
+  TrueLiteral,
+  FalseLiteral,
   Property,
   ObjectLiteral,
   StatementOrExpression,
@@ -38,6 +41,15 @@ export interface BinaryExpressionNodeArgs {
 export type BinaryExpressionNode = (
   args: BinaryExpressionNodeArgs,
 ) => BinaryExpression;
+
+export interface UnaryExpressionNodeArgs {
+  operator: string;
+  argument: Expression;
+}
+
+export type UnaryExpressionNode = (
+  args: UnaryExpressionNodeArgs,
+) => UnaryExpression;
 
 export interface CallExpressionNodeArgs {
   args: Expression[];
@@ -80,6 +92,18 @@ export interface PropertyNodeArgs {
   key: string;
   value?: Expression;
 }
+
+export interface TrueLiteralNodeArgs {
+  value: string;
+}
+
+export type TrueLiteralNode = (args: TrueLiteralNodeArgs) => TrueLiteral;
+
+export interface FalseLiteralNodeArgs {
+  value: string;
+}
+
+export type FalseLiteralNode = (args: FalseLiteralNodeArgs) => FalseLiteral;
 
 export type PropertyNode = (args: PropertyNodeArgs) => Property;
 

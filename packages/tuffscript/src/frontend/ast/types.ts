@@ -21,6 +21,10 @@ export enum ExpressionNodeType {
   StringLiteral = 'StringLiteral',
   Identifier = 'Identifier',
   BinaryExpression = 'BinaryExpression',
+  UnaryExpression = 'UnaryExpression',
+  // Boolean Values
+  TrueLiteral = 'TrueLiteral',
+  FalseLiteral = 'FalseLiteral',
 }
 
 //
@@ -68,6 +72,12 @@ export interface BinaryExpression extends BaseExpression {
   operator: string; // needs to be of type BinaryOperator
 }
 
+export interface UnaryExpression extends BaseExpression {
+  type: ExpressionNodeType.UnaryExpression;
+  operator: string;
+  argument: Expression;
+}
+
 export interface CallExpression extends BaseExpression {
   type: ExpressionNodeType.CallExpression;
   args: Expression[];
@@ -103,6 +113,16 @@ export interface StringLiteral extends BaseExpression {
   value: string;
 }
 
+export interface TrueLiteral extends BaseExpression {
+  type: ExpressionNodeType.TrueLiteral;
+  value: string;
+}
+
+export interface FalseLiteral extends BaseExpression {
+  type: ExpressionNodeType.FalseLiteral;
+  value: string;
+}
+
 export interface Property extends BaseExpression {
   type: ExpressionNodeType.Property;
   key: string;
@@ -121,7 +141,10 @@ export type Expression =
   | ObjectLiteral
   | NumberLiteral
   | StringLiteral
+  | TrueLiteral
+  | FalseLiteral
   | Identifier
+  | UnaryExpression
   | BinaryExpression;
 
 export type StatementOrExpression = Statement | Expression;
