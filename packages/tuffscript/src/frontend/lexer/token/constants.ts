@@ -22,6 +22,18 @@ export const KEYWORD_TOKEN_PATTERNS = {
     name: TokenKind.End,
     regex: 'ավարտել',
   }),
+  [TokenKind.Store]: new TokenType({
+    name: TokenKind.Store,
+    regex: 'պահել',
+  }),
+  [TokenKind.ContainmentSuffix]: new TokenType({
+    name: TokenKind.ContainmentSuffix,
+    regex: 'ում',
+  }),
+  [TokenKind.Equals]: new TokenType({
+    name: TokenKind.Equals,
+    regex: 'հավասար է',
+  }),
   [TokenKind.Function]: new TokenType({
     name: TokenKind.Function,
     regex: 'ֆունկցիա',
@@ -45,14 +57,13 @@ export const OPERATOR_TOKEN_PATTERNS = {
 };
 
 export const PUNCTUATION_TOKEN_PATTERNS = {
-  //   ASSIGN: new TokenType({name: 'ASSIGN', regex: 'havasara'}, ),
+  [TokenKind.Newline]: new TokenType({
+    name: TokenKind.Newline,
+    regex: '[\\n]+',
+  }),
   [TokenKind.Space]: new TokenType({
     name: TokenKind.Space,
-    regex: '[ \\n\\t\\r]',
-  }),
-  [TokenKind.Equals]: new TokenType({
-    name: TokenKind.Equals,
-    regex: '=',
+    regex: '[ \\t\\r]',
   }),
   [TokenKind.Comma]: new TokenType({
     name: TokenKind.Comma,

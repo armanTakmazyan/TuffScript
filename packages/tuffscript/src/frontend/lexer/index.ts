@@ -19,7 +19,7 @@ export class Lexer {
   public lexAnalysis(): Token[] {
     while (this.pos < this.sourceCode.length) {
       const token = this.nextToken();
-      if (token && token.type !== PUNCTUATION_TOKEN_PATTERNS.Space) {
+      if (this.includeToken(token)) {
         this.tokenList.push(token);
       }
     }
@@ -37,6 +37,9 @@ export class Lexer {
   }
 
   private nextToken(): Token | null {
+    // EOF reached
+    if (this.pos >= this.sourceCode.length) return null;
+
     for (const tokenType of TOKEN_PATTERNS_LIST) {
       const regex = new RegExp(`^${tokenType.regex}`);
       const match = regex.exec(this.sourceCode.slice(this.pos));
@@ -65,13 +68,31 @@ export class Lexer {
       }
     }
 
-    if (this.pos < this.sourceCode.length) {
-      const unexpectedChar = this.sourceCode[this.pos];
-      throw new Error(
-        `Unexpected character ${unexpectedChar} at position ${this.pos}.`,
-      );
-    }
+    const unexpectedChar = this.sourceCode[this.pos];
+    throw new Error(
+      `Unexpected character ${unexpectedChar} at position ${this.pos}.`,
+    );
+  }
 
-    return null; // Return null if no token is matched (only possible if EOF reached)
+  private includeToken(token: Token | null): token is Token {
+    if (!token) return false;
+
+    if (
+      token.type.name === TokenKind.Space ||
+      token.type.name === TokenKind.Newline
+    )
+      return false;
+
+    // if (
+    //   token.type.name === TokenKind.Newline &&
+    //   (!this.tokenList.length ||
+    //     this.pos >= this.sourceCode.length ||
+    //     this.tokenList[this.tokenList.length - 1].type.name ===
+    //       TokenKind.Newline)
+    // ) {
+    //   return false;
+    // }
+
+    return true;
   }
 }
