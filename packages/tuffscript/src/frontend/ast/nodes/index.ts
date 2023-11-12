@@ -2,6 +2,7 @@ import { LiteralValues } from '../../lexer/token/constants';
 import { StatementNodeType, ExpressionNodeType } from '../types';
 import {
   AssignmentNode,
+  IfStatementNode,
   FunctionDeclarationNode,
   UnaryExpressionNode,
   BinaryExpressionNode,
@@ -20,6 +21,11 @@ import {
 // Statements
 export const assignmentNode: AssignmentNode = ({ ...rest }) => ({
   type: StatementNodeType.Assignment,
+  ...rest,
+});
+
+export const ifStatementNode: IfStatementNode = ({ ...rest }) => ({
+  type: StatementNodeType.IfStatement,
   ...rest,
 });
 

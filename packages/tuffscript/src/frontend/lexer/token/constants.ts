@@ -55,6 +55,14 @@ export const KEYWORD_TOKEN_PATTERNS = {
     name: TokenKind.ContainmentSuffix,
     regex: 'ում',
   }),
+  [TokenKind.If]: new TokenType({
+    name: TokenKind.If,
+    regex: 'եթե',
+  }),
+  [TokenKind.Else]: new TokenType({
+    name: TokenKind.Else,
+    regex: 'հակառակ դեպքում',
+  }),
   [TokenKind.Function]: new TokenType({
     name: TokenKind.Function,
     regex: 'ֆունկցիա',
@@ -159,4 +167,6 @@ export const KEYWORDS = [
   TokenKind.Store,
   TokenKind.ContainmentSuffix,
   TokenKind.Function,
+  TokenKind.If,
+  TokenKind.Else,
 ] as const;

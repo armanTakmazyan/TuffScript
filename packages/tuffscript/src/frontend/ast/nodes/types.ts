@@ -1,6 +1,7 @@
 import {
   Expression,
   Assignment,
+  IfStatement,
   FunctionDeclaration,
   UnaryExpression,
   BinaryExpression,
@@ -22,6 +23,14 @@ export interface AssignmentNodeArgs {
   value: Expression;
 }
 export type AssignmentNode = (args: AssignmentNodeArgs) => Assignment;
+
+export interface IfStatementNodeArgs {
+  condition: Expression;
+  thenBody: StatementOrExpression[];
+  elseBody?: StatementOrExpression[];
+}
+
+export type IfStatementNode = (args: IfStatementNodeArgs) => IfStatement;
 
 export interface FunctionDeclarationNodeArgs {
   arguments: string[];

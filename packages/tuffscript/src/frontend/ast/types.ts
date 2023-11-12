@@ -7,9 +7,9 @@ import { LiteralValues } from '../lexer/token/constants';
 
 export enum StatementNodeType {
   // STATEMENTS
-
   Assignment = 'Assignment',
   FunctionDeclaration = 'FunctionDeclaration',
+  IfStatement = 'IfStatement',
 }
 
 export enum ExpressionNodeType {
@@ -54,6 +54,13 @@ export interface Assignment extends BaseStatement {
   value: Expression;
 }
 
+export interface IfStatement extends BaseStatement {
+  type: StatementNodeType.IfStatement;
+  condition: Expression;
+  thenBody: StatementOrExpression[];
+  elseBody?: StatementOrExpression[];
+}
+
 export interface FunctionDeclaration extends BaseStatement {
   type: StatementNodeType.FunctionDeclaration;
   arguments: string[];
@@ -61,7 +68,7 @@ export interface FunctionDeclaration extends BaseStatement {
   body: StatementOrExpression[];
 }
 
-export type Statement = Assignment | FunctionDeclaration;
+export type Statement = Assignment | IfStatement | FunctionDeclaration;
 
 /**  Expressions will result in a value at runtime unlike Statements */
 /**

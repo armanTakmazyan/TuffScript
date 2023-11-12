@@ -12,6 +12,7 @@ import {
 } from '../ast/types';
 import {
   assignmentNode,
+  ifStatementNode,
   binaryExpressionNode,
   callExpressionNode,
   functionDeclarationNode,
@@ -132,6 +133,8 @@ export class Parser {
     switch (this.at().type.name) {
       case TokenKind.Store:
         return this.parseVariableAssignment();
+      case TokenKind.If:
+        return this.parseIfStatement();
       case TokenKind.Function:
         return this.parseFunctionDeclaration();
       default:
@@ -139,7 +142,6 @@ export class Parser {
     }
     // const primaryExpression = this.parsePrimaryExpression();
     // const currentToken = this.at();
-    // console.log('currentToken', currentToken);
     // if (
     //   currentToken.type.name !== TokenKind.Newline &&
     //   currentToken.type.name !== TokenKind.EOF
@@ -152,7 +154,6 @@ export class Parser {
 
   parseFunctionDeclaration(): Statement {
     this.eat(); // eat Function keyword
-
     const functionName = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
       message: 'Expected function name following ֆունկցիա keyword',
@@ -215,6 +216,45 @@ export class Parser {
     });
 
     return declaration;
+  }
+
+  parseIfStatement(): Statement {
+    this.eat(); // eat If keyword
+    const condition = this.parseExpression();
+    this.require({
+      expected: [KEYWORD_TOKEN_PATTERNS.Do],
+      message: 'Incorrect If Statement',
+    });
+
+    const thenBody: StatementOrExpression[] = [];
+
+    while (!this.isEOF() && this.at().type.name !== TokenKind.Else) {
+      thenBody.push(this.parseStatement());
+    }
+
+    this.require({
+      expected: [KEYWORD_TOKEN_PATTERNS.Else],
+      message: 'Incorrect If Statement',
+    });
+
+    const elseBody: StatementOrExpression[] = [];
+
+    while (!this.isEOF() && this.at().type.name !== TokenKind.End) {
+      elseBody.push(this.parseStatement());
+    }
+
+    this.require({
+      expected: [KEYWORD_TOKEN_PATTERNS.End],
+      message: 'Incorrect If Statement',
+    });
+
+    const ifStatement = ifStatementNode({
+      condition,
+      thenBody,
+      elseBody,
+    });
+
+    return ifStatement;
   }
 
   // Handle expressions
