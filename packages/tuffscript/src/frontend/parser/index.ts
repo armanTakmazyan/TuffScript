@@ -21,6 +21,7 @@ import {
   stringLiteralNode,
   trueLiteralNode,
   falseLiteralNode,
+  nilLiteralNode,
   objectLiteralNode,
   propertyNode,
   unaryExpressionNode,
@@ -93,16 +94,19 @@ export class Parser {
     message?: string;
   }): Token {
     const token = this.match(...expected);
+    const currentToken = this.at();
+
     if (!token) {
       throw new Error(
-        message ?? `At position ${this.position}, expected ${expected[0].name}`,
+        `${message ? `${message}. ` : ''}At position ${
+          this.position
+        }, expected ${expected[0].name}. But got ${currentToken.value}`,
       );
     }
     return token;
   }
 
   throwError(message: string): never {
-    console.error(this.at());
     throw new Error(message);
   }
 
@@ -196,7 +200,7 @@ export class Parser {
 
     const identifier = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
-      message: 'Incorrect Assignment Format. Expected identifier name',
+      message: 'Incorrect Assignment Format',
     }).value;
 
     const declaration: Assignment = assignmentNode({
@@ -207,7 +211,7 @@ export class Parser {
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.ContainmentSuffix],
       message:
-        'Incorrect Assignment Format. Ensure the format: պպահել <expression> <variable_name> ում',
+        'Incorrect Assignment Format. Ensure the format: պահել <expression> <variable_name> ում',
     });
 
     return declaration;
@@ -438,11 +442,6 @@ export class Parser {
       let computed: boolean;
 
       // non-computed values aka obj.expr
-      console.log(
-        'operator.type.name',
-        operator.type.name,
-        operator.type.name === TokenKind.Dot,
-      );
       if (operator.type.name === TokenKind.Dot) {
         computed = false;
         // get identifier, interesting case, I think we will be able to write myObject.(some_property)
@@ -453,10 +452,8 @@ export class Parser {
           );
         }
       } else {
-        console.log('mtav ste');
         // this allows obj[computedValue]
         computed = true;
-        // TODO: Change this parsePrimaryExpression, to parseExpression -this.parse_expr();
         property = this.parseExpression();
         this.require({ expected: [PUNCTUATION_TOKEN_PATTERNS.CloseBracket] });
       }
@@ -485,15 +482,20 @@ export class Parser {
         return stringLiteralNode({ value: `${this.eat().value}` });
       }
       case TokenKind.True: {
-        return trueLiteralNode({ value: `${this.eat().value}` });
+        this.eat();
+        return trueLiteralNode();
       }
       case TokenKind.False: {
-        return falseLiteralNode({ value: `${this.eat().value}` });
+        this.eat();
+        return falseLiteralNode();
+      }
+      case TokenKind.Nil: {
+        this.eat();
+        return nilLiteralNode();
       }
       case TokenKind.OpenParen: {
         this.eat(); // eat the opening paren
-        // const value = this.parse_expr();
-        const value = this.parsePrimaryExpression();
+        const value = this.parseExpression();
         this.require({ expected: [PUNCTUATION_TOKEN_PATTERNS.CloseParen] });
         return value;
       }

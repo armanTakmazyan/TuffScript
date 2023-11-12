@@ -5,14 +5,15 @@ export enum TokenKind {
   Number = 'Number',
   String = 'String',
   Identifier = 'Identifier',
+  True = 'True',
+  False = 'False',
+  Nil = 'Nil',
   // Keywords
   Do = 'Do',
   End = 'End',
   Function = 'Function',
   Store = 'Store',
   ContainmentSuffix = 'ContainmentSuffix',
-  True = 'True',
-  False = 'False',
   // Grouping * Operators
   UnaryOperator = 'UnaryOperator',
   BinaryOperator = 'BinaryOperator',

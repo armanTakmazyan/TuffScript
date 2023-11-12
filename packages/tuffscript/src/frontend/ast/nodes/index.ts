@@ -1,3 +1,4 @@
+import { LiteralValues } from '../../lexer/token/constants';
 import { StatementNodeType, ExpressionNodeType } from '../types';
 import {
   AssignmentNode,
@@ -13,6 +14,7 @@ import {
   StringLiteralNode,
   TrueLiteralNode,
   FalseLiteralNode,
+  NilLiteralNode,
 } from './types';
 
 // Statements
@@ -64,14 +66,19 @@ export const stringLiteralNode: StringLiteralNode = ({ ...rest }) => ({
   ...rest,
 });
 
-export const trueLiteralNode: TrueLiteralNode = ({ ...rest }) => ({
+export const trueLiteralNode: TrueLiteralNode = () => ({
   type: ExpressionNodeType.TrueLiteral,
-  ...rest,
+  value: LiteralValues.True,
 });
 
-export const falseLiteralNode: FalseLiteralNode = ({ ...rest }) => ({
+export const falseLiteralNode: FalseLiteralNode = () => ({
   type: ExpressionNodeType.FalseLiteral,
-  ...rest,
+  value: LiteralValues.False,
+});
+
+export const nilLiteralNode: NilLiteralNode = () => ({
+  type: ExpressionNodeType.NilLiteral,
+  value: LiteralValues.Nil,
 });
 
 export const propertyNode: PropertyNode = ({ ...rest }) => ({

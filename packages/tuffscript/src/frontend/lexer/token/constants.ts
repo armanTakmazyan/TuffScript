@@ -1,6 +1,12 @@
 import { TokenType } from './tokenType';
 import { TokenKind } from './types';
 
+export enum LiteralValues {
+  True = 'ճշմարտություն',
+  False = 'կեղծիք',
+  Nil = 'սահմանված չէ',
+}
+
 export const LITERAL_TOKEN_PATTERNS = {
   [TokenKind.Number]: new TokenType({
     name: TokenKind.Number,
@@ -10,17 +16,29 @@ export const LITERAL_TOKEN_PATTERNS = {
     name: TokenKind.String,
     regex: "'(?:[^'\\\\]|\\\\.)*'",
   }),
-} as const;
-
-export const KEYWORD_TOKEN_PATTERNS = {
   [TokenKind.True]: new TokenType({
     name: TokenKind.True,
-    regex: 'ճշմարտություն',
+    regex: LiteralValues.True,
   }),
   [TokenKind.False]: new TokenType({
     name: TokenKind.False,
-    regex: 'կեղծիք',
+    regex: LiteralValues.False,
   }),
+  [TokenKind.Nil]: new TokenType({
+    name: TokenKind.Nil,
+    regex: LiteralValues.Nil,
+  }),
+} as const;
+
+// '^[\u0531-\u0556\u0561-\u0587]+$'
+export const IDENTIFIER_TOKEN_PATTERNS = {
+  [TokenKind.Identifier]: new TokenType({
+    name: TokenKind.Identifier,
+    regex: '[\u0531-\u0556\u0561-\u0587]+',
+  }),
+} as const;
+
+export const KEYWORD_TOKEN_PATTERNS = {
   [TokenKind.Do]: new TokenType({
     name: TokenKind.Do,
     regex: 'կատարել',
@@ -40,14 +58,6 @@ export const KEYWORD_TOKEN_PATTERNS = {
   [TokenKind.Function]: new TokenType({
     name: TokenKind.Function,
     regex: 'ֆունկցիա',
-  }),
-} as const;
-
-// '^[\u0531-\u0556\u0561-\u0587]+$'
-export const IDENTIFIER_TOKEN_PATTERNS = {
-  [TokenKind.Identifier]: new TokenType({
-    name: TokenKind.Identifier,
-    regex: '[\u0531-\u0556\u0561-\u0587]+',
   }),
 } as const;
 
@@ -144,8 +154,6 @@ export const TOKEN_PATTERNS_LIST = [
  * keywords and known identifiers, symbols.
  */
 export const KEYWORDS = [
-  TokenKind.True,
-  TokenKind.False,
   TokenKind.Do,
   TokenKind.End,
   TokenKind.Store,

@@ -3,6 +3,8 @@
 // ---     Defines the structure of our languages AST      ---
 // -----------------------------------------------------------
 
+import { LiteralValues } from '../lexer/token/constants';
+
 export enum StatementNodeType {
   // STATEMENTS
 
@@ -25,6 +27,8 @@ export enum ExpressionNodeType {
   // Boolean Values
   TrueLiteral = 'TrueLiteral',
   FalseLiteral = 'FalseLiteral',
+  // Nil
+  NilLiteral = 'NilLiteral',
 }
 
 //
@@ -115,12 +119,17 @@ export interface StringLiteral extends BaseExpression {
 
 export interface TrueLiteral extends BaseExpression {
   type: ExpressionNodeType.TrueLiteral;
-  value: string;
+  value: LiteralValues.True;
 }
 
 export interface FalseLiteral extends BaseExpression {
   type: ExpressionNodeType.FalseLiteral;
-  value: string;
+  value: LiteralValues.False;
+}
+
+export interface NilLiteral extends BaseExpression {
+  type: ExpressionNodeType.NilLiteral;
+  value: LiteralValues.Nil;
 }
 
 export interface Property extends BaseExpression {
@@ -143,6 +152,7 @@ export type Expression =
   | StringLiteral
   | TrueLiteral
   | FalseLiteral
+  | NilLiteral
   | Identifier
   | UnaryExpression
   | BinaryExpression;

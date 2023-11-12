@@ -10,8 +10,10 @@ const tuffCode = `
         23 + 2
         տպե.եետ
         պահել Աշխ Աշխարհ ում
-
+        պահել սահմանված չէ խարխար ում
         պահել 3 հավասար է 4 հավասար է 7 Աշխարհեետ ում
+        3 հավասար է կեղծիք
+        4 հավասար է ճշմարտություն
         7 փոքր է 3
         9 մեծ է 3
          
@@ -20,13 +22,14 @@ const tuffCode = `
 
 const simpleAriphmetic = `
 9 մեծ է 3
+պահել սահմանված չէ խարխար ում
    
 `;
 
 const lexer = new Lexer(tuffCode);
 
 const tokens = lexer.lexAnalysis();
-// console.log(tokens);
+console.log(tokens);
 
 const parser = new Parser({ tokens });
 const astTree = parser.produceAST();

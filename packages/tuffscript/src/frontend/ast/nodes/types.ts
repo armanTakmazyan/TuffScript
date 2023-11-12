@@ -11,6 +11,7 @@ import {
   StringLiteral,
   TrueLiteral,
   FalseLiteral,
+  NilLiteral,
   Property,
   ObjectLiteral,
   StatementOrExpression,
@@ -93,17 +94,11 @@ export interface PropertyNodeArgs {
   value?: Expression;
 }
 
-export interface TrueLiteralNodeArgs {
-  value: string;
-}
+export type TrueLiteralNode = () => TrueLiteral;
 
-export type TrueLiteralNode = (args: TrueLiteralNodeArgs) => TrueLiteral;
+export type FalseLiteralNode = () => FalseLiteral;
 
-export interface FalseLiteralNodeArgs {
-  value: string;
-}
-
-export type FalseLiteralNode = (args: FalseLiteralNodeArgs) => FalseLiteral;
+export type NilLiteralNode = () => NilLiteral;
 
 export type PropertyNode = (args: PropertyNodeArgs) => Property;
 
