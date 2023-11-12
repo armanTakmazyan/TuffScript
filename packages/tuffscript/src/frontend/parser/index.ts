@@ -433,7 +433,7 @@ export class Parser {
   parseCallExpression(caller: Expression): Expression {
     let callExpression: Expression = callExpressionNode({
       caller,
-      args: this.parseArguments(),
+      arguments: this.parseArguments(),
     });
 
     if (this.at().type.name == TokenKind.OpenParen) {

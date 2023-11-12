@@ -91,7 +91,7 @@ export interface UnaryExpression extends BaseExpression {
 
 export interface CallExpression extends BaseExpression {
   type: ExpressionNodeType.CallExpression;
-  args: Expression[];
+  arguments: Expression[];
   caller: Expression;
 }
 

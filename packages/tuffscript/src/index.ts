@@ -1,6 +1,7 @@
 import util from 'util';
 import { Lexer } from './frontend/lexer';
 import { Parser } from './frontend/parser';
+import { Interpreter } from './runtime/interpreter';
 
 const tuffCode = `
 ֆունկցիա անուն()
@@ -37,13 +38,28 @@ const simpleAriphmetic = `
    
 `;
 
-const lexer = new Lexer(tuffCode);
+const simpleFunction = `
+ֆունկցիա անուն()
+կատարել
+
+    23 + 2
+    34 -3 
+    234 * 2 
+ավարտել
+
+անուն()
+`;
+
+const lexer = new Lexer(simpleFunction);
 
 const tokens = lexer.lexAnalysis();
-console.log(tokens);
+// console.log(tokens);
 
 const parser = new Parser({ tokens });
 const astTree = parser.produceAST();
-console.log(
-  util.inspect(astTree, { showHidden: false, depth: null, colors: true }),
-);
+// console.log(
+//   util.inspect(astTree, { showHidden: false, depth: null, colors: true }),
+// );
+
+const interpreter = new Interpreter({ program: astTree });
+console.log(interpreter.evaluate());

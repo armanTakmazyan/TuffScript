@@ -33,8 +33,8 @@ export interface IfStatementNodeArgs {
 export type IfStatementNode = (args: IfStatementNodeArgs) => IfStatement;
 
 export interface FunctionDeclarationNodeArgs {
-  arguments: string[];
   name: string;
+  arguments: string[];
   body: StatementOrExpression[];
 }
 
@@ -62,7 +62,7 @@ export type UnaryExpressionNode = (
 ) => UnaryExpression;
 
 export interface CallExpressionNodeArgs {
-  args: Expression[];
+  arguments: Expression[];
   caller: Expression;
 }
 
