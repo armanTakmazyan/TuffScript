@@ -3,11 +3,13 @@
 // ---     Defines the structure of our languages AST      ---
 // -----------------------------------------------------------
 
+import { LiteralValues } from '../lexer/token/constants';
+
 export enum StatementNodeType {
   // STATEMENTS
-
   Assignment = 'Assignment',
   FunctionDeclaration = 'FunctionDeclaration',
+  IfStatement = 'IfStatement',
 }
 
 export enum ExpressionNodeType {
@@ -21,6 +23,12 @@ export enum ExpressionNodeType {
   StringLiteral = 'StringLiteral',
   Identifier = 'Identifier',
   BinaryExpression = 'BinaryExpression',
+  UnaryExpression = 'UnaryExpression',
+  // Boolean Values
+  TrueLiteral = 'TrueLiteral',
+  FalseLiteral = 'FalseLiteral',
+  // Nil
+  NilLiteral = 'NilLiteral',
 }
 
 //
@@ -46,6 +54,13 @@ export interface Assignment extends BaseStatement {
   value: Expression;
 }
 
+export interface IfStatement extends BaseStatement {
+  type: StatementNodeType.IfStatement;
+  condition: Expression;
+  thenBody: StatementOrExpression[];
+  elseBody?: StatementOrExpression[];
+}
+
 export interface FunctionDeclaration extends BaseStatement {
   type: StatementNodeType.FunctionDeclaration;
   arguments: string[];
@@ -53,7 +68,7 @@ export interface FunctionDeclaration extends BaseStatement {
   body: StatementOrExpression[];
 }
 
-export type Statement = Assignment | FunctionDeclaration;
+export type Statement = Assignment | IfStatement | FunctionDeclaration;
 
 /**  Expressions will result in a value at runtime unlike Statements */
 /**
@@ -66,6 +81,12 @@ export interface BinaryExpression extends BaseExpression {
   left: Expression;
   right: Expression;
   operator: string; // needs to be of type BinaryOperator
+}
+
+export interface UnaryExpression extends BaseExpression {
+  type: ExpressionNodeType.UnaryExpression;
+  operator: string;
+  argument: Expression;
 }
 
 export interface CallExpression extends BaseExpression {
@@ -103,6 +124,21 @@ export interface StringLiteral extends BaseExpression {
   value: string;
 }
 
+export interface TrueLiteral extends BaseExpression {
+  type: ExpressionNodeType.TrueLiteral;
+  value: LiteralValues.True;
+}
+
+export interface FalseLiteral extends BaseExpression {
+  type: ExpressionNodeType.FalseLiteral;
+  value: LiteralValues.False;
+}
+
+export interface NilLiteral extends BaseExpression {
+  type: ExpressionNodeType.NilLiteral;
+  value: LiteralValues.Nil;
+}
+
 export interface Property extends BaseExpression {
   type: ExpressionNodeType.Property;
   key: string;
@@ -121,7 +157,11 @@ export type Expression =
   | ObjectLiteral
   | NumberLiteral
   | StringLiteral
+  | TrueLiteral
+  | FalseLiteral
+  | NilLiteral
   | Identifier
+  | UnaryExpression
   | BinaryExpression;
 
 export type StatementOrExpression = Statement | Expression;

@@ -1,13 +1,18 @@
 import {
   Expression,
   Assignment,
+  IfStatement,
   FunctionDeclaration,
+  UnaryExpression,
   BinaryExpression,
   CallExpression,
   MemberExpression,
   Identifier,
   NumberLiteral,
   StringLiteral,
+  TrueLiteral,
+  FalseLiteral,
+  NilLiteral,
   Property,
   ObjectLiteral,
   StatementOrExpression,
@@ -18,6 +23,14 @@ export interface AssignmentNodeArgs {
   value: Expression;
 }
 export type AssignmentNode = (args: AssignmentNodeArgs) => Assignment;
+
+export interface IfStatementNodeArgs {
+  condition: Expression;
+  thenBody: StatementOrExpression[];
+  elseBody?: StatementOrExpression[];
+}
+
+export type IfStatementNode = (args: IfStatementNodeArgs) => IfStatement;
 
 export interface FunctionDeclarationNodeArgs {
   arguments: string[];
@@ -38,6 +51,15 @@ export interface BinaryExpressionNodeArgs {
 export type BinaryExpressionNode = (
   args: BinaryExpressionNodeArgs,
 ) => BinaryExpression;
+
+export interface UnaryExpressionNodeArgs {
+  operator: string;
+  argument: Expression;
+}
+
+export type UnaryExpressionNode = (
+  args: UnaryExpressionNodeArgs,
+) => UnaryExpression;
 
 export interface CallExpressionNodeArgs {
   args: Expression[];
@@ -80,6 +102,12 @@ export interface PropertyNodeArgs {
   key: string;
   value?: Expression;
 }
+
+export type TrueLiteralNode = () => TrueLiteral;
+
+export type FalseLiteralNode = () => FalseLiteral;
+
+export type NilLiteralNode = () => NilLiteral;
 
 export type PropertyNode = (args: PropertyNodeArgs) => Property;
 

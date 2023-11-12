@@ -1,7 +1,10 @@
+import { LiteralValues } from '../../lexer/token/constants';
 import { StatementNodeType, ExpressionNodeType } from '../types';
 import {
   AssignmentNode,
+  IfStatementNode,
   FunctionDeclarationNode,
+  UnaryExpressionNode,
   BinaryExpressionNode,
   CallExpressionNode,
   MemberExpressionNode,
@@ -10,11 +13,19 @@ import {
   PropertyNode,
   ObjectLiteralNode,
   StringLiteralNode,
+  TrueLiteralNode,
+  FalseLiteralNode,
+  NilLiteralNode,
 } from './types';
 
 // Statements
 export const assignmentNode: AssignmentNode = ({ ...rest }) => ({
   type: StatementNodeType.Assignment,
+  ...rest,
+});
+
+export const ifStatementNode: IfStatementNode = ({ ...rest }) => ({
+  type: StatementNodeType.IfStatement,
   ...rest,
 });
 
@@ -28,6 +39,11 @@ export const functionDeclarationNode: FunctionDeclarationNode = ({
 // Expressions
 export const binaryExpressionNode: BinaryExpressionNode = ({ ...rest }) => ({
   type: ExpressionNodeType.BinaryExpression,
+  ...rest,
+});
+
+export const unaryExpressionNode: UnaryExpressionNode = ({ ...rest }) => ({
+  type: ExpressionNodeType.UnaryExpression,
   ...rest,
 });
 
@@ -54,6 +70,21 @@ export const numberLiteralNode: NumberLiteralNode = ({ ...rest }) => ({
 export const stringLiteralNode: StringLiteralNode = ({ ...rest }) => ({
   type: ExpressionNodeType.StringLiteral,
   ...rest,
+});
+
+export const trueLiteralNode: TrueLiteralNode = () => ({
+  type: ExpressionNodeType.TrueLiteral,
+  value: LiteralValues.True,
+});
+
+export const falseLiteralNode: FalseLiteralNode = () => ({
+  type: ExpressionNodeType.FalseLiteral,
+  value: LiteralValues.False,
+});
+
+export const nilLiteralNode: NilLiteralNode = () => ({
+  type: ExpressionNodeType.NilLiteral,
+  value: LiteralValues.Nil,
 });
 
 export const propertyNode: PropertyNode = ({ ...rest }) => ({

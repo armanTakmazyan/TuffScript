@@ -1,6 +1,12 @@
 import { TokenType } from './tokenType';
 import { TokenKind } from './types';
 
+export enum LiteralValues {
+  True = 'ճշմարտություն',
+  False = 'կեղծիք',
+  Nil = 'սահմանված չէ',
+}
+
 export const LITERAL_TOKEN_PATTERNS = {
   [TokenKind.Number]: new TokenType({
     name: TokenKind.Number,
@@ -10,7 +16,26 @@ export const LITERAL_TOKEN_PATTERNS = {
     name: TokenKind.String,
     regex: "'(?:[^'\\\\]|\\\\.)*'",
   }),
-  // BOOLEAN_LITERAL: /\b(true|false)\b/,
+  [TokenKind.True]: new TokenType({
+    name: TokenKind.True,
+    regex: LiteralValues.True,
+  }),
+  [TokenKind.False]: new TokenType({
+    name: TokenKind.False,
+    regex: LiteralValues.False,
+  }),
+  [TokenKind.Nil]: new TokenType({
+    name: TokenKind.Nil,
+    regex: LiteralValues.Nil,
+  }),
+} as const;
+
+// '^[\u0531-\u0556\u0561-\u0587]+$'
+export const IDENTIFIER_TOKEN_PATTERNS = {
+  [TokenKind.Identifier]: new TokenType({
+    name: TokenKind.Identifier,
+    regex: '[\u0531-\u0556\u0561-\u0587]+',
+  }),
 } as const;
 
 export const KEYWORD_TOKEN_PATTERNS = {
@@ -30,9 +55,13 @@ export const KEYWORD_TOKEN_PATTERNS = {
     name: TokenKind.ContainmentSuffix,
     regex: 'ում',
   }),
-  [TokenKind.Equals]: new TokenType({
-    name: TokenKind.Equals,
-    regex: 'հավասար է',
+  [TokenKind.If]: new TokenType({
+    name: TokenKind.If,
+    regex: 'եթե',
+  }),
+  [TokenKind.Else]: new TokenType({
+    name: TokenKind.Else,
+    regex: 'հակառակ դեպքում',
   }),
   [TokenKind.Function]: new TokenType({
     name: TokenKind.Function,
@@ -40,19 +69,29 @@ export const KEYWORD_TOKEN_PATTERNS = {
   }),
 } as const;
 
-// '^[\u0531-\u0556\u0561-\u0587]+$'
-export const IDENTIFIER_TOKEN_PATTERNS = {
-  [TokenKind.Identifier]: new TokenType({
-    name: TokenKind.Identifier,
-    regex: '[\u0531-\u0556\u0561-\u0587]+',
-  }),
-} as const;
-
 // Grouping * Operators
+export enum UnaryOperators {
+  Not = 'ոչ',
+}
+export enum BinaryOperators {
+  ADDITION = '+',
+  SUBTRACTION = '-',
+  MULTIPLICATION = '*',
+  DIVISION = '/',
+  MODULUS = '%',
+  EQUALS = 'հավասար է',
+  LESS_THAN = 'փոքր է',
+  GREATER_THAN = 'մեծ է',
+}
+
 export const OPERATOR_TOKEN_PATTERNS = {
+  [TokenKind.UnaryOperator]: new TokenType({
+    name: TokenKind.UnaryOperator,
+    regex: 'ոչ',
+  }),
   [TokenKind.BinaryOperator]: new TokenType({
     name: TokenKind.BinaryOperator,
-    regex: '\\+|-|\\*|\\/',
+    regex: '(\\+|-|\\*|\\/|հավասար է|փոքր է|մեծ է)',
   }),
 };
 
@@ -114,8 +153,8 @@ export const PUNCTUATION_TOKEN_PATTERNS = {
 export const TOKEN_PATTERNS_LIST = [
   ...Object.values(LITERAL_TOKEN_PATTERNS),
   ...Object.values(KEYWORD_TOKEN_PATTERNS),
-  ...Object.values(IDENTIFIER_TOKEN_PATTERNS),
   ...Object.values(OPERATOR_TOKEN_PATTERNS),
+  ...Object.values(IDENTIFIER_TOKEN_PATTERNS),
   ...Object.values(PUNCTUATION_TOKEN_PATTERNS),
 ] as const;
 
@@ -125,5 +164,9 @@ export const TOKEN_PATTERNS_LIST = [
 export const KEYWORDS = [
   TokenKind.Do,
   TokenKind.End,
+  TokenKind.Store,
+  TokenKind.ContainmentSuffix,
   TokenKind.Function,
+  TokenKind.If,
+  TokenKind.Else,
 ] as const;

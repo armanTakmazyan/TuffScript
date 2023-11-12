@@ -1,5 +1,5 @@
 import { TokenType } from '../lexer/token/tokenType';
-import { BinaryOperators, TokenKind } from '../lexer/token/types';
+import { TokenKind } from '../lexer/token/types';
 import { Token } from '../lexer/token/token';
 import {
   Program,
@@ -12,6 +12,7 @@ import {
 } from '../ast/types';
 import {
   assignmentNode,
+  ifStatementNode,
   binaryExpressionNode,
   callExpressionNode,
   functionDeclarationNode,
@@ -19,10 +20,16 @@ import {
   memberExpressionNode,
   numberLiteralNode,
   stringLiteralNode,
+  trueLiteralNode,
+  falseLiteralNode,
+  nilLiteralNode,
   objectLiteralNode,
   propertyNode,
+  unaryExpressionNode,
 } from '../ast/nodes';
 import {
+  UnaryOperators,
+  BinaryOperators,
   IDENTIFIER_TOKEN_PATTERNS,
   KEYWORD_TOKEN_PATTERNS,
   PUNCTUATION_TOKEN_PATTERNS,
@@ -55,7 +62,6 @@ export class Parser {
   }
 
   isEOF(): boolean {
-    console.log('this.at()', this.at());
     return this.at().type.name === TokenKind.EOF;
   }
 
@@ -89,16 +95,19 @@ export class Parser {
     message?: string;
   }): Token {
     const token = this.match(...expected);
+    const currentToken = this.at();
+
     if (!token) {
       throw new Error(
-        message ?? `At position ${this.position}, expected ${expected[0].name}`,
+        `${message ? `${message}. ` : ''}At position ${
+          this.position
+        }, expected ${expected[0].name}. But got ${currentToken.value}`,
       );
     }
     return token;
   }
 
   throwError(message: string): never {
-    console.error(this.at());
     throw new Error(message);
   }
 
@@ -124,6 +133,8 @@ export class Parser {
     switch (this.at().type.name) {
       case TokenKind.Store:
         return this.parseVariableAssignment();
+      case TokenKind.If:
+        return this.parseIfStatement();
       case TokenKind.Function:
         return this.parseFunctionDeclaration();
       default:
@@ -131,7 +142,6 @@ export class Parser {
     }
     // const primaryExpression = this.parsePrimaryExpression();
     // const currentToken = this.at();
-    // console.log('currentToken', currentToken);
     // if (
     //   currentToken.type.name !== TokenKind.Newline &&
     //   currentToken.type.name !== TokenKind.EOF
@@ -144,7 +154,6 @@ export class Parser {
 
   parseFunctionDeclaration(): Statement {
     this.eat(); // eat Function keyword
-
     const functionName = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
       message: 'Expected function name following ֆունկցիա keyword',
@@ -188,11 +197,11 @@ export class Parser {
   // պահել 5 իմ_զանգվատս -ում
   parseVariableAssignment(): Statement {
     this.eat(); // eat Store keyword
-    const primaryExpression = this.parsePrimaryExpression();
+    const primaryExpression = this.parseExpression();
 
     const identifier = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
-      message: 'Expected identifier name',
+      message: 'Incorrect Assignment Format',
     }).value;
 
     const declaration: Assignment = assignmentNode({
@@ -203,10 +212,49 @@ export class Parser {
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.ContainmentSuffix],
       message:
-        'Incorrect Assignment Format. Ensure the format: պպահել <expression> <variable_name> ում',
+        'Incorrect Assignment Format. Ensure the format: պահել <expression> <variable_name> ում',
     });
 
     return declaration;
+  }
+
+  parseIfStatement(): Statement {
+    this.eat(); // eat If keyword
+    const condition = this.parseExpression();
+    this.require({
+      expected: [KEYWORD_TOKEN_PATTERNS.Do],
+      message: 'Incorrect If Statement',
+    });
+
+    const thenBody: StatementOrExpression[] = [];
+
+    while (!this.isEOF() && this.at().type.name !== TokenKind.Else) {
+      thenBody.push(this.parseStatement());
+    }
+
+    this.require({
+      expected: [KEYWORD_TOKEN_PATTERNS.Else],
+      message: 'Incorrect If Statement',
+    });
+
+    const elseBody: StatementOrExpression[] = [];
+
+    while (!this.isEOF() && this.at().type.name !== TokenKind.End) {
+      elseBody.push(this.parseStatement());
+    }
+
+    this.require({
+      expected: [KEYWORD_TOKEN_PATTERNS.End],
+      message: 'Incorrect If Statement',
+    });
+
+    const ifStatement = ifStatementNode({
+      condition,
+      thenBody,
+      elseBody,
+    });
+
+    return ifStatement;
   }
 
   // Handle expressions
@@ -214,23 +262,10 @@ export class Parser {
     return this.parseObjectExpression();
   }
 
-  // TODO: We do not have assignment expressions
-  // private parse_assignment_expr(): Expr {
-  //   const left = this.parse_object_expr();
-
-  //   if (this.at().type == TokenType.Equals) {
-  //     this.eat(); // advance past equals
-  //     const value = this.parse_assignment_expr();
-  //     return { value, assigne: left, kind: 'AssignmentExpr' } as AssignmentExpr;
-  //   }
-
-  //   return left;
-  // }
-
   parseObjectExpression(): Expression {
     // { Prop[] }
     if (this.at().type.name !== TokenKind.OpenBrace) {
-      return this.parseAdditiveExpression();
+      return this.parseEqualityExpression();
     }
 
     this.eat(); // advance past open brace.
@@ -295,11 +330,49 @@ export class Parser {
     });
   }
 
+  parseEqualityExpression(): Expression {
+    let left: Expression = this.parseComparisonExpression();
+
+    while (this.at().value === BinaryOperators.EQUALS) {
+      const operator = this.eat().value;
+      const right = this.parseComparisonExpression();
+      left = binaryExpressionNode({
+        left,
+        right,
+        operator,
+      });
+    }
+
+    return left;
+  }
+
+  parseComparisonExpression(): Expression {
+    let left: Expression = this.parseAdditiveExpression();
+
+    while (
+      this.at().value == BinaryOperators.LESS_THAN ||
+      this.at().value == BinaryOperators.GREATER_THAN
+    ) {
+      const operator = this.eat().value;
+      const right = this.parseAdditiveExpression();
+      left = binaryExpressionNode({
+        left,
+        right,
+        operator,
+      });
+    }
+
+    return left;
+  }
+
   // Handle Addition & Subtraction Operations
   parseAdditiveExpression(): Expression {
     let left: Expression = this.parseMultiplicitaveExpression();
 
-    while (this.at().value == '+' || this.at().value == '-') {
+    while (
+      this.at().value == BinaryOperators.ADDITION ||
+      this.at().value == BinaryOperators.SUBTRACTION
+    ) {
       const operator = this.eat().value;
       const right = this.parseMultiplicitaveExpression();
       left = binaryExpressionNode({
@@ -317,9 +390,9 @@ export class Parser {
     let left: Expression = this.parseCallMemberExpression();
 
     while (
-      this.at().value === BinaryOperators.DIVISION_OPERATOR ||
-      this.at().value === BinaryOperators.MULTIPLICATION_OPERATOR ||
-      this.at().value === BinaryOperators.MODULUS_OPERATOR
+      this.at().value === BinaryOperators.DIVISION ||
+      this.at().value === BinaryOperators.MULTIPLICATION ||
+      this.at().value === BinaryOperators.MODULUS
     ) {
       const operator = this.eat().value;
       const right = this.parseCallMemberExpression();
@@ -331,6 +404,19 @@ export class Parser {
     }
 
     return left;
+  }
+
+  parseUnaryOperatorExpression(): Expression {
+    if (this.at().value === UnaryOperators.Not) {
+      const operator = this.eat().value;
+      const unaryOperatorExpression = this.parseUnaryOperatorExpression();
+      return unaryExpressionNode({
+        operator,
+        argument: unaryOperatorExpression,
+      });
+    }
+
+    return this.parseCallMemberExpression();
   }
 
   // foo.bar()()
@@ -396,11 +482,6 @@ export class Parser {
       let computed: boolean;
 
       // non-computed values aka obj.expr
-      console.log(
-        'operator.type.name',
-        operator.type.name,
-        operator.type.name === TokenKind.Dot,
-      );
       if (operator.type.name === TokenKind.Dot) {
         computed = false;
         // get identifier, interesting case, I think we will be able to write myObject.(some_property)
@@ -411,10 +492,8 @@ export class Parser {
           );
         }
       } else {
-        console.log('mtav ste');
         // this allows obj[computedValue]
         computed = true;
-        // TODO: Change this parsePrimaryExpression, to parseExpression -this.parse_expr();
         property = this.parseExpression();
         this.require({ expected: [PUNCTUATION_TOKEN_PATTERNS.CloseBracket] });
       }
@@ -442,10 +521,21 @@ export class Parser {
       case TokenKind.String: {
         return stringLiteralNode({ value: `${this.eat().value}` });
       }
+      case TokenKind.True: {
+        this.eat();
+        return trueLiteralNode();
+      }
+      case TokenKind.False: {
+        this.eat();
+        return falseLiteralNode();
+      }
+      case TokenKind.Nil: {
+        this.eat();
+        return nilLiteralNode();
+      }
       case TokenKind.OpenParen: {
         this.eat(); // eat the opening paren
-        // const value = this.parse_expr();
-        const value = this.parsePrimaryExpression();
+        const value = this.parseExpression();
         this.require({ expected: [PUNCTUATION_TOKEN_PATTERNS.CloseParen] });
         return value;
       }
