@@ -1,74 +1,36 @@
-import {
-  StatementNodeType,
-  ExpressionNodeType,
-} from '../../../frontend/ast/types';
-import {
-  Values,
-  NilValue,
-  RuntimeValue,
-  FunctionValue,
-} from '../../values/types';
-import { createNil } from '../../values/factories';
+import { ExpressionNodeType } from '../../frontend/ast/types';
+import { createNil } from '../values/factories';
+import { RuntimeValue } from '../values/types';
+import { evaluateFunctionDeclaration } from './evaluateFunctionDeclaration';
+import { evaluateAssignment } from './evaluateAssignment';
+import { evaluateIfExpression } from './evaluateIfExpression';
+import { evaluateBinaryExpression } from './binaryExpressionsEvaluators';
+import { evaluateObjectExpression } from './evaluateObjectExpression';
+import { evaluateMemberExpression } from './evaluateMemberExpression';
+import { evaluateCallExpression } from './evaluateCallExpression';
+import { evaluateUnaryExpression } from './evaluateUnaryExpressions';
 import {
   evaluateNil,
-  evaluateIdentifier,
+  evaluateFalseLiteral,
+  evaluateTrueLiteral,
   evaluateNumber,
   evaluateString,
-  evaluateTrueLiteral,
-  evaluateFalseLiteral,
-  evaluateObjectExpression,
-  evaluateMemberExpression,
-  evaluateBinaryExpression,
-  evaluateUnaryExpression,
-  evaluateCallExpression,
-} from '../expressions';
-import {
-  EvaluateArgs,
-  EvaluateProgramArgs,
-  EvaluateAssignmentArgs,
-  EvaluateFunctionDeclarationArgs,
-} from './types';
-
-export function evaluateAssignment({
-  environment,
-  assignment,
-}: EvaluateAssignmentArgs): RuntimeValue {
-  return environment.assignVariable({
-    name: assignment.assigne,
-    value: evaluate({ environment, astNode: assignment.value }),
-  });
-}
-
-export function evaluateFunctionDeclaration({
-  declaration,
-  environment,
-}: EvaluateFunctionDeclarationArgs): FunctionValue {
-  const newFunction: FunctionValue = {
-    type: Values.Function,
-    name: declaration.name,
-    arguments: declaration.arguments,
-    declarationEnvironment: environment,
-    body: declaration.body,
-  };
-
-  environment.assignVariable({ name: newFunction.name, value: newFunction });
-
-  return newFunction;
-}
-
-export function evaluateIfStatement(): NilValue {
-  return createNil();
-}
+  evaluateIdentifier,
+} from './primitiveTypesEvaluators';
+import { EvaluateArgs, EvaluateProgramArgs } from './types';
 
 export function evaluate({ astNode, environment }: EvaluateArgs): RuntimeValue {
   switch (astNode.type) {
-    case StatementNodeType.Assignment: {
+    case ExpressionNodeType.AssignmentExpression: {
       return evaluateAssignment({ assignment: astNode, environment });
     }
-    case StatementNodeType.IfStatement: {
-      return evaluateIfStatement();
+    case ExpressionNodeType.IfExpression: {
+      return evaluateIfExpression({
+        environment,
+        ifExpression: astNode,
+      });
     }
-    case StatementNodeType.FunctionDeclaration: {
+    case ExpressionNodeType.FunctionDeclaration: {
       return evaluateFunctionDeclaration({ declaration: astNode, environment });
     }
     case ExpressionNodeType.NilLiteral: {
@@ -139,10 +101,10 @@ export function evaluateProgram({
   environment,
 }: EvaluateProgramArgs): RuntimeValue {
   let lastEvaluated: RuntimeValue = createNil();
-  for (const statement of program.body) {
+  for (const expression of program.body) {
     lastEvaluated = evaluate({
       environment,
-      astNode: statement,
+      astNode: expression,
     });
   }
   return lastEvaluated;

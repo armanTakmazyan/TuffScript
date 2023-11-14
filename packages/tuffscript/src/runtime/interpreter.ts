@@ -1,6 +1,6 @@
 import { Program } from '../frontend/ast/types';
 import { createGlobalEnviornment } from './environment/helpers';
-import { evaluateProgram } from './evaluators/statements';
+import { evaluateProgram } from './evaluators';
 import { RuntimeValue } from './values/types';
 
 interface InterpreterArgs {

@@ -1,5 +1,5 @@
 import { Environment } from '../environment';
-import { StatementOrExpression } from '../../frontend/ast/types';
+import { Expressions } from '../../frontend/ast/types';
 
 export enum Values {
   Nil = 'Nil',
@@ -72,7 +72,7 @@ export interface FunctionValue extends BaseRuntimeValue {
   type: Values.Function;
   name: string;
   arguments: string[];
-  body: StatementOrExpression[];
+  body: Expressions;
   declarationEnvironment: Environment;
 }
 

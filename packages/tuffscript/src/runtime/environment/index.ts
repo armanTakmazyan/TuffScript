@@ -40,32 +40,32 @@ export class Environment {
   }
 
   assignVariable({ name, value }: AssignVariableArgs): RuntimeValue {
-    const env = this.resolveVariable({ name });
+    const environment = this.resolveVariable({ name }) ?? this;
 
-    if (env.constants.has(name)) {
+    if (environment.constants.has(name)) {
       throw `Cannot reasign to variable ${name} as it was declared constant.`;
     }
 
-    env.variables.set(name, value);
+    environment.variables.set(name, value);
     return value;
   }
 
   findVariable({ name }: FindVariableArgs): RuntimeValue {
-    const env = this.resolveVariable({ name });
-    const variableValue = env.variables.get(name);
+    const environment = this.resolveVariable({ name });
+    const variableValue = environment?.variables?.get?.(name);
     if (!variableValue) {
       throw `Cannot resolve '${name}' as it does not exist.`;
     }
     return variableValue;
   }
 
-  resolveVariable({ name }: ResolveVariableArgs): Environment {
+  resolveVariable({ name }: ResolveVariableArgs): Environment | undefined {
     if (this.variables.has(name)) {
       return this;
     }
 
     if (!this.parent) {
-      throw `Cannot resolve '${name}' as it does not exist.`;
+      return;
     }
 
     return this.parent.resolveVariable({ name });

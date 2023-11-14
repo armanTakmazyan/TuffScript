@@ -16,6 +16,8 @@ export enum TokenKind {
   ContainmentSuffix = 'ContainmentSuffix',
   If = 'If',
   Else = 'Else',
+  And = 'And',
+  Or = 'Or',
   // Grouping * Operators
   UnaryOperator = 'UnaryOperator',
   BinaryOperator = 'BinaryOperator',

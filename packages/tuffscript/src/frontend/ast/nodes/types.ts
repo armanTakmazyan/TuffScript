@@ -1,8 +1,9 @@
 import {
-  Expression,
-  Assignment,
-  IfStatement,
+  Expressions,
+  PrimitiveExpression,
   FunctionDeclaration,
+  AssignmentExpression,
+  IfExpression,
   UnaryExpression,
   BinaryExpression,
   CallExpression,
@@ -15,27 +16,28 @@ import {
   NilLiteral,
   Property,
   ObjectLiteral,
-  StatementOrExpression,
 } from '../types';
 
-export interface AssignmentNodeArgs {
+export interface AssignmentExpressionNodeArgs {
   assigne: string;
-  value: Expression;
+  value: PrimitiveExpression;
 }
-export type AssignmentNode = (args: AssignmentNodeArgs) => Assignment;
+export type AssignmentExpressionNode = (
+  args: AssignmentExpressionNodeArgs,
+) => AssignmentExpression;
 
-export interface IfStatementNodeArgs {
-  condition: Expression;
-  thenBody: StatementOrExpression[];
-  elseBody?: StatementOrExpression[];
+export interface IfExpressionsNodeArgs {
+  condition: PrimitiveExpression;
+  thenBody: Expressions;
+  elseBody: Expressions;
 }
 
-export type IfStatementNode = (args: IfStatementNodeArgs) => IfStatement;
+export type IfExpressionNode = (args: IfExpressionsNodeArgs) => IfExpression;
 
 export interface FunctionDeclarationNodeArgs {
   name: string;
   arguments: string[];
-  body: StatementOrExpression[];
+  body: Expressions;
 }
 
 export type FunctionDeclarationNode = (
@@ -43,8 +45,8 @@ export type FunctionDeclarationNode = (
 ) => FunctionDeclaration;
 
 export interface BinaryExpressionNodeArgs {
-  left: Expression;
-  right: Expression;
+  left: PrimitiveExpression;
+  right: PrimitiveExpression;
   operator: string; // needs to be of type BinaryOperator
 }
 
@@ -54,7 +56,7 @@ export type BinaryExpressionNode = (
 
 export interface UnaryExpressionNodeArgs {
   operator: string;
-  argument: Expression;
+  argument: PrimitiveExpression;
 }
 
 export type UnaryExpressionNode = (
@@ -62,8 +64,8 @@ export type UnaryExpressionNode = (
 ) => UnaryExpression;
 
 export interface CallExpressionNodeArgs {
-  arguments: Expression[];
-  caller: Expression;
+  arguments: PrimitiveExpression[];
+  caller: PrimitiveExpression;
 }
 
 export type CallExpressionNode = (
@@ -71,8 +73,8 @@ export type CallExpressionNode = (
 ) => CallExpression;
 
 export interface MemberExpressionNodeArgs {
-  object: Expression;
-  property: Expression;
+  object: PrimitiveExpression;
+  property: PrimitiveExpression;
   computed: boolean;
 }
 
@@ -100,7 +102,7 @@ export type StringLiteralNode = (args: StringLiteralNodeArgs) => StringLiteral;
 
 export interface PropertyNodeArgs {
   key: string;
-  value?: Expression;
+  value?: PrimitiveExpression;
 }
 
 export type TrueLiteralNode = () => TrueLiteral;

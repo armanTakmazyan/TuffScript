@@ -18,16 +18,22 @@ const tuffCode = `
         7 փոքր է 3
         9 մեծ է 3
          
-        եթե 7 փոքր է 3 կատարել
-          պահել 3 փոփոփոել ում
+        
+
+        ֆունկցիա արտե() կատարել
+          եթե 7 փոքր է 3  փոքր է 3  փոքր է 3 կատարել
+            պահել 3 փոփոփոել ում
           հակառակ դեպքում 
-          եթե 7 փոքր է 3 կատարել
-          պահել 3 փոփոփոել ում
-          հակառակ դեպքում 
-          փոփոփոել()
+            եթե 7 փոքր է 3 կամ 7 հավասար է 7 և 4 կատարել
+            պահել 3 փոփոփոել ում
+            հակառակ դեպքում 
+            փոփոփոել()
           ավարտել
           
+          ավարտել
         ավարտել
+
+        արտե
 
     ավարտել
 `;
@@ -39,15 +45,26 @@ const simpleAriphmetic = `
 `;
 
 const simpleFunction = `
-ֆունկցիա անուն()
+ֆունկցիա անուննն(ան)
 կատարել
-
-    23 + 2
-    34 -3 
-    234 * 2 
+  եթե սահմանված չէ կատարել
+  3
+  հակառակ դեպքում 
+  4
+  ավարտել
+  34 մեծ է 32
+  ֆունկցիա անուուննն() կատարել
+  պահել 'tpeluya' փոփփփփփփփոփոել ում
+    ֆունկցիա աաաաանուուննն() կատարել
+    փոփփփփփփփոփոել
+    ավարտել 
+  
+  ավարտել
+  անուուննն()
 ավարտել
 
-անուն()
+պահել անուննն(6,3) փոփոփոփոել ում
+փոփոփոփոել()
 `;
 
 const lexer = new Lexer(simpleFunction);
@@ -57,9 +74,9 @@ const tokens = lexer.lexAnalysis();
 
 const parser = new Parser({ tokens });
 const astTree = parser.produceAST();
-// console.log(
-//   util.inspect(astTree, { showHidden: false, depth: null, colors: true }),
-// );
+console.log(
+  util.inspect(astTree, { showHidden: false, depth: null, colors: true }),
+);
 
 const interpreter = new Interpreter({ program: astTree });
 console.log(interpreter.evaluate());
