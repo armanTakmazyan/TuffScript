@@ -13,7 +13,7 @@ export function evaluateFunctionDeclaration({
     body: declaration.body,
   };
 
-  environment.assignVariable({ name: newFunction.name, value: newFunction });
+  environment.setVariableValue({ name: newFunction.name, value: newFunction });
 
   return newFunction;
 }

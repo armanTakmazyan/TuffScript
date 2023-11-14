@@ -31,7 +31,7 @@ export function evaluateCallExpression({
     for (let i = 0; i < callable.arguments.length; i++) {
       // TODO: Check the bounds here. Verify arity of function
       const functionName = callable.arguments[i];
-      environment.assignVariable({
+      environment.setVariableValue({
         name: functionName,
         value: functionArguments[i],
       });

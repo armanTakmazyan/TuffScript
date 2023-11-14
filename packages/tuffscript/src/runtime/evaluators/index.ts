@@ -2,7 +2,7 @@ import { ExpressionNodeType } from '../../frontend/ast/types';
 import { createNil } from '../values/factories';
 import { RuntimeValue } from '../values/types';
 import { evaluateFunctionDeclaration } from './evaluateFunctionDeclaration';
-import { evaluateAssignment } from './evaluateAssignment';
+import { evaluateAssignmentExpression } from './evaluateAssignment';
 import { evaluateIfExpression } from './evaluateIfExpression';
 import { evaluateBinaryExpression } from './binaryExpressionsEvaluators';
 import { evaluateObjectExpression } from './evaluateObjectExpression';
@@ -21,17 +21,17 @@ import { EvaluateArgs, EvaluateProgramArgs } from './types';
 
 export function evaluate({ astNode, environment }: EvaluateArgs): RuntimeValue {
   switch (astNode.type) {
+    case ExpressionNodeType.FunctionDeclaration: {
+      return evaluateFunctionDeclaration({ declaration: astNode, environment });
+    }
     case ExpressionNodeType.AssignmentExpression: {
-      return evaluateAssignment({ assignment: astNode, environment });
+      return evaluateAssignmentExpression({ assignment: astNode, environment });
     }
     case ExpressionNodeType.IfExpression: {
       return evaluateIfExpression({
         environment,
         ifExpression: astNode,
       });
-    }
-    case ExpressionNodeType.FunctionDeclaration: {
-      return evaluateFunctionDeclaration({ declaration: astNode, environment });
     }
     case ExpressionNodeType.NilLiteral: {
       return evaluateNil();

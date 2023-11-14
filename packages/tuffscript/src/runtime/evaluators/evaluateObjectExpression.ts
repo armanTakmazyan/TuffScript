@@ -13,7 +13,7 @@ export function evaluateObjectExpression({
 
   for (const { key, value } of objectLiteral.properties) {
     const runtimeVal = !value
-      ? environment.findVariable({ name: key })
+      ? environment.getVariableValue({ name: key })
       : evaluate({
           astNode: value,
           environment,

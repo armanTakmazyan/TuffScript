@@ -17,7 +17,9 @@ export function evaluateIdentifier({
   identifier,
   environment,
 }: EvaluateIdentifierArgs): RuntimeValue {
-  const identifierValue = environment.findVariable({ name: identifier.symbol });
+  const identifierValue = environment.getVariableValue({
+    name: identifier.symbol,
+  });
   return identifierValue;
 }
 

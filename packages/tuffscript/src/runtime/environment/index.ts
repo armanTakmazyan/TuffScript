@@ -1,22 +1,10 @@
 import { RuntimeValue } from '../values/types';
-
-interface CreateConstantArgs {
-  name: string;
-  value: RuntimeValue;
-}
-
-interface AssignVariableArgs {
-  name: string;
-  value: RuntimeValue;
-}
-
-interface FindVariableArgs {
-  name: string;
-}
-
-interface ResolveVariableArgs {
-  name: string;
-}
+import {
+  CreateConstantArgs,
+  SetVariableValueArgs,
+  GetVariableValueArgs,
+  FindVariableEnvironmentArgs,
+} from './types';
 
 export class Environment {
   private parent?: Environment;
@@ -39,8 +27,8 @@ export class Environment {
     return value;
   }
 
-  assignVariable({ name, value }: AssignVariableArgs): RuntimeValue {
-    const environment = this.resolveVariable({ name }) ?? this;
+  setVariableValue({ name, value }: SetVariableValueArgs): RuntimeValue {
+    const environment = this.findVariableEnvironment({ name }) ?? this;
 
     if (environment.constants.has(name)) {
       throw `Cannot reasign to variable ${name} as it was declared constant.`;
@@ -50,8 +38,8 @@ export class Environment {
     return value;
   }
 
-  findVariable({ name }: FindVariableArgs): RuntimeValue {
-    const environment = this.resolveVariable({ name });
+  getVariableValue({ name }: GetVariableValueArgs): RuntimeValue {
+    const environment = this.findVariableEnvironment({ name });
     const variableValue = environment?.variables?.get?.(name);
     if (!variableValue) {
       throw `Cannot resolve '${name}' as it does not exist.`;
@@ -59,7 +47,9 @@ export class Environment {
     return variableValue;
   }
 
-  resolveVariable({ name }: ResolveVariableArgs): Environment | undefined {
+  findVariableEnvironment({
+    name,
+  }: FindVariableEnvironmentArgs): Environment | undefined {
     if (this.variables.has(name)) {
       return this;
     }
@@ -68,6 +58,6 @@ export class Environment {
       return;
     }
 
-    return this.parent.resolveVariable({ name });
+    return this.parent.findVariableEnvironment({ name });
   }
 }
