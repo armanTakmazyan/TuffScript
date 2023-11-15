@@ -90,7 +90,7 @@ export class Parser {
     const currentToken = this.at();
 
     if (!token) {
-      throw new Error(
+      this.throwError(
         `${message ? `${message}. ` : ''}At position ${
           this.position
         }, expected ${expected[0].name}. But got ${currentToken.value}`,
@@ -111,11 +111,8 @@ export class Parser {
 
     while (!this.isEOF()) {
       program.body.push(this.parseExpression());
-      // this was here for the \n things
-      // this.eat();
     }
 
-    console.log('program', program);
     return program;
   }
 
@@ -136,7 +133,7 @@ export class Parser {
     this.eat(); // eat Function keyword
     const functionName = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
-      message: 'Expected function name following ֆունկցիա keyword',
+      message: 'Expected function name following "ֆունկցիա" keyword',
     }).value;
 
     const functionArguments = this.parseArguments().map(argument => {
@@ -162,7 +159,8 @@ export class Parser {
 
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.End],
-      message: 'Closing brace expected inside function declaration',
+      message:
+        'Closing keyword "ավարտել" expected at the end of the function declaration',
     });
 
     const functionDeclaration = functionDeclarationNode({
@@ -174,7 +172,6 @@ export class Parser {
     return functionDeclaration;
   }
 
-  // պահել 5 իմ_զանգվատս -ում
   parseAssignmentExpression(): AssignmentExpression {
     this.eat(); // eat Store keyword
     const primitiveExpression = this.parsePrimitiveExpression();
@@ -192,7 +189,7 @@ export class Parser {
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.ContainmentSuffix],
       message:
-        'Incorrect Assignment Format. Ensure the format: պահել <expression> <variable_name> ում',
+        'Incorrect Assignment Format. Ensure the format: պահել <primitive_expression> <variable_name> ում',
     });
 
     return declaration;
@@ -257,7 +254,7 @@ export class Parser {
       }).value;
 
       // Allows shorthand key: pair -> { key, }
-      if (this.at().type.name == TokenKind.Comma) {
+      if (this.at().type.name === TokenKind.Comma) {
         this.eat(); // advance past comma
 
         properties.push(
@@ -266,8 +263,7 @@ export class Parser {
           }),
         );
         continue;
-      } // Allows shorthand key: pair -> { key }
-      else if (this.at().type.name == TokenKind.CloseBrace) {
+      } else if (this.at().type.name === TokenKind.CloseBrace) {
         properties.push(
           propertyNode({
             key,
@@ -291,7 +287,7 @@ export class Parser {
         }),
       );
 
-      if (this.at().type.name != TokenKind.CloseBrace) {
+      if (this.at().type.name !== TokenKind.CloseBrace) {
         this.require({
           expected: [PUNCTUATION_TOKEN_PATTERNS.Comma],
           message: 'Expected comma or closing bracket following property',
@@ -361,8 +357,8 @@ export class Parser {
     let left: PrimitiveExpression = this.parseAdditiveExpression();
 
     while (
-      this.at().value == BinaryOperators.LESS_THAN ||
-      this.at().value == BinaryOperators.GREATER_THAN
+      this.at().value === BinaryOperators.LESS_THAN ||
+      this.at().value === BinaryOperators.GREATER_THAN
     ) {
       const operator = this.eat().value;
       const right = this.parseAdditiveExpression();
@@ -376,13 +372,12 @@ export class Parser {
     return left;
   }
 
-  // Handle Addition & Subtraction Operations
   parseAdditiveExpression(): PrimitiveExpression {
     let left: PrimitiveExpression = this.parseMultiplicitaveExpression();
 
     while (
-      this.at().value == BinaryOperators.ADDITION ||
-      this.at().value == BinaryOperators.SUBTRACTION
+      this.at().value === BinaryOperators.ADDITION ||
+      this.at().value === BinaryOperators.SUBTRACTION
     ) {
       const operator = this.eat().value;
       const right = this.parseMultiplicitaveExpression();
@@ -396,7 +391,6 @@ export class Parser {
     return left;
   }
 
-  // Handle Multiplication, Division & Modulo Operations
   parseMultiplicitaveExpression(): PrimitiveExpression {
     let left: PrimitiveExpression = this.parseUnaryOperatorExpression();
 
@@ -434,7 +428,7 @@ export class Parser {
   parseCallMemberExpression(): PrimitiveExpression {
     const member = this.parseMemberExpression();
 
-    if (this.at().type.name == TokenKind.OpenParen) {
+    if (this.at().type.name === TokenKind.OpenParen) {
       return this.parseCallExpression(member);
     }
 
@@ -447,7 +441,7 @@ export class Parser {
       arguments: this.parseArguments(),
     });
 
-    if (this.at().type.name == TokenKind.OpenParen) {
+    if (this.at().type.name === TokenKind.OpenParen) {
       callExpression = this.parseCallExpression(callExpression);
     }
 
@@ -459,7 +453,7 @@ export class Parser {
       expected: [PUNCTUATION_TOKEN_PATTERNS.OpenParen],
     });
     const args =
-      this.at().type.name == TokenKind.CloseParen
+      this.at().type.name === TokenKind.CloseParen
         ? []
         : this.parseArgumentsList();
 
@@ -473,7 +467,7 @@ export class Parser {
   parseArgumentsList(): PrimitiveExpression[] {
     const args = [this.parsePrimitiveExpression()];
 
-    while (this.at().type.name == TokenKind.Comma && this.eat()) {
+    while (this.at().type.name === TokenKind.Comma && this.eat()) {
       args.push(this.parsePrimitiveExpression());
     }
 
@@ -481,7 +475,7 @@ export class Parser {
   }
 
   parseMemberExpression(): PrimitiveExpression {
-    let primaryExpression: PrimitiveExpression = this.parseBaseExpression();
+    let primaryExpression: PrimitiveExpression = this.parsePrimaryExpression();
 
     while (
       this.at().type.name === TokenKind.Dot ||
@@ -495,7 +489,7 @@ export class Parser {
       if (operator.type.name === TokenKind.Dot) {
         computed = false;
         // get identifier, interesting case, I think we will be able to write myObject.(some_property)
-        property = this.parseBaseExpression();
+        property = this.parsePrimaryExpression();
         if (property.type !== ExpressionNodeType.Identifier) {
           this.throwError(
             'Cannonot use dot operator without right hand side being an identifier',
@@ -518,8 +512,7 @@ export class Parser {
     return primaryExpression;
   }
 
-  // Parse Literal Values & Grouping Expressions
-  parseBaseExpression(): PrimitiveExpression {
+  parsePrimaryExpression(): PrimitiveExpression {
     const token = this.at();
     switch (token.type.name) {
       case TokenKind.Identifier: {

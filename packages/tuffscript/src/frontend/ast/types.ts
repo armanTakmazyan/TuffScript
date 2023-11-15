@@ -6,11 +6,11 @@
 import { LiteralValues } from '../lexer/token/constants';
 
 export enum ExpressionNodeType {
-  // TOP level expressions
+  // High-level, complex expressions
   FunctionDeclaration = 'FunctionDeclaration',
   AssignmentExpression = 'AssignmentExpression',
   IfExpression = 'IfExpression',
-  // Other expressions
+  // Primitive expressions
   MemberExpression = 'MemberExpression',
   CallExpression = 'CallExpression',
   // Literals
@@ -32,6 +32,13 @@ export interface BaseExpression {
   type: ExpressionNodeType;
 }
 
+// HIGH-LEVEL/COMPLEX EXPRESSIONS
+export interface FunctionDeclaration extends BaseExpression {
+  type: ExpressionNodeType.FunctionDeclaration;
+  arguments: string[];
+  name: string;
+  body: Expressions;
+}
 export interface AssignmentExpression extends BaseExpression {
   type: ExpressionNodeType.AssignmentExpression;
   assigne: string;
@@ -45,18 +52,7 @@ export interface IfExpression extends BaseExpression {
   elseBody: Expressions;
 }
 
-export interface FunctionDeclaration extends BaseExpression {
-  type: ExpressionNodeType.FunctionDeclaration;
-  arguments: string[];
-  name: string;
-  body: Expressions;
-}
-
-/**
- * A operation with two sides seperated by a operator.
- * Both sides can be ANY Complex Expression.
- * - Supported Operators -> + | - | / | * | %
- */
+// PRIMITIVE EXPRESSIONS
 export interface BinaryExpression extends BaseExpression {
   type: ExpressionNodeType.BinaryExpression;
   left: PrimitiveExpression;
@@ -70,12 +66,6 @@ export interface UnaryExpression extends BaseExpression {
   argument: PrimitiveExpression;
 }
 
-export interface CallExpression extends BaseExpression {
-  type: ExpressionNodeType.CallExpression;
-  arguments: PrimitiveExpression[];
-  caller: PrimitiveExpression;
-}
-
 export interface MemberExpression extends BaseExpression {
   type: ExpressionNodeType.MemberExpression;
   object: PrimitiveExpression;
@@ -83,18 +73,18 @@ export interface MemberExpression extends BaseExpression {
   computed: boolean;
 }
 
+export interface CallExpression extends BaseExpression {
+  type: ExpressionNodeType.CallExpression;
+  arguments: PrimitiveExpression[];
+  caller: PrimitiveExpression;
+}
+
 // LITERAL / PRIMARY EXPRESSION TYPES
-/**
- * Represents a user-defined variable or symbol in source.
- */
 export interface Identifier extends BaseExpression {
   type: ExpressionNodeType.Identifier;
   symbol: string;
 }
 
-/**
- * Represents a numeric constant inside the soure code.
- */
 export interface NumberLiteral extends BaseExpression {
   type: ExpressionNodeType.NumberLiteral;
   value: number;
@@ -132,17 +122,17 @@ export interface ObjectLiteral extends BaseExpression {
 }
 
 export type PrimitiveExpression =
+  | ObjectLiteral
+  | BinaryExpression
+  | UnaryExpression
   | MemberExpression
   | CallExpression
-  | ObjectLiteral
+  | Identifier
   | NumberLiteral
   | StringLiteral
   | TrueLiteral
   | FalseLiteral
-  | NilLiteral
-  | Identifier
-  | UnaryExpression
-  | BinaryExpression;
+  | NilLiteral;
 
 export type Expression =
   | FunctionDeclaration

@@ -1,9 +1,9 @@
 import {
   Expressions,
-  PrimitiveExpression,
   FunctionDeclaration,
   AssignmentExpression,
   IfExpression,
+  PrimitiveExpression,
   UnaryExpression,
   BinaryExpression,
   CallExpression,
@@ -17,6 +17,16 @@ import {
   Property,
   ObjectLiteral,
 } from '../types';
+
+export interface FunctionDeclarationNodeArgs {
+  name: string;
+  arguments: string[];
+  body: Expressions;
+}
+
+export type FunctionDeclarationNode = (
+  args: FunctionDeclarationNodeArgs,
+) => FunctionDeclaration;
 
 export interface AssignmentExpressionNodeArgs {
   assigne: string;
@@ -33,16 +43,6 @@ export interface IfExpressionsNodeArgs {
 }
 
 export type IfExpressionNode = (args: IfExpressionsNodeArgs) => IfExpression;
-
-export interface FunctionDeclarationNodeArgs {
-  name: string;
-  arguments: string[];
-  body: Expressions;
-}
-
-export type FunctionDeclarationNode = (
-  args: FunctionDeclarationNodeArgs,
-) => FunctionDeclaration;
 
 export interface BinaryExpressionNodeArgs {
   left: PrimitiveExpression;
@@ -63,15 +63,6 @@ export type UnaryExpressionNode = (
   args: UnaryExpressionNodeArgs,
 ) => UnaryExpression;
 
-export interface CallExpressionNodeArgs {
-  arguments: PrimitiveExpression[];
-  caller: PrimitiveExpression;
-}
-
-export type CallExpressionNode = (
-  args: CallExpressionNodeArgs,
-) => CallExpression;
-
 export interface MemberExpressionNodeArgs {
   object: PrimitiveExpression;
   property: PrimitiveExpression;
@@ -81,6 +72,15 @@ export interface MemberExpressionNodeArgs {
 export type MemberExpressionNode = (
   args: MemberExpressionNodeArgs,
 ) => MemberExpression;
+
+export interface CallExpressionNodeArgs {
+  arguments: PrimitiveExpression[];
+  caller: PrimitiveExpression;
+}
+
+export type CallExpressionNode = (
+  args: CallExpressionNodeArgs,
+) => CallExpression;
 
 export interface IdentifierNodeArgs {
   symbol: string;
@@ -100,16 +100,16 @@ export interface StringLiteralNodeArgs {
 
 export type StringLiteralNode = (args: StringLiteralNodeArgs) => StringLiteral;
 
-export interface PropertyNodeArgs {
-  key: string;
-  value?: PrimitiveExpression;
-}
-
 export type TrueLiteralNode = () => TrueLiteral;
 
 export type FalseLiteralNode = () => FalseLiteral;
 
 export type NilLiteralNode = () => NilLiteral;
+
+export interface PropertyNodeArgs {
+  key: string;
+  value?: PrimitiveExpression;
+}
 
 export type PropertyNode = (args: PropertyNodeArgs) => Property;
 

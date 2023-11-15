@@ -18,6 +18,13 @@ import {
   NilLiteralNode,
 } from './types';
 
+export const functionDeclarationNode: FunctionDeclarationNode = ({
+  ...rest
+}) => ({
+  type: ExpressionNodeType.FunctionDeclaration,
+  ...rest,
+});
+
 export const assignmentExpressionNode: AssignmentExpressionNode = ({
   ...rest
 }) => ({
@@ -30,14 +37,6 @@ export const ifExpressionNode: IfExpressionNode = ({ ...rest }) => ({
   ...rest,
 });
 
-export const functionDeclarationNode: FunctionDeclarationNode = ({
-  ...rest
-}) => ({
-  type: ExpressionNodeType.FunctionDeclaration,
-  ...rest,
-});
-
-// Expressions
 export const binaryExpressionNode: BinaryExpressionNode = ({ ...rest }) => ({
   type: ExpressionNodeType.BinaryExpression,
   ...rest,
@@ -48,13 +47,13 @@ export const unaryExpressionNode: UnaryExpressionNode = ({ ...rest }) => ({
   ...rest,
 });
 
-export const callExpressionNode: CallExpressionNode = ({ ...rest }) => ({
-  type: ExpressionNodeType.CallExpression,
+export const memberExpressionNode: MemberExpressionNode = ({ ...rest }) => ({
+  type: ExpressionNodeType.MemberExpression,
   ...rest,
 });
 
-export const memberExpressionNode: MemberExpressionNode = ({ ...rest }) => ({
-  type: ExpressionNodeType.MemberExpression,
+export const callExpressionNode: CallExpressionNode = ({ ...rest }) => ({
+  type: ExpressionNodeType.CallExpression,
   ...rest,
 });
 
