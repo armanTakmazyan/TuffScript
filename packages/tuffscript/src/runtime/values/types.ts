@@ -20,14 +20,6 @@ export interface NilValue extends BaseRuntimeValue {
   value: null;
 }
 
-export interface BooleanValue extends BaseRuntimeValue {
-  type: Values.Boolean;
-  value: boolean;
-}
-
-/**
- * Runtime value that has access to the raw native javascript number.
- */
 export interface NumberValue extends BaseRuntimeValue {
   type: Values.Number;
   value: number;
@@ -36,11 +28,6 @@ export interface NumberValue extends BaseRuntimeValue {
 export interface StringValue extends BaseRuntimeValue {
   type: Values.String;
   value: string;
-}
-
-export interface NilValue extends BaseRuntimeValue {
-  type: Values.Nil;
-  value: null;
 }
 
 export interface FalseLiteral extends BaseRuntimeValue {
@@ -52,6 +39,8 @@ export interface TrueLiteral extends BaseRuntimeValue {
   type: Values.Boolean;
   value: true;
 }
+
+export type BooleanValue = FalseLiteral | TrueLiteral;
 
 export interface ObjectValue extends BaseRuntimeValue {
   type: Values.Object;

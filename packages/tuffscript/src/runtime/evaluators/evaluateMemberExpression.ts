@@ -1,5 +1,5 @@
-import { createNil } from '../values/factories';
 import { RuntimeValue } from '../values/types';
+import { evaluateNil } from './primitiveTypesEvaluators';
 import { EvaluateMemberExpressionArgs } from './types';
 
 export function evaluateMemberExpression({
@@ -10,5 +10,5 @@ export function evaluateMemberExpression({
   // TODO: member expression
   console.log('memberExpression', memberExpression);
 
-  return createNil();
+  return evaluateNil();
 }

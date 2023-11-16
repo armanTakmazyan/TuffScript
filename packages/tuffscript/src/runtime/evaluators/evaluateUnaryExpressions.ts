@@ -1,8 +1,10 @@
 import { evaluate } from '.';
 import { UnaryOperators } from '../../frontend/lexer/token/constants';
-import { createNil } from '../values/factories';
 import { BooleanValue, NilValue } from '../values/types';
-import { evaluateBooleanFromType } from './primitiveTypesEvaluators';
+import {
+  evaluateNil,
+  evaluateBooleanFromType,
+} from './primitiveTypesEvaluators';
 import { EvaluateUnaryExpressionArgs } from './types';
 
 export function evaluateUnaryExpression({
@@ -20,5 +22,5 @@ export function evaluateUnaryExpression({
   }
 
   // TODO: we do not have this unary operator
-  return createNil();
+  return evaluateNil();
 }

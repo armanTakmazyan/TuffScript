@@ -1,5 +1,4 @@
 import { ExpressionNodeType } from '../../frontend/ast/types';
-import { createNil } from '../values/factories';
 import { RuntimeValue } from '../values/types';
 import { evaluateFunctionDeclaration } from './evaluateFunctionDeclaration';
 import { evaluateAssignmentExpression } from './evaluateAssignment';
@@ -100,7 +99,7 @@ export function evaluateProgram({
   program,
   environment,
 }: EvaluateProgramArgs): RuntimeValue {
-  let lastEvaluated: RuntimeValue = createNil();
+  let lastEvaluated: RuntimeValue = evaluateNil();
   for (const expression of program.body) {
     lastEvaluated = evaluate({
       environment,

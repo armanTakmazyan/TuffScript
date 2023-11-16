@@ -1,7 +1,7 @@
 import { evaluate } from '.';
 import { Environment } from '../environment';
-import { createNil } from '../values/factories';
 import { Values, RuntimeValue } from '../values/types';
+import { evaluateNil } from './primitiveTypesEvaluators';
 import { EvaluateCallExpressionArgs } from './types';
 
 export function evaluateCallExpression({
@@ -37,7 +37,7 @@ export function evaluateCallExpression({
       });
     }
 
-    let result: RuntimeValue = createNil();
+    let result: RuntimeValue = evaluateNil();
 
     for (const expression of callable.body) {
       result = evaluate({

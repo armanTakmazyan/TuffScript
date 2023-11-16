@@ -1,6 +1,6 @@
 import { evaluate } from '.';
-import { createNil } from '../values/factories';
 import { RuntimeValue } from '../values/types';
+import { evaluateNil } from './primitiveTypesEvaluators';
 import { EvaluateAndReturnLastResultArgs } from './types';
 
 export function evaluateAndReturnLastResult({
@@ -18,5 +18,5 @@ export function evaluateAndReturnLastResult({
     }
   }
 
-  return createNil();
+  return evaluateNil();
 }
