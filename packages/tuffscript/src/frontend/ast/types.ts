@@ -5,15 +5,12 @@
 
 import { LiteralValues } from '../lexer/token/constants';
 
-export enum StatementNodeType {
-  // STATEMENTS
-  Assignment = 'Assignment',
-  FunctionDeclaration = 'FunctionDeclaration',
-  IfStatement = 'IfStatement',
-}
-
 export enum ExpressionNodeType {
-  // EXPRESSIONS
+  // High-level, complex expressions
+  FunctionDeclaration = 'FunctionDeclaration',
+  AssignmentExpression = 'AssignmentExpression',
+  IfExpression = 'IfExpression',
+  // Primitive expressions
   MemberExpression = 'MemberExpression',
   CallExpression = 'CallExpression',
   // Literals
@@ -31,89 +28,63 @@ export enum ExpressionNodeType {
   NilLiteral = 'NilLiteral',
 }
 
-//
-// Statements do not result in a value at runtime.
-// They contain one or more expressions internally
-
-export interface BaseStatement {
-  type: StatementNodeType;
-}
-
 export interface BaseExpression {
   type: ExpressionNodeType;
 }
 
-/**
- * Defines a block which contains many statements.
- * -  Only one program will be contained in a file.
- */
-
-export interface Assignment extends BaseStatement {
-  type: StatementNodeType.Assignment;
-  assigne: string;
-  value: Expression;
-}
-
-export interface IfStatement extends BaseStatement {
-  type: StatementNodeType.IfStatement;
-  condition: Expression;
-  thenBody: StatementOrExpression[];
-  elseBody?: StatementOrExpression[];
-}
-
-export interface FunctionDeclaration extends BaseStatement {
-  type: StatementNodeType.FunctionDeclaration;
+// HIGH-LEVEL/COMPLEX EXPRESSIONS
+export interface FunctionDeclaration extends BaseExpression {
+  type: ExpressionNodeType.FunctionDeclaration;
   arguments: string[];
   name: string;
-  body: StatementOrExpression[];
+  body: Expressions;
+}
+export interface AssignmentExpression extends BaseExpression {
+  type: ExpressionNodeType.AssignmentExpression;
+  assigne: string;
+  value: PrimitiveExpression;
 }
 
-export type Statement = Assignment | IfStatement | FunctionDeclaration;
+export interface IfExpression extends BaseExpression {
+  type: ExpressionNodeType.IfExpression;
+  condition: PrimitiveExpression;
+  thenBody: Expressions;
+  elseBody: Expressions;
+}
 
-/**  Expressions will result in a value at runtime unlike Statements */
-/**
- * A operation with two sides seperated by a operator.
- * Both sides can be ANY Complex Expression.
- * - Supported Operators -> + | - | / | * | %
- */
+// PRIMITIVE EXPRESSIONS
 export interface BinaryExpression extends BaseExpression {
   type: ExpressionNodeType.BinaryExpression;
-  left: Expression;
-  right: Expression;
+  left: PrimitiveExpression;
+  right: PrimitiveExpression;
   operator: string; // needs to be of type BinaryOperator
 }
 
 export interface UnaryExpression extends BaseExpression {
   type: ExpressionNodeType.UnaryExpression;
   operator: string;
-  argument: Expression;
-}
-
-export interface CallExpression extends BaseExpression {
-  type: ExpressionNodeType.CallExpression;
-  args: Expression[];
-  caller: Expression;
+  argument: PrimitiveExpression;
 }
 
 export interface MemberExpression extends BaseExpression {
   type: ExpressionNodeType.MemberExpression;
-  object: Expression;
-  property: Expression;
+  object: PrimitiveExpression;
+  property: PrimitiveExpression;
   computed: boolean;
 }
 
+export interface CallExpression extends BaseExpression {
+  type: ExpressionNodeType.CallExpression;
+  arguments: PrimitiveExpression[];
+  caller: PrimitiveExpression;
+}
+
 // LITERAL / PRIMARY EXPRESSION TYPES
-/**
- * Represents a user-defined variable or symbol in source.
- */
 export interface Identifier extends BaseExpression {
   type: ExpressionNodeType.Identifier;
   symbol: string;
 }
 
-/**
- * Represents a numeric constant inside the soure code.
- */
 export interface NumberLiteral extends BaseExpression {
   type: ExpressionNodeType.NumberLiteral;
   value: number;
@@ -142,7 +113,7 @@ export interface NilLiteral extends BaseExpression {
 export interface Property extends BaseExpression {
   type: ExpressionNodeType.Property;
   key: string;
-  value?: Expression;
+  value?: PrimitiveExpression;
 }
 
 export interface ObjectLiteral extends BaseExpression {
@@ -150,23 +121,28 @@ export interface ObjectLiteral extends BaseExpression {
   properties: Property[];
 }
 
-export type Expression =
+export type PrimitiveExpression =
+  | ObjectLiteral
+  | BinaryExpression
+  | UnaryExpression
   | MemberExpression
   | CallExpression
-  | Property
-  | ObjectLiteral
+  | Identifier
   | NumberLiteral
   | StringLiteral
   | TrueLiteral
   | FalseLiteral
-  | NilLiteral
-  | Identifier
-  | UnaryExpression
-  | BinaryExpression;
+  | NilLiteral;
 
-export type StatementOrExpression = Statement | Expression;
+export type Expression =
+  | FunctionDeclaration
+  | AssignmentExpression
+  | IfExpression
+  | PrimitiveExpression;
+
+export type Expressions = Expression[];
 
 export interface Program {
   type: 'Program';
-  body: StatementOrExpression[];
+  body: Expressions;
 }

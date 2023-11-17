@@ -1,9 +1,9 @@
 import { LiteralValues } from '../../lexer/token/constants';
-import { StatementNodeType, ExpressionNodeType } from '../types';
+import { ExpressionNodeType } from '../types';
 import {
-  AssignmentNode,
-  IfStatementNode,
   FunctionDeclarationNode,
+  AssignmentExpressionNode,
+  IfExpressionNode,
   UnaryExpressionNode,
   BinaryExpressionNode,
   CallExpressionNode,
@@ -18,25 +18,25 @@ import {
   NilLiteralNode,
 } from './types';
 
-// Statements
-export const assignmentNode: AssignmentNode = ({ ...rest }) => ({
-  type: StatementNodeType.Assignment,
-  ...rest,
-});
-
-export const ifStatementNode: IfStatementNode = ({ ...rest }) => ({
-  type: StatementNodeType.IfStatement,
-  ...rest,
-});
-
 export const functionDeclarationNode: FunctionDeclarationNode = ({
   ...rest
 }) => ({
-  type: StatementNodeType.FunctionDeclaration,
+  type: ExpressionNodeType.FunctionDeclaration,
   ...rest,
 });
 
-// Expressions
+export const assignmentExpressionNode: AssignmentExpressionNode = ({
+  ...rest
+}) => ({
+  type: ExpressionNodeType.AssignmentExpression,
+  ...rest,
+});
+
+export const ifExpressionNode: IfExpressionNode = ({ ...rest }) => ({
+  type: ExpressionNodeType.IfExpression,
+  ...rest,
+});
+
 export const binaryExpressionNode: BinaryExpressionNode = ({ ...rest }) => ({
   type: ExpressionNodeType.BinaryExpression,
   ...rest,
@@ -47,13 +47,13 @@ export const unaryExpressionNode: UnaryExpressionNode = ({ ...rest }) => ({
   ...rest,
 });
 
-export const callExpressionNode: CallExpressionNode = ({ ...rest }) => ({
-  type: ExpressionNodeType.CallExpression,
+export const memberExpressionNode: MemberExpressionNode = ({ ...rest }) => ({
+  type: ExpressionNodeType.MemberExpression,
   ...rest,
 });
 
-export const memberExpressionNode: MemberExpressionNode = ({ ...rest }) => ({
-  type: ExpressionNodeType.MemberExpression,
+export const callExpressionNode: CallExpressionNode = ({ ...rest }) => ({
+  type: ExpressionNodeType.CallExpression,
   ...rest,
 });
 

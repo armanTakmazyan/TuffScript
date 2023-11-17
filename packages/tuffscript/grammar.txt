@@ -1,0 +1,33 @@
+program : expressions
+
+expressions: expression | expression WHITESPACE expressions
+
+expression =
+  | function_declaration_expression
+  | assignment_expression  // պահել 5 իմ_զանգվատս -ում
+  | if_else_expression
+  | primitive_expressions; 
+
+
+primitive_expressions:    
+  | ObjectLiteral
+  | BinaryExpression
+  | UnaryExpression
+  | memberExpression
+  | callExpression
+  | primary_expressions
+  ;
+
+  primary_expressions =  Identifier
+  | numberLiteral
+  | stringLiteral
+  | TrueLiteral
+  | FalseLiteral
+  | NilLiteral;
+
+
+function_declaration_expression: funkcia <identifier> (<identifier>, <identifier>, ...) katarel expessions avartel
+
+assignment_expression: pahel <primitive_expressions> <identiier> um 
+
+if_else_expression: ete <primitive_expressions> katarel <expressions> hakarak depqum <expressions> avartel

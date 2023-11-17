@@ -82,6 +82,8 @@ export enum BinaryOperators {
   EQUALS = 'հավասար է',
   LESS_THAN = 'փոքր է',
   GREATER_THAN = 'մեծ է',
+  AND = 'և',
+  OR = 'կամ',
 }
 
 export const OPERATOR_TOKEN_PATTERNS = {
@@ -91,7 +93,7 @@ export const OPERATOR_TOKEN_PATTERNS = {
   }),
   [TokenKind.BinaryOperator]: new TokenType({
     name: TokenKind.BinaryOperator,
-    regex: '(\\+|-|\\*|\\/|հավասար է|փոքր է|մեծ է)',
+    regex: '(\\+|-|\\*|\\/|հավասար է|փոքր է|մեծ է|և|կամ)',
   }),
 };
 
@@ -169,4 +171,6 @@ export const KEYWORDS = [
   TokenKind.Function,
   TokenKind.If,
   TokenKind.Else,
+  TokenKind.And,
+  TokenKind.Or,
 ] as const;

@@ -3,19 +3,21 @@ import { TokenKind } from '../lexer/token/types';
 import { Token } from '../lexer/token/token';
 import {
   Program,
-  Statement,
+  Expressions,
   Expression,
   Property,
-  Assignment,
-  StatementOrExpression,
+  FunctionDeclaration,
+  AssignmentExpression,
+  IfExpression,
+  PrimitiveExpression,
   ExpressionNodeType,
 } from '../ast/types';
 import {
-  assignmentNode,
-  ifStatementNode,
+  functionDeclarationNode,
+  assignmentExpressionNode,
+  ifExpressionNode,
   binaryExpressionNode,
   callExpressionNode,
-  functionDeclarationNode,
   identifierNode,
   memberExpressionNode,
   numberLiteralNode,
@@ -35,21 +37,11 @@ import {
   PUNCTUATION_TOKEN_PATTERNS,
 } from '../lexer/token/constants';
 
-// Orders Of Prescidence
-// Assignment
-// Object
-// AdditiveExpr
-// MultiplicitaveExpr
-// Call
-// Member
-// PrimaryExpr
-
 export interface ParserArgs {
   tokens: Token[];
 }
 
 export class Parser {
-  scope: any = {};
   tokens: Token[];
   position: number = 0;
 
@@ -98,7 +90,7 @@ export class Parser {
     const currentToken = this.at();
 
     if (!token) {
-      throw new Error(
+      this.throwError(
         `${message ? `${message}. ` : ''}At position ${
           this.position
         }, expected ${expected[0].name}. But got ${currentToken.value}`,
@@ -118,49 +110,34 @@ export class Parser {
     };
 
     while (!this.isEOF()) {
-      console.log('program', program);
-      program.body.push(this.parseStatement());
-      // this was here for the \n things
-      // this.eat();
+      program.body.push(this.parseExpression());
     }
 
     return program;
   }
 
-  // Handle complex statement types
-  parseStatement(): StatementOrExpression {
-    // skip to parse_expr
+  parseExpression(): Expression {
     switch (this.at().type.name) {
-      case TokenKind.Store:
-        return this.parseVariableAssignment();
-      case TokenKind.If:
-        return this.parseIfStatement();
       case TokenKind.Function:
         return this.parseFunctionDeclaration();
+      case TokenKind.Store:
+        return this.parseAssignmentExpression();
+      case TokenKind.If:
+        return this.parseIfExpression();
       default:
-        return this.parseExpression();
+        return this.parsePrimitiveExpression();
     }
-    // const primaryExpression = this.parsePrimaryExpression();
-    // const currentToken = this.at();
-    // if (
-    //   currentToken.type.name !== TokenKind.Newline &&
-    //   currentToken.type.name !== TokenKind.EOF
-    // ) {
-    //   this.throwError('Expected: end of statement!');
-    // }
-
-    // return primaryExpression;
   }
 
-  parseFunctionDeclaration(): Statement {
+  parseFunctionDeclaration(): FunctionDeclaration {
     this.eat(); // eat Function keyword
     const functionName = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
-      message: 'Expected function name following ֆունկցիա keyword',
+      message: 'Expected function name following "ֆունկցիա" keyword',
     }).value;
 
     const functionArguments = this.parseArguments().map(argument => {
-      // Note: It seems shoul work
+      // Note: It seems should work
       if (argument.type !== ExpressionNodeType.Identifier) {
         this.throwError(
           'Inside function declaration expected parameters to be of type string',
@@ -174,15 +151,16 @@ export class Parser {
       message: 'Expected function body following declaration',
     });
 
-    const body: StatementOrExpression[] = [];
+    const body: Expressions = [];
 
     while (!this.isEOF() && this.at().type.name !== TokenKind.End) {
-      body.push(this.parseStatement());
+      body.push(this.parseExpression());
     }
 
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.End],
-      message: 'Closing brace expected inside function declaration',
+      message:
+        'Closing keyword "ավարտել" expected at the end of the function declaration',
     });
 
     const functionDeclaration = functionDeclarationNode({
@@ -194,78 +172,76 @@ export class Parser {
     return functionDeclaration;
   }
 
-  // պահել 5 իմ_զանգվատս -ում
-  parseVariableAssignment(): Statement {
+  parseAssignmentExpression(): AssignmentExpression {
     this.eat(); // eat Store keyword
-    const primaryExpression = this.parseExpression();
+    const primitiveExpression = this.parsePrimitiveExpression();
 
     const identifier = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
       message: 'Incorrect Assignment Format',
     }).value;
 
-    const declaration: Assignment = assignmentNode({
+    const declaration: AssignmentExpression = assignmentExpressionNode({
       assigne: identifier,
-      value: primaryExpression,
+      value: primitiveExpression,
     });
 
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.ContainmentSuffix],
       message:
-        'Incorrect Assignment Format. Ensure the format: պահել <expression> <variable_name> ում',
+        'Incorrect Assignment Format. Ensure the format: պահել <primitive_expression> <variable_name> ում',
     });
 
     return declaration;
   }
 
-  parseIfStatement(): Statement {
+  parseIfExpression(): IfExpression {
     this.eat(); // eat If keyword
-    const condition = this.parseExpression();
+    const condition = this.parsePrimitiveExpression();
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.Do],
-      message: 'Incorrect If Statement',
+      message: 'Incorrect If Expression',
     });
 
-    const thenBody: StatementOrExpression[] = [];
+    const thenBody: Expressions = [];
 
     while (!this.isEOF() && this.at().type.name !== TokenKind.Else) {
-      thenBody.push(this.parseStatement());
+      thenBody.push(this.parseExpression());
     }
 
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.Else],
-      message: 'Incorrect If Statement',
+      message: 'Incorrect If Expression',
     });
 
-    const elseBody: StatementOrExpression[] = [];
+    const elseBody: Expressions = [];
 
     while (!this.isEOF() && this.at().type.name !== TokenKind.End) {
-      elseBody.push(this.parseStatement());
+      elseBody.push(this.parseExpression());
     }
 
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.End],
-      message: 'Incorrect If Statement',
+      message: 'Incorrect If Expression',
     });
 
-    const ifStatement = ifStatementNode({
+    const ifExpression = ifExpressionNode({
       condition,
       thenBody,
       elseBody,
     });
 
-    return ifStatement;
+    return ifExpression;
   }
 
-  // Handle expressions
-  parseExpression(): Expression {
+  parsePrimitiveExpression(): PrimitiveExpression {
     return this.parseObjectExpression();
   }
 
-  parseObjectExpression(): Expression {
+  parseObjectExpression(): PrimitiveExpression {
     // { Prop[] }
     if (this.at().type.name !== TokenKind.OpenBrace) {
-      return this.parseEqualityExpression();
+      return this.parseLogicalOrExpression();
     }
 
     this.eat(); // advance past open brace.
@@ -278,7 +254,7 @@ export class Parser {
       }).value;
 
       // Allows shorthand key: pair -> { key, }
-      if (this.at().type.name == TokenKind.Comma) {
+      if (this.at().type.name === TokenKind.Comma) {
         this.eat(); // advance past comma
 
         properties.push(
@@ -287,8 +263,7 @@ export class Parser {
           }),
         );
         continue;
-      } // Allows shorthand key: pair -> { key }
-      else if (this.at().type.name == TokenKind.CloseBrace) {
+      } else if (this.at().type.name === TokenKind.CloseBrace) {
         properties.push(
           propertyNode({
             key,
@@ -303,7 +278,7 @@ export class Parser {
         message: 'Missing colon following identifier in ObjectExpr',
       });
 
-      const value = this.parseExpression();
+      const value = this.parsePrimitiveExpression();
 
       properties.push(
         propertyNode({
@@ -312,7 +287,7 @@ export class Parser {
         }),
       );
 
-      if (this.at().type.name != TokenKind.CloseBrace) {
+      if (this.at().type.name !== TokenKind.CloseBrace) {
         this.require({
           expected: [PUNCTUATION_TOKEN_PATTERNS.Comma],
           message: 'Expected comma or closing bracket following property',
@@ -330,8 +305,40 @@ export class Parser {
     });
   }
 
-  parseEqualityExpression(): Expression {
-    let left: Expression = this.parseComparisonExpression();
+  parseLogicalOrExpression(): PrimitiveExpression {
+    let left: PrimitiveExpression = this.parseLogicalAndExpression();
+
+    while (this.at().value === BinaryOperators.OR) {
+      const operator = this.eat().value;
+      const right = this.parseLogicalAndExpression();
+      left = binaryExpressionNode({
+        left,
+        right,
+        operator,
+      });
+    }
+
+    return left;
+  }
+
+  parseLogicalAndExpression(): PrimitiveExpression {
+    let left: PrimitiveExpression = this.parseEqualityExpression();
+
+    while (this.at().value === BinaryOperators.AND) {
+      const operator = this.eat().value;
+      const right = this.parseEqualityExpression();
+      left = binaryExpressionNode({
+        left,
+        right,
+        operator,
+      });
+    }
+
+    return left;
+  }
+
+  parseEqualityExpression(): PrimitiveExpression {
+    let left: PrimitiveExpression = this.parseComparisonExpression();
 
     while (this.at().value === BinaryOperators.EQUALS) {
       const operator = this.eat().value;
@@ -346,12 +353,12 @@ export class Parser {
     return left;
   }
 
-  parseComparisonExpression(): Expression {
-    let left: Expression = this.parseAdditiveExpression();
+  parseComparisonExpression(): PrimitiveExpression {
+    let left: PrimitiveExpression = this.parseAdditiveExpression();
 
     while (
-      this.at().value == BinaryOperators.LESS_THAN ||
-      this.at().value == BinaryOperators.GREATER_THAN
+      this.at().value === BinaryOperators.LESS_THAN ||
+      this.at().value === BinaryOperators.GREATER_THAN
     ) {
       const operator = this.eat().value;
       const right = this.parseAdditiveExpression();
@@ -365,13 +372,12 @@ export class Parser {
     return left;
   }
 
-  // Handle Addition & Subtraction Operations
-  parseAdditiveExpression(): Expression {
-    let left: Expression = this.parseMultiplicitaveExpression();
+  parseAdditiveExpression(): PrimitiveExpression {
+    let left: PrimitiveExpression = this.parseMultiplicitaveExpression();
 
     while (
-      this.at().value == BinaryOperators.ADDITION ||
-      this.at().value == BinaryOperators.SUBTRACTION
+      this.at().value === BinaryOperators.ADDITION ||
+      this.at().value === BinaryOperators.SUBTRACTION
     ) {
       const operator = this.eat().value;
       const right = this.parseMultiplicitaveExpression();
@@ -385,9 +391,8 @@ export class Parser {
     return left;
   }
 
-  // Handle Multiplication, Division & Modulo Operations
-  parseMultiplicitaveExpression(): Expression {
-    let left: Expression = this.parseCallMemberExpression();
+  parseMultiplicitaveExpression(): PrimitiveExpression {
+    let left: PrimitiveExpression = this.parseUnaryOperatorExpression();
 
     while (
       this.at().value === BinaryOperators.DIVISION ||
@@ -395,7 +400,7 @@ export class Parser {
       this.at().value === BinaryOperators.MODULUS
     ) {
       const operator = this.eat().value;
-      const right = this.parseCallMemberExpression();
+      const right = this.parseUnaryOperatorExpression();
       left = binaryExpressionNode({
         left,
         right,
@@ -406,7 +411,7 @@ export class Parser {
     return left;
   }
 
-  parseUnaryOperatorExpression(): Expression {
+  parseUnaryOperatorExpression(): PrimitiveExpression {
     if (this.at().value === UnaryOperators.Not) {
       const operator = this.eat().value;
       const unaryOperatorExpression = this.parseUnaryOperatorExpression();
@@ -420,35 +425,35 @@ export class Parser {
   }
 
   // foo.bar()()
-  parseCallMemberExpression(): Expression {
+  parseCallMemberExpression(): PrimitiveExpression {
     const member = this.parseMemberExpression();
 
-    if (this.at().type.name == TokenKind.OpenParen) {
+    if (this.at().type.name === TokenKind.OpenParen) {
       return this.parseCallExpression(member);
     }
 
     return member;
   }
 
-  parseCallExpression(caller: Expression): Expression {
-    let callExpression: Expression = callExpressionNode({
+  parseCallExpression(caller: PrimitiveExpression): PrimitiveExpression {
+    let callExpression: PrimitiveExpression = callExpressionNode({
       caller,
-      args: this.parseArguments(),
+      arguments: this.parseArguments(),
     });
 
-    if (this.at().type.name == TokenKind.OpenParen) {
+    if (this.at().type.name === TokenKind.OpenParen) {
       callExpression = this.parseCallExpression(callExpression);
     }
 
     return callExpression;
   }
 
-  parseArguments(): Expression[] {
+  parseArguments(): PrimitiveExpression[] {
     this.require({
       expected: [PUNCTUATION_TOKEN_PATTERNS.OpenParen],
     });
     const args =
-      this.at().type.name == TokenKind.CloseParen
+      this.at().type.name === TokenKind.CloseParen
         ? []
         : this.parseArgumentsList();
 
@@ -459,26 +464,25 @@ export class Parser {
     return args;
   }
 
-  // Note: we do not have assignment expressions, only biding statements, so pass here the parseExpression()
-  parseArgumentsList(): Expression[] {
-    const args = [this.parseExpression()];
+  parseArgumentsList(): PrimitiveExpression[] {
+    const args = [this.parsePrimitiveExpression()];
 
-    while (this.at().type.name == TokenKind.Comma && this.eat()) {
-      args.push(this.parseExpression());
+    while (this.at().type.name === TokenKind.Comma && this.eat()) {
+      args.push(this.parsePrimitiveExpression());
     }
 
     return args;
   }
 
-  parseMemberExpression(): Expression {
-    let primaryExpression: Expression = this.parsePrimaryExpression();
+  parseMemberExpression(): PrimitiveExpression {
+    let primaryExpression: PrimitiveExpression = this.parsePrimaryExpression();
 
     while (
       this.at().type.name === TokenKind.Dot ||
       this.at().type.name === TokenKind.OpenBracket
     ) {
       const operator = this.eat();
-      let property: Expression;
+      let property: PrimitiveExpression;
       let computed: boolean;
 
       // non-computed values aka obj.expr
@@ -494,7 +498,7 @@ export class Parser {
       } else {
         // this allows obj[computedValue]
         computed = true;
-        property = this.parseExpression();
+        property = this.parsePrimitiveExpression();
         this.require({ expected: [PUNCTUATION_TOKEN_PATTERNS.CloseBracket] });
       }
 
@@ -508,8 +512,7 @@ export class Parser {
     return primaryExpression;
   }
 
-  // Parse Literal Values & Grouping Expressions
-  parsePrimaryExpression(): Expression {
+  parsePrimaryExpression(): PrimitiveExpression {
     const token = this.at();
     switch (token.type.name) {
       case TokenKind.Identifier: {
@@ -535,7 +538,7 @@ export class Parser {
       }
       case TokenKind.OpenParen: {
         this.eat(); // eat the opening paren
-        const value = this.parseExpression();
+        const value = this.parsePrimitiveExpression();
         this.require({ expected: [PUNCTUATION_TOKEN_PATTERNS.CloseParen] });
         return value;
       }
