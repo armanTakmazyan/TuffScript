@@ -18,7 +18,7 @@ export class Environment {
   }
 
   createConstant({ name, value }: CreateConstantArgs): RuntimeValue {
-    if (this.variables.has(name)) {
+    if (this.variables.has(name) || this.constants.has(name)) {
       throw `Cannot declare variable ${name}. As it already is defined.`;
     }
 
