@@ -38,6 +38,16 @@ export const IDENTIFIER_TOKEN_PATTERNS = {
   }),
 } as const;
 
+export enum KeywordValues {
+  Do = 'կատարել',
+  End = 'ավարտել',
+  Store = 'պահել',
+  ContainmentSuffix = 'ում',
+  If = 'եթե',
+  Else = 'հակառակ դեպքում',
+  Function = 'ֆունկցիա',
+}
+
 export const KEYWORD_TOKEN_PATTERNS = {
   [TokenKind.Do]: new TokenType({
     name: TokenKind.Do,

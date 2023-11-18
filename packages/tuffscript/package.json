@@ -2,6 +2,11 @@
   "name": "tuffscript",
   "version": "1.0.0",
   "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./ast/types": "./lib/frontend/ast/types.js",
+    "./token/constants": "./lib/frontend/lexer/token/constants.js"
+  },
   "files": [
     "lib/**/*"
   ],
