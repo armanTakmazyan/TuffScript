@@ -39,9 +39,9 @@ const tuffCode = `
 `;
 
 const simpleAriphmetic = `
-9 մեծ է 3
-պահել սահմանված չէ խարխար ում
-   
+պահել 9 խարխար ում
+պահել -5 խարխարումում ում
+խարխար - խարխարումում
 `;
 
 const simpleFunction = `
@@ -69,7 +69,7 @@ const simpleFunction = `
 պահեհհհլ.ել['պա'].լ
 `;
 
-const lexer = new Lexer(simpleFunction);
+const lexer = new Lexer(simpleAriphmetic);
 
 const tokens = lexer.lexAnalysis();
 // console.log(tokens);

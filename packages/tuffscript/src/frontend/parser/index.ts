@@ -412,7 +412,11 @@ export class Parser {
   }
 
   parseUnaryOperatorExpression(): PrimitiveExpression {
-    if (this.at().value === UnaryOperators.Not) {
+    const currentToken = this.at();
+    if (
+      currentToken.value === UnaryOperators.Not ||
+      currentToken.value === UnaryOperators.Minus
+    ) {
       const operator = this.eat().value;
       const unaryOperatorExpression = this.parseUnaryOperatorExpression();
       return unaryExpressionNode({

@@ -72,7 +72,9 @@ export const KEYWORD_TOKEN_PATTERNS = {
 // Grouping * Operators
 export enum UnaryOperators {
   Not = 'ոչ',
+  Minus = '-',
 }
+
 export enum BinaryOperators {
   ADDITION = '+',
   SUBTRACTION = '-',
