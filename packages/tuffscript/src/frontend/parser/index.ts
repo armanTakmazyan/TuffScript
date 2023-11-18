@@ -137,10 +137,9 @@ export class Parser {
     }).value;
 
     const functionArguments = this.parseArguments().map(argument => {
-      // Note: It seems should work
       if (argument.type !== ExpressionNodeType.Identifier) {
         this.throwError(
-          'Inside function declaration expected parameters to be of type string',
+          `Function parameter must be an identifier, found '${argument.type}' instead.`,
         );
       }
       return argument.symbol;
@@ -239,12 +238,11 @@ export class Parser {
   }
 
   parseObjectExpression(): PrimitiveExpression {
-    // { Prop[] }
     if (this.at().type.name !== TokenKind.OpenBrace) {
       return this.parseLogicalOrExpression();
     }
 
-    this.eat(); // advance past open brace.
+    this.eat(); // eat open brace
     const properties: Property[] = [];
 
     while (!this.isEOF() && this.at().type.name !== TokenKind.CloseBrace) {
@@ -253,9 +251,9 @@ export class Parser {
         message: 'Object literal key expected',
       }).value;
 
-      // Allows shorthand key: pair -> { key, }
+      // Handle shorthand property notation in object literals (e.g., { key, })
       if (this.at().type.name === TokenKind.Comma) {
-        this.eat(); // advance past comma
+        this.eat(); // eat comma token
 
         properties.push(
           propertyNode({
@@ -272,7 +270,7 @@ export class Parser {
         continue;
       }
 
-      // { key: val }
+      // Expect a colon after property key in object literal (e.g., { key: value })
       this.require({
         expected: [PUNCTUATION_TOKEN_PATTERNS.Colon],
         message: 'Missing colon following identifier in ObjectExpr',
@@ -428,7 +426,7 @@ export class Parser {
     return this.parseCallMemberExpression();
   }
 
-  // foo.bar()()
+  // Parse member expressions with potential for consecutive call syntax (e.g., foo.bar()())
   parseCallMemberExpression(): PrimitiveExpression {
     const member = this.parseMemberExpression();
 
@@ -487,12 +485,10 @@ export class Parser {
     ) {
       const operator = this.eat();
       let property: PrimitiveExpression;
-      let computed: boolean;
 
-      // non-computed values aka obj.expr
+      // Handle non-computed property access (e.g., obj.prop)
       if (operator.type.name === TokenKind.Dot) {
-        computed = false;
-        // get identifier, interesting case, I think we will be able to write myObject.(some_property)
+        // Parse RHS as identifier for dot notation
         property = this.parsePrimaryExpression();
         if (property.type !== ExpressionNodeType.Identifier) {
           this.throwError(
@@ -500,8 +496,7 @@ export class Parser {
           );
         }
       } else {
-        // this allows obj[computedValue]
-        computed = true;
+        // Handle computed property access (e.g., obj[expr])
         property = this.parsePrimitiveExpression();
         this.require({ expected: [PUNCTUATION_TOKEN_PATTERNS.CloseBracket] });
       }
@@ -509,7 +504,6 @@ export class Parser {
       primaryExpression = memberExpressionNode({
         object: primaryExpression,
         property,
-        computed,
       });
     }
 
@@ -541,7 +535,7 @@ export class Parser {
         return nilLiteralNode();
       }
       case TokenKind.OpenParen: {
-        this.eat(); // eat the opening paren
+        this.eat(); // eat opening parenthesis
         const value = this.parsePrimitiveExpression();
         this.require({ expected: [PUNCTUATION_TOKEN_PATTERNS.CloseParen] });
         return value;

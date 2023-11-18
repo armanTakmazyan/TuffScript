@@ -63,13 +63,13 @@ const simpleFunction = `
   անուուննն()
 ավարտել
 
-պահել անուննն(6,3) փոփոփոփոել ում
+պահել անուննն(6) փոփոփոփոել ում
 փոփոփոփոել()
 պահել {ել: {պա: {լ: 4}}} պահեհհհլ ում
-պահեհհհլ.ել['պա'].լ
+պահեհհհլ.ել.պա
 `;
 
-const lexer = new Lexer(simpleAriphmetic);
+const lexer = new Lexer(simpleFunction);
 
 const tokens = lexer.lexAnalysis();
 // console.log(tokens);

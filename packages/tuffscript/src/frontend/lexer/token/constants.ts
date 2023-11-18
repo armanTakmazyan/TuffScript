@@ -162,9 +162,7 @@ export const TOKEN_PATTERNS_LIST = [
   ...Object.values(PUNCTUATION_TOKEN_PATTERNS),
 ] as const;
 
-/**
- * keywords and known identifiers, symbols.
- */
+// keywords and known identifiers, symbols
 export const KEYWORDS = [
   TokenKind.Do,
   TokenKind.End,
