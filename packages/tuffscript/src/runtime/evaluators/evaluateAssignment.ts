@@ -1,6 +1,6 @@
-import { evaluate } from '.';
 import { RuntimeValue } from '../values/types';
 import { EvaluateAssignmentArgs } from './types';
+import { evaluate } from './index';
 
 export function evaluateAssignmentExpression({
   environment,

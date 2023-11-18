@@ -1,8 +1,8 @@
-import { evaluate } from '.';
 import { Environment } from '../environment';
 import { Values, RuntimeValue } from '../values/types';
 import { evaluateNil } from './primitiveTypesEvaluators';
 import { EvaluateCallExpressionArgs } from './types';
+import { evaluate } from './index';
 
 export function evaluateCallExpression({
   environment,
@@ -26,13 +26,18 @@ export function evaluateCallExpression({
   }
 
   if (callable.type === Values.Function) {
-    const environment = new Environment(callable.declarationEnvironment);
+    if (callable.arguments.length !== functionArguments.length) {
+      throw new Error(
+        `Expected ${callable.arguments.length} arguments, but got ${functionArguments.length}`,
+      );
+    }
+
+    const newEnvironment = new Environment(callable.declarationEnvironment);
 
     for (let i = 0; i < callable.arguments.length; i++) {
-      // TODO: Check the bounds here. Verify arity of function
-      const functionName = callable.arguments[i];
-      environment.setVariableValue({
-        name: functionName,
+      const functionArgumentName = callable.arguments[i];
+      newEnvironment.setVariableValue({
+        name: functionArgumentName,
         value: functionArguments[i],
       });
     }
@@ -42,7 +47,7 @@ export function evaluateCallExpression({
     for (const expression of callable.body) {
       result = evaluate({
         astNode: expression,
-        environment: environment,
+        environment: newEnvironment,
       });
     }
 

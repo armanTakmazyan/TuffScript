@@ -1,6 +1,7 @@
 import {
   NilValue,
   BooleanValue,
+  StringValue,
   NumberValue,
   FunctionCall,
   NativeFuctionValue,
@@ -14,11 +15,17 @@ export interface CreateBooleanArgs {
 
 export type CreateBoolean = (args: CreateBooleanArgs) => BooleanValue;
 
-export interface CreateNumberValueArgs {
+export interface CreateNumberArgs {
   numberValue: number;
 }
 
-export type CreateNumberValue = (args: CreateNumberValueArgs) => NumberValue;
+export type CreateNumber = (args: CreateNumberArgs) => NumberValue;
+
+export interface CreateStringArgs {
+  stringValue: string;
+}
+
+export type CreateString = (args: CreateStringArgs) => StringValue;
 
 export interface CreateNativeFunctionArgs {
   execute: FunctionCall;

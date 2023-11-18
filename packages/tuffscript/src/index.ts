@@ -65,6 +65,8 @@ const simpleFunction = `
 
 պահել անուննն(6,3) փոփոփոփոել ում
 փոփոփոփոել()
+պահել {ել: {պա: {լ: 4}}} պահեհհհլ ում
+պահեհհհլ.ել['պա'].լ
 `;
 
 const lexer = new Lexer(simpleFunction);

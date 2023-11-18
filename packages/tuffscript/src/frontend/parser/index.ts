@@ -522,7 +522,7 @@ export class Parser {
         return numberLiteralNode({ value: parseFloat(this.eat().value) });
       }
       case TokenKind.String: {
-        return stringLiteralNode({ value: `${this.eat().value}` });
+        return stringLiteralNode({ value: this.eat().value });
       }
       case TokenKind.True: {
         this.eat();

@@ -13,6 +13,7 @@ import {
   BinaryExpression,
   MemberExpression,
   UnaryExpression,
+  PrimitiveExpression,
 } from '../../frontend/ast/types';
 import { Environment } from '../environment';
 import { RuntimeValue } from '../values/types';
@@ -20,16 +21,6 @@ import { RuntimeValue } from '../values/types';
 export interface EvaluateProgramArgs {
   program: Program;
   environment: Environment;
-}
-
-export interface EvaluateAssignmentArgs {
-  assignment: AssignmentExpression;
-  environment: Environment;
-}
-
-export interface EvaluateFunctionDeclarationArgs {
-  environment: Environment;
-  declaration: FunctionDeclaration;
 }
 
 export interface EvaluateArgs {
@@ -42,14 +33,34 @@ export interface EvaluateAndReturnLastResultArgs {
   expressions: Expressions;
 }
 
+export interface EvaluateFunctionDeclarationArgs {
+  environment: Environment;
+  declaration: FunctionDeclaration;
+}
+
+export interface EvaluateAssignmentArgs {
+  environment: Environment;
+  assignment: AssignmentExpression;
+}
+
 export interface EvaluateIfExpressionArgs {
   ifExpression: IfExpression;
   environment: Environment;
 }
 
+export interface EvaluateConditionToBooleanArgs {
+  condition: boolean;
+}
+
+export interface EvaluateStringConcatenationArgs {
+  leftHandSide: RuntimeValue;
+  rightHandSide: RuntimeValue;
+}
+
 export interface EvaluateAdditionExpressionArgs {
   leftHandSide: RuntimeValue;
   rightHandSide: RuntimeValue;
+  operator: string;
 }
 
 export interface EvaluateNumericBinaryExpressionArgs {
@@ -85,11 +96,6 @@ export interface EvaluateEqualityExpressionArgs {
   rightHandSide: RuntimeValue;
 }
 
-export interface evaluateAssignment {
-  environment: Environment;
-  assignmentExpresion: AssignmentExpression;
-}
-
 export interface EvaluateIdentifierArgs {
   identifier: Identifier;
   environment: Environment;
@@ -104,13 +110,23 @@ export interface EvaluateStringArgs {
 }
 
 export interface EvaluateObjectExpressionArgs {
-  objectLiteral: ObjectLiteral;
   environment: Environment;
+  objectLiteral: ObjectLiteral;
+}
+
+export interface GetMemberExpressionObjectArgs {
+  environment: Environment;
+  memberObject: PrimitiveExpression;
+}
+
+export interface GetMemberExpressionProperty {
+  environment: Environment;
+  property: PrimitiveExpression;
 }
 
 export interface EvaluateMemberExpressionArgs {
-  memberExpression: MemberExpression;
   environment: Environment;
+  memberExpression: MemberExpression;
 }
 
 export interface EvaluateCallExpressionArgs {

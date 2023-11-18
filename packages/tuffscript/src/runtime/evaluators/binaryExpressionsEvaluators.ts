@@ -1,17 +1,13 @@
-import { evaluate } from '.';
 import { BinaryOperators } from '../../frontend/lexer/token/constants';
+import { evaluateBooleanFromType, evaluateConditionToBoolean } from './helpers';
+import { createBoolean, createNumber, createString } from '../factories';
 import {
   Values,
-  NumberValue,
   BooleanValue,
-  RuntimeValue,
+  NumberValue,
   StringValue,
+  RuntimeValue,
 } from '../values/types';
-import {
-  evaluateBooleanFromType,
-  evaluateFalseLiteral,
-  evaluateTrueLiteral,
-} from './primitiveTypesEvaluators';
 import {
   EvaluateAdditionExpressionArgs,
   EvaluateBinaryExpressionArgs,
@@ -19,9 +15,11 @@ import {
   EvaluateEqualityExpressionArgs,
   EvaluateLogicalBinaryExpressionArgs,
   EvaluateNumericBinaryExpressionArgs,
+  EvaluateStringConcatenationArgs,
 } from './types';
+import { evaluate } from './index';
 
-function evaluatNumericBinaryExpression({
+function evaluateNumericBinaryExpression({
   operator,
   leftHandSide,
   rightHandSide,
@@ -30,27 +28,86 @@ function evaluatNumericBinaryExpression({
     leftHandSide.type === Values.Number &&
     rightHandSide.type === Values.Number
   ) {
-    let result: number;
-    // TODO: we catch this in the other expression evaluator
-    if (operator == '+') {
-      result = leftHandSide.value + rightHandSide.value;
-    } else if (operator == '-') {
-      result = leftHandSide.value - rightHandSide.value;
-    } else if (operator == '*') {
-      result = leftHandSide.value * rightHandSide.value;
-    } else if (operator == '/') {
-      // TODO: Division by zero checks
-      result = leftHandSide.value / rightHandSide.value;
-    } else {
-      result = leftHandSide.value % rightHandSide.value;
+    switch (operator) {
+      case '+': {
+        return createNumber({
+          numberValue: leftHandSide.value + rightHandSide.value,
+        });
+      }
+      case '-': {
+        return createNumber({
+          numberValue: leftHandSide.value - rightHandSide.value,
+        });
+      }
+      case '*': {
+        return createNumber({
+          numberValue: leftHandSide.value * rightHandSide.value,
+        });
+      }
+      case '/': {
+        if (rightHandSide.value === 0) {
+          throw new Error('Division by zero error');
+        }
+        return createNumber({
+          numberValue: leftHandSide.value / rightHandSide.value,
+        });
+      }
+      case '%': {
+        if (rightHandSide.value === 0) {
+          throw new Error('Modulus by zero error');
+        }
+        return createNumber({
+          numberValue: leftHandSide.value % rightHandSide.value,
+        });
+      }
+      default:
+        throw new Error(`Unsupported binary operator: ${operator}`);
     }
-
-    return { value: result, type: Values.Number };
   }
 
   throw new Error(
-    `Binary operator ${operator} does not support value type: ${rightHandSide.type}`,
+    `Invalid operand type(s) for binary operator ${operator}. Expected both operands to be of type 'Number', but received types: left operand - ${leftHandSide.type}, right operand - ${rightHandSide.type}.`,
   );
+}
+
+export function evaluateStringConcatenation({
+  leftHandSide,
+  rightHandSide,
+}: EvaluateStringConcatenationArgs): StringValue {
+  if (
+    leftHandSide.type === Values.String &&
+    rightHandSide.type === Values.String
+  ) {
+    return createString({
+      stringValue: leftHandSide.value + rightHandSide.value,
+    });
+  }
+
+  throw new Error(
+    `Unexpected String Concatenation on: ${leftHandSide.type} and ${rightHandSide.type}`,
+  );
+}
+
+export function evaluateAdditionExpression({
+  operator,
+  leftHandSide,
+  rightHandSide,
+}: EvaluateAdditionExpressionArgs): StringValue | NumberValue {
+  if (
+    leftHandSide.type === Values.Number &&
+    rightHandSide.type === Values.Number
+  ) {
+    return evaluateNumericBinaryExpression({
+      leftHandSide,
+      operator,
+      rightHandSide,
+    });
+  }
+
+  return evaluateStringConcatenation({
+    leftHandSide,
+    rightHandSide,
+  });
 }
 
 export function evaluateEqualityExpression({
@@ -59,33 +116,35 @@ export function evaluateEqualityExpression({
 }: EvaluateEqualityExpressionArgs): BooleanValue {
   switch (leftHandSide.type) {
     case Values.Nil: {
-      return leftHandSide.type === rightHandSide.type
-        ? evaluateTrueLiteral()
-        : evaluateFalseLiteral();
+      return evaluateConditionToBoolean({
+        condition: leftHandSide.type === rightHandSide.type,
+      });
     }
     case Values.Boolean:
     case Values.Number:
     case Values.String: {
-      return leftHandSide.type === rightHandSide.type &&
-        leftHandSide.value === rightHandSide.value
-        ? evaluateTrueLiteral()
-        : evaluateFalseLiteral();
+      return evaluateConditionToBoolean({
+        condition:
+          leftHandSide.type === rightHandSide.type &&
+          leftHandSide.value === rightHandSide.value,
+      });
     }
     case Values.Object: {
-      return leftHandSide.type === rightHandSide.type &&
-        leftHandSide.properties === rightHandSide.properties
-        ? evaluateTrueLiteral()
-        : evaluateFalseLiteral();
+      return evaluateConditionToBoolean({
+        condition:
+          leftHandSide.type === rightHandSide.type &&
+          leftHandSide.properties === rightHandSide.properties,
+      });
     }
     case Values.Function:
     case Values.NativeFunction: {
-      return leftHandSide === rightHandSide
-        ? evaluateTrueLiteral()
-        : evaluateFalseLiteral();
+      return evaluateConditionToBoolean({
+        condition: leftHandSide === rightHandSide,
+      });
     }
     default: {
       throw new Error(
-        `Unsupported conditional binary expression with the operator: Equality`,
+        `Unsupported equality comparison for type: ${leftHandSide}`,
       );
     }
   }
@@ -105,19 +164,15 @@ export function evaluateConditionalBinaryExpression({
     rightHandSide.type === Values.Number
   ) {
     if (operator === BinaryOperators.LESS_THAN) {
-      const booleanResult = leftHandSide.value < rightHandSide.value;
-      return {
-        type: Values.Boolean,
-        value: booleanResult,
-      };
+      return createBoolean({
+        booleanValue: leftHandSide.value < rightHandSide.value,
+      });
     }
 
     if (operator === BinaryOperators.GREATER_THAN) {
-      const booleanResult = leftHandSide.value > rightHandSide.value;
-      return {
-        type: Values.Boolean,
-        value: booleanResult,
-      };
+      return createBoolean({
+        booleanValue: leftHandSide.value > rightHandSide.value,
+      });
     }
   }
 
@@ -134,49 +189,20 @@ export function evaluateLogicalBinaryExpression({
   if (operator === BinaryOperators.AND) {
     const booleanLeftSide = evaluateBooleanFromType(leftHandSide);
     const booleanRightSide = evaluateBooleanFromType(rightHandSide);
-    const booleanResult = booleanLeftSide.value && booleanRightSide.value;
-    return {
-      type: Values.Boolean,
-      value: booleanResult,
-    };
+    return createBoolean({
+      booleanValue: booleanLeftSide.value && booleanRightSide.value,
+    });
   }
 
   if (operator === BinaryOperators.OR) {
     const booleanLeftSide = evaluateBooleanFromType(leftHandSide);
     const booleanRightSide = evaluateBooleanFromType(rightHandSide);
-    const booleanResult = booleanLeftSide.value || booleanRightSide.value;
-    return {
-      type: Values.Boolean,
-      value: booleanResult,
-    };
+    return createBoolean({
+      booleanValue: booleanLeftSide.value || booleanRightSide.value,
+    });
   }
 
   throw new Error(`Unsupported Binary operation: ${operator}`);
-}
-
-export function evaluateAdditionExpression({
-  leftHandSide,
-  rightHandSide,
-}: EvaluateAdditionExpressionArgs): StringValue | NumberValue {
-  if (
-    leftHandSide.type === Values.Number &&
-    rightHandSide.type === Values.Number
-  ) {
-    const result = leftHandSide.value + rightHandSide.value;
-    return { type: Values.Number, value: result };
-  }
-
-  if (
-    leftHandSide.type === Values.String &&
-    rightHandSide.type === Values.String
-  ) {
-    const result = leftHandSide.value + rightHandSide.value;
-    return { type: Values.String, value: result };
-  }
-
-  throw new Error(
-    `Unsupported Addition operation on: ${leftHandSide.type} and ${rightHandSide.type}`,
-  );
 }
 
 export function evaluateBinaryExpression({
@@ -196,6 +222,7 @@ export function evaluateBinaryExpression({
     case BinaryOperators.ADDITION: {
       return evaluateAdditionExpression({
         leftHandSide,
+        operator: binaryExpression.operator,
         rightHandSide,
       });
     }
@@ -203,7 +230,7 @@ export function evaluateBinaryExpression({
     case BinaryOperators.MULTIPLICATION:
     case BinaryOperators.DIVISION:
     case BinaryOperators.MODULUS: {
-      return evaluatNumericBinaryExpression({
+      return evaluateNumericBinaryExpression({
         leftHandSide,
         operator: binaryExpression.operator,
         rightHandSide,

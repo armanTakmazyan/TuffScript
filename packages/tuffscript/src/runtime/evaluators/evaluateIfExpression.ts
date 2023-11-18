@@ -1,8 +1,10 @@
-import { evaluate } from '.';
 import { RuntimeValue } from '../values/types';
-import { evaluateAndReturnLastResult } from './helpers';
-import { evaluateBooleanFromType } from './primitiveTypesEvaluators';
 import { EvaluateIfExpressionArgs } from './types';
+import {
+  evaluateBooleanFromType,
+  evaluateAndReturnLastResult,
+} from './helpers';
+import { evaluate } from './index';
 
 export function evaluateIfExpression({
   ifExpression,
