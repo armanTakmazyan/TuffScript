@@ -1,0 +1,38 @@
+{
+  "name": "tuff-script-language-configuration",
+  "displayName": "TuffScript Language Configuration",
+  "description": "Language Configuration for TuffScript",
+  "version": "1.0.0",
+  "publisher": "Arman Takmazyan",
+  "icon": "./images/logo.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/armanTakmazyan/TuffScript"
+  },
+  "engines": {
+    "vscode": "^1.33.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "TuffScript", 
+        "extensions": [
+          ".tuff" 
+        ],
+        "icon": {
+          "dark": "./images/icon.png",
+          "light": "./images/icon.png"
+        },
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [{
+      "language": "TuffScript",
+      "scopeName": "source.TuffScript",
+      "path": "./syntaxes/TuffScript.tmLanguage.json"
+    }]
+  }
+}
