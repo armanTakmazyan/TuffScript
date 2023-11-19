@@ -1,7 +1,7 @@
 {
     "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-    "name": "TuffScript",
-    "scopeName": "source.TuffScript",
+    "name": "tuffscript",
+    "scopeName": "source.tuffscript",
     "patterns": [
         {
             "include": "#comments"

@@ -1,0 +1,50 @@
+{
+    "name": "tuffscript-formatter-extension",
+    "displayName": "TuffScript Formatter",
+    "description": "TuffScript Formatter for VS Code",
+    "version": "1.0.0",
+    "publisher": "ArmanTakmazyan",
+    "icon": "./images/logo.png",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/armanTakmazyan/TuffScript"
+    },
+    "main": "./lib/index.js",
+    "engines": {
+        "vscode": "^1.65.2"
+    },
+    "categories": [
+      "Programming Languages",
+      "Formatters"
+    ],
+    "activationEvents": [
+      "onStartupFinished",
+      "onLanguage:tuffscript",
+      "onCommand:identifier.tuffscript"
+    ],
+    "contributes": {
+      "commands": [
+        {
+          "command": "identifier.tuffscript",
+          "title": "TuffScript Formatter"
+        }
+      ]
+    },
+    "scripts": {
+        "build": "yarn rimraf ./lib && tsc --declaration",
+        "watch": "npx tsc -w",
+        "start": "yarn run build:live",
+        "build:live": "nodemon"
+    },
+    "devDependencies": {
+        "@types/node": "^20.8.10",
+        "@types/vscode": "^1.65.2",
+        "nodemon": "^3.0.1",
+        "rimraf": "^5.0.5",
+        "typescript": "^5.2.2"
+    },
+    "peerDependencies": {
+        "tuffscript": "^1.0.0",
+        "tuffscript-formatter": "^1.0.0"
+    }
+  }
