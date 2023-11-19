@@ -51,31 +51,31 @@ export enum KeywordValues {
 export const KEYWORD_TOKEN_PATTERNS = {
   [TokenKind.Do]: new TokenType({
     name: TokenKind.Do,
-    regex: 'կատարել',
+    regex: KeywordValues.Do,
   }),
   [TokenKind.End]: new TokenType({
     name: TokenKind.End,
-    regex: 'ավարտել',
+    regex: KeywordValues.End,
   }),
   [TokenKind.Store]: new TokenType({
     name: TokenKind.Store,
-    regex: 'պահել',
+    regex: KeywordValues.Store,
   }),
   [TokenKind.ContainmentSuffix]: new TokenType({
     name: TokenKind.ContainmentSuffix,
-    regex: 'ում',
+    regex: KeywordValues.ContainmentSuffix,
   }),
   [TokenKind.If]: new TokenType({
     name: TokenKind.If,
-    regex: 'եթե',
+    regex: KeywordValues.If,
   }),
   [TokenKind.Else]: new TokenType({
     name: TokenKind.Else,
-    regex: 'հակառակ դեպքում',
+    regex: KeywordValues.Else,
   }),
   [TokenKind.Function]: new TokenType({
     name: TokenKind.Function,
-    regex: 'ֆունկցիա',
+    regex: KeywordValues.Function,
   }),
 } as const;
 

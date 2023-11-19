@@ -1,8 +1,24 @@
 import { UnaryOperators, KeywordValues } from 'tuffscript/token/constants';
-import { ExpressionNodeType } from 'tuffscript/ast/types';
+import {
+  ExpressionNodeType,
+  FunctionDeclaration,
+  AssignmentExpression,
+  IfExpression,
+  ObjectLiteral,
+  BinaryExpression,
+  UnaryExpression,
+  MemberExpression,
+  CallExpression,
+  Identifier,
+  NumberLiteral,
+  StringLiteral,
+  TrueLiteral,
+  FalseLiteral,
+  NilLiteral,
+} from 'tuffscript/ast/types';
 import { createIndentation } from '../helpers';
 import {
-  FormBlockArgs,
+  FormatBlockArgs,
   FormatFuntionDeclarationArgs,
   FormatAssignmentExpressionArgs,
   FormatIfExpressionArgs,
@@ -12,215 +28,162 @@ import {
   FormatMemberExpressionArgs,
   FormatCallExpressionArgs,
   FormatPrimaryExpressionArgs,
-  FormatAST,
+  FormatterVisitor,
+  FormatterVisitorConstructorArgs,
 } from './types';
+import { StringBuilder } from '../stringBuilder';
 
-export function formatBlock({
-  block,
-  stringBuilder,
-  indentationLevel,
-}: FormBlockArgs): void {
-  for (const expression of block) {
-    stringBuilder.append({ value: createIndentation({ indentationLevel }) });
-    formatAST({ astNode: expression, indentationLevel, stringBuilder });
-    stringBuilder.append({ value: '\n' });
-  }
-}
-
-export function formatFunctionDeclaration({
-  astNode,
-  stringBuilder,
-  indentationLevel,
-}: FormatFuntionDeclarationArgs): void {
-  stringBuilder.append({ value: KeywordValues.Function });
-  stringBuilder.append({ value: ` ${astNode.name}` });
-  stringBuilder.append({ value: '(' });
-  stringBuilder.append({ value: astNode.arguments.join(', ') });
-  stringBuilder.append({ value: `) ${KeywordValues.Do}\n` });
-  formatBlock({
-    block: astNode.body,
-    indentationLevel: indentationLevel + 1,
-    stringBuilder,
-  });
-  stringBuilder.append({
-    value: createIndentation({ indentationLevel }) + `${KeywordValues.End}`,
+export function formatFunctionDeclaration(
+  this: FormatterVisitor,
+  { astNode }: FormatFuntionDeclarationArgs,
+): void {
+  this.stringBuilder.append({ value: KeywordValues.Function });
+  this.stringBuilder.append({ value: ` ${astNode.name}` });
+  this.stringBuilder.append({ value: '(' });
+  this.stringBuilder.append({ value: astNode.arguments.join(', ') });
+  this.stringBuilder.append({ value: `) ${KeywordValues.Do}\n` });
+  this.formatBlock({ block: astNode.body });
+  this.stringBuilder.append({
+    value:
+      createIndentation({ indentationLevel: this.indentationLevel }) +
+      `${KeywordValues.End}`,
   });
 }
 
-export function formatAssignmentExpression({
-  astNode,
-  stringBuilder,
-  indentationLevel,
-}: FormatAssignmentExpressionArgs): void {
-  stringBuilder.append({ value: `${KeywordValues.Store} ` });
-  formatAST({ astNode: astNode.value, indentationLevel, stringBuilder });
-  stringBuilder.append({
+export function formatAssignmentExpression(
+  this: FormatterVisitor,
+  { astNode }: FormatAssignmentExpressionArgs,
+): void {
+  this.stringBuilder.append({ value: `${KeywordValues.Store} ` });
+  astNode.value.accept(this);
+  this.stringBuilder.append({
     value: ` ${astNode.assigne} ${KeywordValues.ContainmentSuffix}`,
   });
 }
 
-function formatIfExpression({
-  astNode,
-  indentationLevel,
-  stringBuilder,
-}: FormatIfExpressionArgs) {
-  stringBuilder.append({ value: `${KeywordValues.If} ` });
-  formatAST({
-    astNode: astNode.condition,
-    indentationLevel,
-    stringBuilder,
+function formatIfExpression(
+  this: FormatterVisitor,
+  { astNode }: FormatIfExpressionArgs,
+) {
+  this.stringBuilder.append({ value: `${KeywordValues.If} ` });
+  astNode.condition.accept(this);
+  this.stringBuilder.append({ value: ` ${KeywordValues.Do}\n` });
+  this.formatBlock({ block: astNode.thenBody });
+  this.stringBuilder.append({
+    value: createIndentation({ indentationLevel: this.indentationLevel }),
   });
-  stringBuilder.append({ value: ` ${KeywordValues.Do}\n` });
-  formatBlock({
-    block: astNode.thenBody,
-    stringBuilder,
-    indentationLevel: indentationLevel + 1,
-  });
-  stringBuilder.append({ value: createIndentation({ indentationLevel }) });
-  stringBuilder.append({ value: `${KeywordValues.Else}\n` });
-
-  formatBlock({
-    block: astNode.elseBody,
-    indentationLevel: indentationLevel + 1,
-    stringBuilder,
-  });
-
-  stringBuilder.append({ value: `${KeywordValues.End}` });
+  this.stringBuilder.append({ value: `${KeywordValues.Else}\n` });
+  this.formatBlock({ block: astNode.elseBody });
+  this.stringBuilder.append({ value: `${KeywordValues.End}` });
 }
 
-export function formatObjectLiteral({
-  astNode,
-  indentationLevel,
-  stringBuilder,
-}: FormatObjectLiteralArgs): void {
-  stringBuilder.append({ value: '{\n' });
+export function formatObjectLiteral(
+  this: FormatterVisitor,
+  { astNode }: FormatObjectLiteralArgs,
+): void {
+  this.stringBuilder.append({ value: '{\n' });
   const properties = astNode.properties;
 
   properties.forEach((property, index) => {
-    const newIndentationLevel = createIndentation({
-      indentationLevel: indentationLevel + 1,
-    });
     if (property.value) {
-      stringBuilder.append({
+      const newIndentationLevel = createIndentation({
+        indentationLevel: this.indentationLevel + 1,
+      });
+
+      this.stringBuilder.append({
         value: newIndentationLevel + property.key + ': ',
       });
-      formatAST({
-        astNode: property.value,
-        indentationLevel,
-        stringBuilder,
-      });
+      property.value.accept(this);
+
       // Add a comma if it's not the last property
       if (index < properties.length - 1) {
-        stringBuilder.append({ value: ',' });
+        this.stringBuilder.append({ value: ',' });
       }
     }
     // TODO: Check this part
-    stringBuilder.append({ value: ',' });
+    this.stringBuilder.append({ value: ',' });
 
-    stringBuilder.append({ value: '\n' });
+    this.stringBuilder.append({ value: '\n' });
   });
 
-  stringBuilder.append({
-    value: createIndentation({ indentationLevel }) + '}',
+  this.stringBuilder.append({
+    value: createIndentation({ indentationLevel: this.indentationLevel }) + '}',
   });
 }
 
-export function formatBinaryExpression({
-  astNode,
-  indentationLevel,
-  stringBuilder,
-}: FormatBinaryExpressionArgs): void {
-  formatAST({ astNode: astNode.left, indentationLevel, stringBuilder });
-  stringBuilder.append({ value: ` ${astNode.operator} ` });
-  formatAST({ astNode: astNode.right, indentationLevel, stringBuilder });
+export function formatBinaryExpression(
+  this: FormatterVisitor,
+  { astNode }: FormatBinaryExpressionArgs,
+): void {
+  astNode.left.accept(this);
+  this.stringBuilder.append({ value: ` ${astNode.operator} ` });
+  astNode.right.accept(this);
 }
 
-export function formatUnaryExpression({
-  astNode,
-  indentationLevel,
-  stringBuilder,
-}: FormatUnaryExpressionArgs): void {
-  stringBuilder.append({
+export function formatUnaryExpression(
+  this: FormatterVisitor,
+  { astNode }: FormatUnaryExpressionArgs,
+): void {
+  this.stringBuilder.append({
     value: `${astNode.operator}${
       astNode.operator === UnaryOperators.Not ? ' ' : ''
     }`,
   });
-  formatAST({ astNode: astNode.argument, indentationLevel, stringBuilder });
+  astNode.argument.accept(this);
 }
 
 // TODO: catch dynamically computed values
-export function formatMemberExpression({
-  astNode,
-  indentationLevel,
-  stringBuilder,
-}: FormatMemberExpressionArgs): void {
-  formatAST({
-    astNode: astNode.object,
-    indentationLevel,
-    stringBuilder,
-  });
+export function formatMemberExpression(
+  this: FormatterVisitor,
+  { astNode }: FormatMemberExpressionArgs,
+): void {
+  astNode.object.accept(this);
+
   if (astNode.property.type === ExpressionNodeType.Identifier) {
-    stringBuilder.append({ value: '.' });
-    formatAST({
-      astNode: astNode.property,
-      indentationLevel,
-      stringBuilder,
-    });
+    this.stringBuilder.append({ value: '.' });
+    astNode.property.accept(this);
   }
   if (astNode.property.type !== ExpressionNodeType.Identifier) {
-    stringBuilder.append({ value: '[' });
-    formatAST({
-      astNode: astNode.property,
-      indentationLevel,
-      stringBuilder,
-    });
-    stringBuilder.append({ value: ']' });
+    this.stringBuilder.append({ value: '[' });
+    astNode.property.accept(this);
+    this.stringBuilder.append({ value: ']' });
   }
 }
 
-export function formatCallExpression({
-  astNode,
-  stringBuilder,
-  indentationLevel,
-}: FormatCallExpressionArgs): void {
-  formatAST({
-    astNode: astNode.caller,
-    indentationLevel,
-    stringBuilder,
-  });
+export function formatCallExpression(
+  this: FormatterVisitor,
+  { astNode }: FormatCallExpressionArgs,
+): void {
+  astNode.caller.accept(this);
 
-  stringBuilder.append({ value: '(' });
+  this.stringBuilder.append({ value: '(' });
   for (const [argumentIndex, argument] of astNode.arguments.entries()) {
-    formatAST({
-      astNode: argument,
-      indentationLevel,
-      stringBuilder,
-    });
+    argument.accept(this);
     if (argumentIndex < astNode.arguments.length - 1) {
-      stringBuilder.append({ value: ',' });
+      this.stringBuilder.append({ value: ',' });
     }
   }
-  stringBuilder.append({ value: ')' });
+  this.stringBuilder.append({ value: ')' });
 }
 
-export function formatPrimaryExpression({
-  astNode,
-  stringBuilder,
-}: FormatPrimaryExpressionArgs): void {
+export function formatPrimaryExpression(
+  this: FormatterVisitor,
+  { astNode }: FormatPrimaryExpressionArgs,
+): void {
   switch (astNode.type) {
     case ExpressionNodeType.StringLiteral: {
-      stringBuilder.append({ value: `'${astNode.value}'` });
+      this.stringBuilder.append({ value: `'${astNode.value}'` });
       break;
     }
     case ExpressionNodeType.NumberLiteral:
     case ExpressionNodeType.FalseLiteral:
     case ExpressionNodeType.TrueLiteral:
     case ExpressionNodeType.NilLiteral: {
-      stringBuilder.append({ value: `${astNode.value}` });
+      this.stringBuilder.append({ value: `${astNode.value}` });
       break;
     }
     case ExpressionNodeType.Identifier: {
-      stringBuilder.append({ value: astNode.symbol });
+      this.stringBuilder.append({ value: astNode.symbol });
       break;
     }
     default: {
@@ -229,93 +192,77 @@ export function formatPrimaryExpression({
   }
 }
 
-export const formatAST: FormatAST = ({
-  astNode,
-  indentationLevel,
-  stringBuilder,
-}) => {
-  switch (astNode.type) {
-    case ExpressionNodeType.FunctionDeclaration: {
-      formatFunctionDeclaration({
-        astNode,
-        indentationLevel,
-        stringBuilder,
-      });
-      break;
-    }
-    case ExpressionNodeType.AssignmentExpression: {
-      formatAssignmentExpression({
-        astNode,
-        indentationLevel,
-        stringBuilder,
-      });
-      break;
-    }
-    case ExpressionNodeType.IfExpression: {
-      formatIfExpression({
-        astNode,
-        indentationLevel,
-        stringBuilder,
-      });
-      break;
-    }
-    case ExpressionNodeType.ObjectLiteral: {
-      formatObjectLiteral({
-        astNode,
-        indentationLevel,
-        stringBuilder,
-      });
-      break;
-    }
-    case ExpressionNodeType.BinaryExpression: {
-      formatBinaryExpression({
-        astNode,
-        indentationLevel,
-        stringBuilder,
-      });
-      break;
-    }
-    case ExpressionNodeType.UnaryExpression: {
-      formatUnaryExpression({
-        astNode,
-        indentationLevel,
-        stringBuilder,
-      });
-      break;
-    }
-    case ExpressionNodeType.MemberExpression: {
-      formatMemberExpression({
-        astNode,
-        indentationLevel,
-        stringBuilder,
-      });
-      break;
-    }
-    case ExpressionNodeType.CallExpression: {
-      formatCallExpression({
-        astNode,
-        indentationLevel,
-        stringBuilder,
-      });
-      break;
-    }
-    case ExpressionNodeType.Identifier:
-    case ExpressionNodeType.NumberLiteral:
-    case ExpressionNodeType.StringLiteral:
-    case ExpressionNodeType.TrueLiteral:
-    case ExpressionNodeType.FalseLiteral:
-    case ExpressionNodeType.NilLiteral: {
-      formatPrimaryExpression({
-        astNode,
-        indentationLevel,
-        stringBuilder,
-      });
-      break;
-    }
-    default: {
-      throw new Error(
-        `This AST Node has not yet been setup for interpretation.\n ${astNode}`,
-      );
-    }
+export class Formatter implements FormatterVisitor {
+  stringBuilder: StringBuilder;
+  indentationLevel: number;
+
+  constructor({
+    stringBuilder,
+    indentationLevel,
+  }: FormatterVisitorConstructorArgs) {
+    this.stringBuilder = stringBuilder;
+    this.indentationLevel = indentationLevel;
   }
-};
+
+  // Increases indentation for nested blocks (e.g., functions, if statements).
+  withIncreasedIndentation(callback: () => void): void {
+    this.indentationLevel++;
+    callback.call(this);
+    this.indentationLevel--;
+  }
+
+  formatBlock(this: FormatterVisitor, { block }: FormatBlockArgs): void {
+    this.withIncreasedIndentation(function (this: FormatterVisitor) {
+      for (const expression of block) {
+        this.stringBuilder.append({
+          value: createIndentation({ indentationLevel: this.indentationLevel }),
+        });
+        expression.accept(this);
+        this.stringBuilder.append({ value: '\n' });
+      }
+    });
+  }
+
+  visitFunctionDeclaration(node: FunctionDeclaration): void {
+    formatFunctionDeclaration.call(this, { astNode: node });
+  }
+  visitAssignmentExpression(node: AssignmentExpression): void {
+    formatAssignmentExpression.call(this, { astNode: node });
+  }
+  visitIfExpression(node: IfExpression): void {
+    formatIfExpression.call(this, { astNode: node });
+  }
+  visitObjectLiteral(node: ObjectLiteral): void {
+    formatObjectLiteral.call(this, { astNode: node });
+  }
+  visitBinaryExpression(node: BinaryExpression): void {
+    formatBinaryExpression.call(this, { astNode: node });
+  }
+  visitUnaryExpression(node: UnaryExpression): void {
+    formatUnaryExpression.call(this, { astNode: node });
+  }
+  visitMemberExpression(node: MemberExpression): void {
+    formatMemberExpression.call(this, { astNode: node });
+  }
+  visitCallExpression(node: CallExpression): void {
+    formatCallExpression.call(this, { astNode: node });
+  }
+  visitIdentifier(node: Identifier): void {
+    formatPrimaryExpression.call(this, { astNode: node });
+  }
+  visitNumberLiteral(node: NumberLiteral): void {
+    formatPrimaryExpression.call(this, { astNode: node });
+  }
+  visitStringLiteral(node: StringLiteral): void {
+    formatPrimaryExpression.call(this, { astNode: node });
+  }
+  visitTrueLiteral(node: TrueLiteral): void {
+    formatPrimaryExpression.call(this, { astNode: node });
+  }
+  visitFalseLiteral(node: FalseLiteral): void {
+    formatPrimaryExpression.call(this, { astNode: node });
+  }
+  visitNilLiteral(node: NilLiteral): void {
+    formatPrimaryExpression.call(this, { astNode: node });
+  }
+}

@@ -26,8 +26,8 @@ import {
   falseLiteralNode,
   nilLiteralNode,
   objectLiteralNode,
-  propertyNode,
   unaryExpressionNode,
+  createProperty,
 } from '../ast/nodes';
 import {
   UnaryOperators,
@@ -256,14 +256,14 @@ export class Parser {
         this.eat(); // eat comma token
 
         properties.push(
-          propertyNode({
+          createProperty({
             key,
           }),
         );
         continue;
       } else if (this.at().type.name === TokenKind.CloseBrace) {
         properties.push(
-          propertyNode({
+          createProperty({
             key,
           }),
         );
@@ -279,7 +279,7 @@ export class Parser {
       const value = this.parsePrimitiveExpression();
 
       properties.push(
-        propertyNode({
+        createProperty({
           key,
           value,
         }),

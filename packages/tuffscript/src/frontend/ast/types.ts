@@ -17,7 +17,6 @@ export enum ExpressionNodeType {
   MemberExpression = 'MemberExpression',
   CallExpression = 'CallExpression',
   // Primary Expressions
-  Property = 'Property',
   NumberLiteral = 'NumberLiteral',
   StringLiteral = 'StringLiteral',
   Identifier = 'Identifier',
@@ -30,6 +29,7 @@ export enum ExpressionNodeType {
 
 export interface BaseExpression {
   type: ExpressionNodeType;
+  accept(visitor: ASTNodeVisitor): void;
 }
 
 // HIGH-LEVEL/COMPLEX EXPRESSIONS
@@ -109,8 +109,8 @@ export interface NilLiteral extends BaseExpression {
   value: LiteralValues.Nil;
 }
 
-export interface Property extends BaseExpression {
-  type: ExpressionNodeType.Property;
+export interface Property {
+  type: 'Property';
   key: string;
   value?: PrimitiveExpression;
 }
@@ -147,4 +147,20 @@ export type Expressions = Expression[];
 export interface Program {
   type: 'Program';
   body: Expressions;
+}
+export interface ASTNodeVisitor {
+  visitFunctionDeclaration(node: FunctionDeclaration): void;
+  visitAssignmentExpression(node: AssignmentExpression): void;
+  visitIfExpression(node: IfExpression): void;
+  visitObjectLiteral(node: ObjectLiteral): void;
+  visitBinaryExpression(node: BinaryExpression): void;
+  visitUnaryExpression(node: UnaryExpression): void;
+  visitMemberExpression(node: MemberExpression): void;
+  visitCallExpression(node: CallExpression): void;
+  visitIdentifier(node: Identifier): void;
+  visitNumberLiteral(node: NumberLiteral): void;
+  visitStringLiteral(node: StringLiteral): void;
+  visitTrueLiteral(node: TrueLiteral): void;
+  visitFalseLiteral(node: FalseLiteral): void;
+  visitNilLiteral(node: NilLiteral): void;
 }
