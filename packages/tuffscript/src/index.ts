@@ -1,8 +1,6 @@
 export { Lexer } from './frontend/lexer';
 export { Parser } from './frontend/parser';
 export { Interpreter } from './runtime/interpreter';
-export * from './frontend/ast/types'; // TODO: think about this
-export { KeywordValues } from './frontend/lexer/token/constants';
 
 // const lexer = new Lexer(simpleFunction);
 

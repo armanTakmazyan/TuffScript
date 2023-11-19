@@ -10,7 +10,7 @@ import {
   ObjectLiteral,
   PrimaryExpression,
   UnaryExpression,
-} from 'tuffscript';
+} from 'tuffscript/ast/types';
 import { StringBuilder } from '../stringBuilder';
 
 export interface Formatter {
