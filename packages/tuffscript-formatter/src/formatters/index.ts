@@ -85,23 +85,22 @@ export function formatObjectLiteral(
   const properties = astNode.properties;
 
   properties.forEach((property, index) => {
-    if (property.value) {
-      const newIndentationLevel = createIndentation({
-        indentationLevel: this.indentationLevel + 1,
-      });
+    const newIndentationLevel = createIndentation({
+      indentationLevel: this.indentationLevel + 1,
+    });
 
+    if (property.value) {
       this.stringBuilder.append({
         value: newIndentationLevel + property.key + ': ',
       });
       property.value.accept(this);
-
-      // Add a comma if it's not the last property
-      if (index < properties.length - 1) {
-        this.stringBuilder.append({ value: ',' });
-      }
+    } else {
+      this.stringBuilder.append({ value: newIndentationLevel + property.key });
     }
-    // TODO: Check this part
-    this.stringBuilder.append({ value: ',' });
+    // Add a comma if it's not the last property
+    if (index < properties.length - 1) {
+      this.stringBuilder.append({ value: ',' });
+    }
 
     this.stringBuilder.append({ value: '\n' });
   });
@@ -132,7 +131,6 @@ export function formatUnaryExpression(
   astNode.argument.accept(this);
 }
 
-// TODO: catch dynamically computed values
 export function formatMemberExpression(
   this: FormatterVisitor,
   { astNode }: FormatMemberExpressionArgs,
