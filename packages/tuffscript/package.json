@@ -7,6 +7,13 @@
     "./ast/types": "./lib/frontend/ast/types.js",
     "./token/constants": "./lib/frontend/lexer/token/constants.js"
   },
+  "typesVersions": {
+    "*": {
+        "ast/types": [
+            "./lib/frontend/ast/types.d.ts"
+        ]
+    }
+},
   "files": [
     "lib/**/*"
   ],

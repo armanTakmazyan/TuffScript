@@ -105,12 +105,12 @@ export type FalseLiteralNode = () => FalseLiteral;
 
 export type NilLiteralNode = () => NilLiteral;
 
-export interface PropertyNodeArgs {
+export interface CreatePropertyArgs {
   key: string;
   value?: PrimitiveExpression;
 }
 
-export type PropertyNode = (args: PropertyNodeArgs) => Property;
+export type CreateProperty = (args: CreatePropertyArgs) => Property;
 
 export interface ObjectLiteralNodeArgs {
   properties: Property[];

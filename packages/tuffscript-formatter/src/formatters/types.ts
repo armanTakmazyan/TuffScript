@@ -1,8 +1,8 @@
 import {
+  ASTNodeVisitor,
   AssignmentExpression,
   BinaryExpression,
   CallExpression,
-  Expression,
   Expressions,
   FunctionDeclaration,
   IfExpression,
@@ -13,55 +13,54 @@ import {
 } from 'tuffscript/ast/types';
 import { StringBuilder } from '../stringBuilder';
 
-export interface Formatter {
+export interface FormatterVisitorConstructorArgs {
   indentationLevel: number;
   stringBuilder: StringBuilder;
 }
 
-export interface FormBlockArgs extends Formatter {
+export interface FormatBlockArgs {
   block: Expressions;
 }
 
-export interface FormatFuntionDeclarationArgs extends Formatter {
+export interface FormatterVisitor extends ASTNodeVisitor {
+  indentationLevel: number;
+  stringBuilder: StringBuilder;
+  formatBlock: (args: FormatBlockArgs) => void;
+  withIncreasedIndentation(callback: () => void): void;
+}
+
+export interface FormatFuntionDeclarationArgs {
   astNode: FunctionDeclaration;
 }
 
-export interface FormatAssignmentExpressionArgs extends Formatter {
+export interface FormatAssignmentExpressionArgs {
   astNode: AssignmentExpression;
 }
 
-export interface FormatIfExpressionArgs extends Formatter {
+export interface FormatIfExpressionArgs {
   astNode: IfExpression;
 }
 
-export interface FormatObjectLiteralArgs extends Formatter {
+export interface FormatObjectLiteralArgs {
   astNode: ObjectLiteral;
 }
 
-export interface FormatBinaryExpressionArgs extends Formatter {
+export interface FormatBinaryExpressionArgs {
   astNode: BinaryExpression;
 }
 
-export interface FormatUnaryExpressionArgs extends Formatter {
+export interface FormatUnaryExpressionArgs {
   astNode: UnaryExpression;
 }
 
-export interface FormatMemberExpressionArgs extends Formatter {
+export interface FormatMemberExpressionArgs {
   astNode: MemberExpression;
 }
 
-export interface FormatCallExpressionArgs extends Formatter {
+export interface FormatCallExpressionArgs {
   astNode: CallExpression;
 }
 
-export interface FormatPrimaryExpressionArgs extends Formatter {
+export interface FormatPrimaryExpressionArgs {
   astNode: PrimaryExpression;
 }
-
-export interface FormatASTArgs {
-  astNode: Expression;
-  indentationLevel: number;
-  stringBuilder: StringBuilder;
-}
-
-export type FormatAST = (args: FormatASTArgs) => void;
