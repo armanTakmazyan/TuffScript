@@ -66,7 +66,6 @@ export type UnaryExpressionNode = (
 export interface MemberExpressionNodeArgs {
   object: PrimitiveExpression;
   property: PrimitiveExpression;
-  computed: boolean;
 }
 
 export type MemberExpressionNode = (

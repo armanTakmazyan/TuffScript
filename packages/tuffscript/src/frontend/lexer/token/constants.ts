@@ -38,6 +38,16 @@ export const IDENTIFIER_TOKEN_PATTERNS = {
   }),
 } as const;
 
+export enum KeywordValues {
+  Do = 'կատարել',
+  End = 'ավարտել',
+  Store = 'պահել',
+  ContainmentSuffix = 'ում',
+  If = 'եթե',
+  Else = 'հակառակ դեպքում',
+  Function = 'ֆունկցիա',
+}
+
 export const KEYWORD_TOKEN_PATTERNS = {
   [TokenKind.Do]: new TokenType({
     name: TokenKind.Do,
@@ -72,7 +82,9 @@ export const KEYWORD_TOKEN_PATTERNS = {
 // Grouping * Operators
 export enum UnaryOperators {
   Not = 'ոչ',
+  Minus = '-',
 }
+
 export enum BinaryOperators {
   ADDITION = '+',
   SUBTRACTION = '-',
@@ -160,9 +172,7 @@ export const TOKEN_PATTERNS_LIST = [
   ...Object.values(PUNCTUATION_TOKEN_PATTERNS),
 ] as const;
 
-/**
- * keywords and known identifiers, symbols.
- */
+// keywords and known identifiers, symbols
 export const KEYWORDS = [
   TokenKind.Do,
   TokenKind.End,

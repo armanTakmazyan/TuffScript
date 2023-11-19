@@ -1,5 +1,6 @@
-import { TokenKind } from './token/types';
 import { Token } from './token/token';
+import { TokenKind } from './token/types';
+import { processTokenValue } from './token/helpers';
 import {
   TOKEN_PATTERNS_LIST,
   PUNCTUATION_TOKEN_PATTERNS,
@@ -46,7 +47,10 @@ export class Lexer {
       if (matchedString) {
         const token = new Token({
           type: tokenType,
-          value: matchedString,
+          value: processTokenValue({
+            tokenValue: matchedString,
+            tokenTypeName: tokenType.name,
+          }),
           position: this.pos,
         });
 

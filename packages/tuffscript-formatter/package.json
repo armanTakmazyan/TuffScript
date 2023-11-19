@@ -1,0 +1,29 @@
+{
+    "name": "tuffscript-formatter",
+    "version": "1.0.0",
+    "main": "./lib/index.js",
+    "files": [
+      "lib/**/*"
+    ],
+    "license": "MIT",
+    "description": "TuffScript programming langauge formatter",
+    "author": "Arman Takmazyan",
+    "sideEffects": false,
+    "scripts": {
+      "formatTuffScript": "node lib/formatFile.js",
+      "build": "yarn rimraf ./lib && tsc --declaration",
+      "watch": "npx tsc -w",
+      "start": "yarn run build:live",
+      "build:live": "nodemon"
+    },
+    "dependencies": {
+        "tuffscript": "^1.0.0"
+    },
+    "devDependencies": {
+      "@types/node": "^20.8.10",
+      "nodemon": "^3.0.1",
+      "rimraf": "^5.0.5",
+      "typescript": "^5.2.2"
+    }
+  }
+  

@@ -1,0 +1,139 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "TuffScript",
+    "scopeName": "source.TuffScript",
+    "patterns": [
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#string_literals"
+        },
+        {
+            "include": "#numeric_literals"
+        },
+        {
+            "include": "#object_literals"
+        },
+        {
+            "include": "#literals"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#operators"
+        },
+        {
+            "include": "#punctuation"
+        },
+        {
+            "include": "#function_calls"
+        }
+    ],
+    "repository": {
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.tuffscript",
+                    "match": "//.*"
+                }
+            ]
+        },
+        "literals": {
+            "patterns": [
+                {
+                    "name": "constant.language.boolean.true.tuffscript",
+                    "match": "\\bճշմարտություն\\b"
+                },
+                {
+                    "name": "constant.language.boolean.false.tuffscript",
+                    "match": "\\bկեղծիք\\b"
+                },
+                {
+                    "name": "constant.language.nil.tuffscript",
+                    "match": "\\bսահմանված չէ\\b"
+                }
+            ]
+        },
+        "string_literals": {
+            "patterns": [
+                {
+                    "name": "string.quoted.single.tuffscript",
+                    "begin": "'",
+                    "end": "'",
+                    "patterns": [
+                        {
+                            "name": "constant.character.escape.tuffscript",
+                            "match": "\\\\[0tnr'\"\\\\]"
+                        }
+                    ]
+                }
+            ]
+        },
+        "numeric_literals": {
+            "patterns": [
+                {
+                    "name": "constant.numeric.tuffscript",
+                    "match": "\\b[0-9]+\\b"
+                }
+            ]
+        },
+        "object_literals": {
+            "patterns": [
+                {
+                    "name": "variable.object.tuffscript",
+                    "begin": "\\{",
+                    "end": "\\}",
+                    "patterns": [
+                        {
+                            "include": "#string_literals"
+                        },
+                        {
+                            "include": "#numeric_literals"
+                        },
+                        {
+                            "include": "#object_literals" 
+                        }
+                    ]
+                }
+            ]
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.tuffscript",
+                    "match": "\\b(կատարել|ավարտել|պահել|ում|եթե|հակառակ դեպքում|ֆունկցիա)\\b"
+                }
+            ]
+        },
+        "operators": {
+            "patterns": [
+                {
+                    "name": "keyword.operator.arithmetic.tuffscript",
+                    "match": "(\\+|-|\\*|\\/)"
+                },
+                {
+                    "name": "keyword.operator.logical.tuffscript",
+                    "match": "(հավասար է|փոքր է|մեծ է|և|կամ)"
+                }
+            ]
+        },
+        "punctuation": {
+            "patterns": [
+                {
+                    "name": "punctuation.tuffscript",
+                    "match": "[\\n\\t\\r\\,\\.\\:\\;\\(\\)\\{\\}\\[\\]\\']"
+                }
+            ]
+        },
+        "function_calls": {
+            "patterns": [
+                {
+                    "name": "entity.name.function.tuffscript",
+                    "match": "\\b[\\wԱ-ֆ]+\\s*(?=\\()"
+                }
+            ]
+        }
+    }
+}

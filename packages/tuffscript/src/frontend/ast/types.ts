@@ -11,16 +11,16 @@ export enum ExpressionNodeType {
   AssignmentExpression = 'AssignmentExpression',
   IfExpression = 'IfExpression',
   // Primitive expressions
+  ObjectLiteral = 'ObjectLiteral',
+  BinaryExpression = 'BinaryExpression',
+  UnaryExpression = 'UnaryExpression',
   MemberExpression = 'MemberExpression',
   CallExpression = 'CallExpression',
-  // Literals
+  // Primary Expressions
   Property = 'Property',
-  ObjectLiteral = 'ObjectLiteral',
   NumberLiteral = 'NumberLiteral',
   StringLiteral = 'StringLiteral',
   Identifier = 'Identifier',
-  BinaryExpression = 'BinaryExpression',
-  UnaryExpression = 'UnaryExpression',
   // Boolean Values
   TrueLiteral = 'TrueLiteral',
   FalseLiteral = 'FalseLiteral',
@@ -70,7 +70,6 @@ export interface MemberExpression extends BaseExpression {
   type: ExpressionNodeType.MemberExpression;
   object: PrimitiveExpression;
   property: PrimitiveExpression;
-  computed: boolean;
 }
 
 export interface CallExpression extends BaseExpression {
@@ -121,18 +120,21 @@ export interface ObjectLiteral extends BaseExpression {
   properties: Property[];
 }
 
-export type PrimitiveExpression =
-  | ObjectLiteral
-  | BinaryExpression
-  | UnaryExpression
-  | MemberExpression
-  | CallExpression
+export type PrimaryExpression =
   | Identifier
   | NumberLiteral
   | StringLiteral
   | TrueLiteral
   | FalseLiteral
   | NilLiteral;
+
+export type PrimitiveExpression =
+  | ObjectLiteral
+  | BinaryExpression
+  | UnaryExpression
+  | MemberExpression
+  | CallExpression
+  | PrimaryExpression;
 
 export type Expression =
   | FunctionDeclaration

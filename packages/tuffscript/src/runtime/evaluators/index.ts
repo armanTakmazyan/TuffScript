@@ -1,5 +1,4 @@
 import { ExpressionNodeType } from '../../frontend/ast/types';
-import { RuntimeValue } from '../values/types';
 import { evaluateFunctionDeclaration } from './evaluateFunctionDeclaration';
 import { evaluateAssignmentExpression } from './evaluateAssignment';
 import { evaluateIfExpression } from './evaluateIfExpression';
@@ -8,6 +7,7 @@ import { evaluateObjectExpression } from './evaluateObjectExpression';
 import { evaluateMemberExpression } from './evaluateMemberExpression';
 import { evaluateCallExpression } from './evaluateCallExpression';
 import { evaluateUnaryExpression } from './evaluateUnaryExpressions';
+import { RuntimeValue } from '../values/types';
 import {
   evaluateNil,
   evaluateFalseLiteral,
@@ -32,31 +32,6 @@ export function evaluate({ astNode, environment }: EvaluateArgs): RuntimeValue {
         ifExpression: astNode,
       });
     }
-    case ExpressionNodeType.NilLiteral: {
-      return evaluateNil();
-    }
-    case ExpressionNodeType.TrueLiteral: {
-      return evaluateTrueLiteral();
-    }
-    case ExpressionNodeType.FalseLiteral: {
-      return evaluateFalseLiteral();
-    }
-    case ExpressionNodeType.Identifier: {
-      return evaluateIdentifier({
-        environment,
-        identifier: astNode,
-      });
-    }
-    case ExpressionNodeType.NumberLiteral: {
-      return evaluateNumber({
-        numberLiteral: astNode,
-      });
-    }
-    case ExpressionNodeType.StringLiteral: {
-      return evaluateString({
-        stringLiteral: astNode,
-      });
-    }
     case ExpressionNodeType.ObjectLiteral: {
       return evaluateObjectExpression({
         environment,
@@ -75,17 +50,42 @@ export function evaluate({ astNode, environment }: EvaluateArgs): RuntimeValue {
         unaryExpression: astNode,
       });
     }
+    case ExpressionNodeType.MemberExpression: {
+      return evaluateMemberExpression({
+        environment,
+        memberExpression: astNode,
+      });
+    }
     case ExpressionNodeType.CallExpression: {
       return evaluateCallExpression({
         environment,
         callExpression: astNode,
       });
     }
-    case ExpressionNodeType.MemberExpression: {
-      return evaluateMemberExpression({
+    case ExpressionNodeType.Identifier: {
+      return evaluateIdentifier({
         environment,
-        memberExpression: astNode,
+        identifier: astNode,
       });
+    }
+    case ExpressionNodeType.NumberLiteral: {
+      return evaluateNumber({
+        numberLiteral: astNode,
+      });
+    }
+    case ExpressionNodeType.StringLiteral: {
+      return evaluateString({
+        stringLiteral: astNode,
+      });
+    }
+    case ExpressionNodeType.TrueLiteral: {
+      return evaluateTrueLiteral();
+    }
+    case ExpressionNodeType.FalseLiteral: {
+      return evaluateFalseLiteral();
+    }
+    case ExpressionNodeType.NilLiteral: {
+      return evaluateNil();
     }
     default: {
       throw new Error(
