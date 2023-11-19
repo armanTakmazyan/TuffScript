@@ -1,8 +1,11 @@
 {
   "files.eol": "\n",
+  "typescript.tsdk": "node_modules\\typescript\\lib",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "typescript.tsdk": "node_modules\\typescript\\lib",
-  
+  "[tuffscript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ArmanTakmazyan.tuffscript-formatter-extension",
+  }
 }

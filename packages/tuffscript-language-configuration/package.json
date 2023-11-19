@@ -3,7 +3,7 @@
   "displayName": "TuffScript Language Configuration",
   "description": "Language Configuration for TuffScript",
   "version": "1.0.0",
-  "publisher": "Arman Takmazyan",
+  "publisher": "ArmanTakmazyan",
   "icon": "./images/logo.png",
   "repository": {
     "type": "git",
@@ -18,7 +18,8 @@
   "contributes": {
     "languages": [
       {
-        "id": "TuffScript", 
+        "id": "tuffscript", 
+        "aliases": ["TuffScript", "tuffscript"],
         "extensions": [
           ".tuff" 
         ],
@@ -30,9 +31,9 @@
       }
     ],
     "grammars": [{
-      "language": "TuffScript",
-      "scopeName": "source.TuffScript",
-      "path": "./syntaxes/TuffScript.tmLanguage.json"
+      "language": "tuffscript",
+      "scopeName": "source.tuffscript",
+      "path": "./syntaxes/tuffscript.tmLanguage.json"
     }]
   }
 }

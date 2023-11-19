@@ -344,6 +344,11 @@
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.4.tgz#0a41252ad431c473158b22f9bfb9a63df7541cff"
   integrity sha512-MMzuxN3GdFwskAnb6fz0orFvhfqi752yjaXylr0Rp4oDg5H0Zn1IuyRhDVvYOwAXoJirx2xuS16I3WjxnAIHiQ==
 
+"@types/vscode@^1.65.2":
+  version "1.84.1"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.84.1.tgz#2e89dc074743737209f1769f7e7762499edaca71"
+  integrity sha512-DB10vBRLEPA/us7p3gQilU2Tq5HDu6JWTyCpD9qtb7MKWIvJS5In9HU3YgVGCXf/miwHJiY62aXwjtUSMpT8HA==
+
 "@typescript-eslint/eslint-plugin@^6.9.1":
   version "6.9.1"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-6.9.1.tgz#d8ce497dc0ed42066e195c8ecc40d45c7b1254f4"
