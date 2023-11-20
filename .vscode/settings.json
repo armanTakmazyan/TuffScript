@@ -6,6 +6,6 @@
   },
   "[tuffscript]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "ArmanTakmazyan.tuffscript-formatter-extension",
+    "editor.defaultFormatter": "ArmanTakmazyan.tuffscript-formatter-extension"
   }
 }

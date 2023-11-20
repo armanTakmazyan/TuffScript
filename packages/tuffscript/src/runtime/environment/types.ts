@@ -1,5 +1,9 @@
 import { RuntimeValue } from '../values/types';
 
+export interface IsNameDefinedInScopeArgs {
+  name: string;
+}
+
 export interface CreateConstantArgs {
   name: string;
   value: RuntimeValue;
