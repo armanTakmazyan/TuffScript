@@ -40,6 +40,7 @@ import {
   LintProgramArgs,
   LinterVisitor,
   LinterVisitorArgs,
+  LintProgramResult,
 } from './type';
 
 export class TuffScriptLinter implements LinterVisitor {
@@ -173,10 +174,15 @@ export class TuffScriptLinter implements LinterVisitor {
     analyzePrimaryExpression.call(this, { astNode: node });
   }
 
-  lintProgram({ program }: LintProgramArgs): void {
+  lintProgram({ program }: LintProgramArgs): LintProgramResult {
     program.body.forEach(expression => {
       expression.accept(this);
     });
     this.exitScope();
+
+    return {
+      unusedSymbols: this.unusedSymbols,
+      unresolvedReferences: this.unresolvedReferences,
+    };
   }
 }

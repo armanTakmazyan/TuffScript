@@ -16,6 +16,11 @@ export interface LintProgramArgs {
   program: Program;
 }
 
+export interface LintProgramResult {
+  unusedSymbols: SymbolEntities;
+  unresolvedReferences: References;
+}
+
 export interface LinterVisitorArgs {
   globalSymbols?: GlobalSymbols;
 }
