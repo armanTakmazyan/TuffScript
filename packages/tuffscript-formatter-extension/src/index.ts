@@ -21,17 +21,35 @@ async function loadModule(moduleName: string) {
   }
 
   if (!tuffScriptModule) {
-    throw new Error('TuffScript module not found in any workspace folder');
+    throw new Error(`${moduleName} module not found in any workspace folder`);
   }
 
   return tuffScriptModule;
+}
+
+let outputChannel: vscode.OutputChannel;
+
+function getOrCreateOutputChannel({ name }: { name: string }) {
+  // Check if the outputChannel already exists and has the same name
+  if (outputChannel && outputChannel.name === name) {
+    return outputChannel;
+  } else {
+    // Dispose the existing channel if it's not the right one
+    if (outputChannel) {
+      outputChannel.dispose();
+    }
+
+    // Create a new output channel
+    outputChannel = vscode.window.createOutputChannel(name);
+    return outputChannel;
+  }
 }
 
 export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<void> {
   const disposable = vscode.commands.registerCommand(
-    'identifier.tuffScript',
+    'tuffScriptFormatter.formatCode',
     async () => {
       vscode.window.showInformationMessage(
         'TuffScript Formatter extension is now active',
@@ -55,8 +73,9 @@ export async function activate(
 
                 const formattedCode = tuffScriptFormatter({ program: astTree });
 
-                const outputChannel =
-                  vscode.window.createOutputChannel('TuffScript');
+                const outputChannel = getOrCreateOutputChannel({
+                  name: 'TuffScript Formatter',
+                });
                 outputChannel.appendLine('TuffScript: Formatting Completed');
 
                 return [
@@ -82,5 +101,5 @@ export async function activate(
   );
 
   context.subscriptions.push(disposable);
-  vscode.commands.executeCommand('identifier.tuffScript');
+  vscode.commands.executeCommand('tuffScriptFormatter.formatCode');
 }
