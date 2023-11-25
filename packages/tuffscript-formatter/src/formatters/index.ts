@@ -64,7 +64,7 @@ export function formatAssignmentExpression(
 function formatIfExpression(
   this: FormatterVisitor,
   { astNode }: FormatIfExpressionArgs,
-) {
+): void {
   this.stringBuilder.append({ value: `${KeywordValues.If} ` });
   astNode.condition.accept(this);
   this.stringBuilder.append({ value: ` ${KeywordValues.Do}\n` });
@@ -224,42 +224,55 @@ export class Formatter implements FormatterVisitor {
   visitFunctionDeclaration(node: FunctionDeclaration): void {
     formatFunctionDeclaration.call(this, { astNode: node });
   }
+
   visitAssignmentExpression(node: AssignmentExpression): void {
     formatAssignmentExpression.call(this, { astNode: node });
   }
+
   visitIfExpression(node: IfExpression): void {
     formatIfExpression.call(this, { astNode: node });
   }
+
   visitObjectLiteral(node: ObjectLiteral): void {
     formatObjectLiteral.call(this, { astNode: node });
   }
+
   visitBinaryExpression(node: BinaryExpression): void {
     formatBinaryExpression.call(this, { astNode: node });
   }
+
   visitUnaryExpression(node: UnaryExpression): void {
     formatUnaryExpression.call(this, { astNode: node });
   }
+
   visitMemberExpression(node: MemberExpression): void {
     formatMemberExpression.call(this, { astNode: node });
   }
+
   visitCallExpression(node: CallExpression): void {
     formatCallExpression.call(this, { astNode: node });
   }
+
   visitIdentifier(node: Identifier): void {
     formatPrimaryExpression.call(this, { astNode: node });
   }
+
   visitNumberLiteral(node: NumberLiteral): void {
     formatPrimaryExpression.call(this, { astNode: node });
   }
+
   visitStringLiteral(node: StringLiteral): void {
     formatPrimaryExpression.call(this, { astNode: node });
   }
+
   visitTrueLiteral(node: TrueLiteral): void {
     formatPrimaryExpression.call(this, { astNode: node });
   }
+
   visitFalseLiteral(node: FalseLiteral): void {
     formatPrimaryExpression.call(this, { astNode: node });
   }
+
   visitNilLiteral(node: NilLiteral): void {
     formatPrimaryExpression.call(this, { astNode: node });
   }

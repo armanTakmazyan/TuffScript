@@ -5,13 +5,15 @@
   "exports": {
     ".": "./lib/index.js",
     "./ast/types": "./lib/frontend/ast/types.js",
-    "./token/constants": "./lib/frontend/lexer/token/constants.js"
+    "./token/constants": "./lib/frontend/lexer/token/constants.js",
+    "./runtime/constants": "./lib/runtime/constants/globalFunctionNames.js"
   },
   "typesVersions": {
     "*": {
         "ast/types": [
             "./lib/frontend/ast/types.d.ts"
-        ]
+        ],
+        "runtime/constants": ["./lib/runtime/constants/globalFunctionNames.d.ts"]
     }
 },
   "files": [
