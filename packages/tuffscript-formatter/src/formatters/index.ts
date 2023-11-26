@@ -38,9 +38,11 @@ export function formatFunctionDeclaration(
   { astNode }: FormatFuntionDeclarationArgs,
 ): void {
   this.stringBuilder.append({ value: KeywordValues.Function });
-  this.stringBuilder.append({ value: ` ${astNode.name}` });
+  this.stringBuilder.append({ value: ` ${astNode.name.symbol}` });
   this.stringBuilder.append({ value: '(' });
-  this.stringBuilder.append({ value: astNode.arguments.join(', ') });
+  this.stringBuilder.append({
+    value: astNode.arguments.map(argument => argument.symbol).join(', '),
+  });
   this.stringBuilder.append({ value: `) ${KeywordValues.Do}\n` });
   this.formatBlock({ block: astNode.body });
   this.stringBuilder.append({
@@ -57,7 +59,7 @@ export function formatAssignmentExpression(
   this.stringBuilder.append({ value: `${KeywordValues.Store} ` });
   astNode.value.accept(this);
   this.stringBuilder.append({
-    value: ` ${astNode.assigne} ${KeywordValues.ContainmentSuffix}`,
+    value: ` ${astNode.assigne.symbol} ${KeywordValues.ContainmentSuffix}`,
   });
 }
 

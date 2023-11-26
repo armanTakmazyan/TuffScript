@@ -1,3 +1,4 @@
+import { Position } from 'tuffscript/token/types';
 import {
   SymbolEntity,
   SymbolEntityTypes,
@@ -17,12 +18,14 @@ export class Symbol implements SymbolEntity {
   type: SymbolEntityTypes;
   scope: BaseSymbolTable;
   references: References;
+  position: Position;
 
-  constructor({ name, type, scope, references }: SymbolEntity) {
+  constructor({ name, type, scope, references, position }: SymbolEntity) {
     this.name = name;
     this.type = type;
     this.scope = scope;
     this.references = references;
+    this.position = position;
   }
 }
 
@@ -70,10 +73,12 @@ export class SymbolTable implements BaseSymbolTable {
 
   resolveReference({
     identifier,
+    position,
   }: ResolveReferenceArgs): ResolveReferenceResult {
     const reference: Reference = {
       identifier,
       from: this,
+      position,
       resolved: undefined,
     };
 

@@ -15,6 +15,7 @@ import {
   FalseLiteral,
   NilLiteral,
 } from 'tuffscript/ast/types';
+import { GLOBAL_IMMUTABLE_SYMBOL_POSITION } from './SymbolTable/constants';
 import {
   analyzeFunctionDeclaration,
   analyzeAssignmentExpression,
@@ -35,7 +36,7 @@ import {
   SymbolTableScopeNames,
 } from './SymbolTable/types';
 import {
-  GlobalSymbols,
+  GlobalImmutableSymbols,
   EnterScopeArgs,
   LintProgramArgs,
   LinterVisitor,
@@ -44,17 +45,23 @@ import {
 } from './type';
 
 export class TuffScriptLinter implements LinterVisitor {
-  globalSymbols: GlobalSymbols;
+  globalImmutableSymbols: GlobalImmutableSymbols;
   currentScope: BaseSymbolTable;
   unusedSymbols: SymbolEntity[];
   unresolvedReferences: References;
 
-  constructor({ globalSymbols = [] }: LinterVisitorArgs = {}) {
-    this.globalSymbols = [
-      ...globalSymbols,
+  constructor({ globalImmutableSymbols = [] }: LinterVisitorArgs = {}) {
+    this.globalImmutableSymbols = [
+      ...globalImmutableSymbols,
       ...Object.values(globalFunctionNames),
     ];
 
+    this.currentScope = this.createGlobalScope();
+    this.unusedSymbols = [];
+    this.unresolvedReferences = [];
+  }
+
+  createGlobalScope(): BaseSymbolTable {
     this.currentScope = new SymbolTable({
       scopeName: SymbolTableScopeNames.Global,
       scopeLevel: 0,
@@ -63,21 +70,28 @@ export class TuffScriptLinter implements LinterVisitor {
       parentScope: undefined,
     });
 
-    this.currentScope.symbols = this.globalSymbols.reduce(
+    this.currentScope.symbols = this.globalImmutableSymbols.reduce(
       (result, globalSymbol) => {
         const newGlobalSymbol = new Symbol({
           name: globalSymbol,
           references: [],
           scope: this.currentScope,
           type: SymbolEntityTypes.Variable,
+          position: GLOBAL_IMMUTABLE_SYMBOL_POSITION,
         });
         return result.set(globalSymbol, newGlobalSymbol);
       },
       new Map<string, SymbolEntity>(),
     );
 
+    return this.currentScope;
+  }
+
+  resetGlobalScope(): BaseSymbolTable {
+    this.currentScope = this.createGlobalScope();
     this.unusedSymbols = [];
     this.unresolvedReferences = [];
+    return this.currentScope;
   }
 
   enterScope({ scopeName }: EnterScopeArgs): SymbolTable {
@@ -97,7 +111,7 @@ export class TuffScriptLinter implements LinterVisitor {
     // Identify and store unused variables
     this.currentScope.symbols.forEach(symbol => {
       if (
-        !this.globalSymbols.includes(symbol.name) &&
+        !this.globalImmutableSymbols.includes(symbol.name) &&
         !symbol.references.length
       ) {
         this.unusedSymbols.push(symbol);
@@ -110,7 +124,7 @@ export class TuffScriptLinter implements LinterVisitor {
       }
     });
 
-    // TODO: think about this
+    // Exit to parent scope if available, otherwise stay in the current (global) scope
     if (this.currentScope.parentScope) {
       this.currentScope = this.currentScope.parentScope;
     }
@@ -175,6 +189,7 @@ export class TuffScriptLinter implements LinterVisitor {
   }
 
   lintProgram({ program }: LintProgramArgs): LintProgramResult {
+    this.resetGlobalScope();
     program.body.forEach(expression => {
       expression.accept(this);
     });

@@ -1,3 +1,4 @@
+import { Position } from 'tuffscript/token/types';
 import { SymbolTable } from '.';
 
 export enum SymbolEntityTypes {
@@ -19,6 +20,7 @@ export interface SymbolEntity {
    * @type {References}
    */
   references: References;
+  position: Position;
 }
 
 export type SymbolEntities = SymbolEntity[];
@@ -56,6 +58,7 @@ export interface Reference {
    * @type {number}
    */
   flag?: number;
+  position: Position;
 }
 
 export type References = Reference[];
@@ -78,6 +81,7 @@ export type LookupResult = SymbolLookup | undefined;
 
 export interface ResolveReferenceArgs {
   identifier: string;
+  position: Position;
 }
 
 export type ResolveReferenceResult = Reference | undefined;

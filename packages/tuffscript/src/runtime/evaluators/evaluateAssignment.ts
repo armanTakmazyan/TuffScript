@@ -7,7 +7,7 @@ export function evaluateAssignmentExpression({
   assignment,
 }: EvaluateAssignmentArgs): RuntimeValue {
   return environment.setVariableValue({
-    name: assignment.assigne,
+    name: assignment.assigne.symbol,
     value: evaluate({ environment, astNode: assignment.value }),
   });
 }

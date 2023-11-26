@@ -10,7 +10,7 @@ export interface EnterScopeArgs {
   scopeName: string;
 }
 
-export type GlobalSymbols = string[];
+export type GlobalImmutableSymbols = string[];
 
 export interface LintProgramArgs {
   program: Program;
@@ -22,11 +22,11 @@ export interface LintProgramResult {
 }
 
 export interface LinterVisitorArgs {
-  globalSymbols?: GlobalSymbols;
+  globalImmutableSymbols?: GlobalImmutableSymbols;
 }
 
 export interface LinterVisitor extends ASTNodeVisitor {
-  globalSymbols: GlobalSymbols;
+  globalImmutableSymbols: GlobalImmutableSymbols;
   currentScope: BaseSymbolTable;
   unusedSymbols: SymbolEntities;
   unresolvedReferences: References;

@@ -7,8 +7,8 @@ export function evaluateFunctionDeclaration({
 }: EvaluateFunctionDeclarationArgs): FunctionValue {
   const newFunction: FunctionValue = {
     type: Values.Function,
-    name: declaration.name,
-    arguments: declaration.arguments,
+    name: declaration.name.symbol,
+    arguments: declaration.arguments.map(argument => argument.symbol),
     declarationEnvironment: environment,
     body: declaration.body,
   };

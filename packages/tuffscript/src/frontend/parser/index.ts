@@ -135,7 +135,7 @@ export class Parser {
     const functionName = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
       message: 'Expected function name following "ֆունկցիա" keyword',
-    }).value;
+    });
 
     const functionArguments = this.parseArguments().map(argument => {
       if (argument.type !== ExpressionNodeType.Identifier) {
@@ -143,7 +143,7 @@ export class Parser {
           `Function parameter must be an identifier, found '${argument.type}' instead.`,
         );
       }
-      return argument.symbol;
+      return argument;
     });
 
     this.require({
@@ -165,7 +165,7 @@ export class Parser {
 
     const functionDeclaration = functionDeclarationNode({
       body,
-      name: functionName,
+      name: identifierNode({ token: functionName }),
       arguments: functionArguments,
       position: ExpressionPosition.from({
         start: functionKeyword,
@@ -180,10 +180,10 @@ export class Parser {
     const storeKeyword = this.eat(); // eat Store keyword
     const primitiveExpression = this.parsePrimitiveExpression();
 
-    const identifier = this.require({
+    const assigne = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
       message: 'Incorrect Assignment Format',
-    }).value;
+    });
 
     const containmentSuffix = this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.ContainmentSuffix],
@@ -192,7 +192,7 @@ export class Parser {
     });
 
     const declaration: AssignmentExpression = assignmentExpressionNode({
-      assigne: identifier,
+      assigne: identifierNode({ token: assigne }),
       value: primitiveExpression,
       position: ExpressionPosition.from({
         start: storeKeyword,
@@ -262,7 +262,7 @@ export class Parser {
       const key = this.require({
         expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
         message: 'Object literal key expected',
-      }).value;
+      });
 
       // Handle shorthand property notation in object literals (e.g., { key, })
       if (this.at().type.name === TokenKind.Comma) {
@@ -270,14 +270,14 @@ export class Parser {
 
         properties.push(
           createProperty({
-            key,
+            token: key,
           }),
         );
         continue;
       } else if (this.at().type.name === TokenKind.CloseBrace) {
         properties.push(
           createProperty({
-            key,
+            token: key,
           }),
         );
         continue;
@@ -293,7 +293,7 @@ export class Parser {
 
       properties.push(
         createProperty({
-          key,
+          token: key,
           value,
         }),
       );

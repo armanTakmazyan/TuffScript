@@ -132,9 +132,11 @@ export const nilLiteralNode: NilLiteralNode = ({ token }) => ({
   },
 });
 
-export const createProperty: CreateProperty = ({ ...rest }) => ({
+export const createProperty: CreateProperty = ({ token, value }) => ({
   type: 'Property',
-  ...rest,
+  key: token.value,
+  position: token.position,
+  value,
 });
 
 export const objectLiteralNode: ObjectLiteralNode = ({ ...rest }) => ({

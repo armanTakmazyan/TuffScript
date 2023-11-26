@@ -19,24 +19,26 @@ export function analyzeFunctionDeclaration(
   { astNode }: AnalyzeFuntionDeclarationArgs,
 ): void {
   const functionSymbol = new Symbol({
-    name: astNode.name,
+    name: astNode.name.symbol,
     type: SymbolEntityTypes.Variable,
     references: [],
     scope: this.currentScope,
+    position: astNode.position,
   });
 
   this.currentScope.symbols.set(functionSymbol.name, functionSymbol);
 
-  this.enterScope({ scopeName: astNode.name });
+  this.enterScope({ scopeName: functionSymbol.name });
 
   astNode.arguments.forEach(argument => {
     const argumentSymbol = new Symbol({
-      name: argument,
+      name: argument.symbol,
       type: SymbolEntityTypes.Variable,
       references: [],
       scope: this.currentScope,
+      position: argument.position,
     });
-    this.currentScope.symbols.set(argument, argumentSymbol);
+    this.currentScope.symbols.set(argument.symbol, argumentSymbol);
   });
   astNode.body.forEach(expression => expression.accept(this));
 
@@ -49,10 +51,11 @@ export function analyzeAssignmentExpression(
 ): void {
   astNode.value.accept(this);
   const assigneSymbol = new Symbol({
-    name: astNode.assigne,
+    name: astNode.assigne.symbol,
     type: SymbolEntityTypes.Variable,
     references: [],
     scope: this.currentScope,
+    position: astNode.position,
   });
   this.currentScope.insert({ symbol: assigneSymbol });
 }
@@ -75,7 +78,10 @@ export function analyzeObjectLiteral(
       property.value.accept(this);
     }
     // Resolves references for shorthand notations
-    this.currentScope.resolveReference({ identifier: property.key });
+    this.currentScope.resolveReference({
+      identifier: property.key,
+      position: property.position,
+    });
   });
 }
 
@@ -128,6 +134,7 @@ export function analyzePrimaryExpression(
     case ExpressionNodeType.Identifier: {
       this.currentScope.resolveReference({
         identifier: astNode.symbol,
+        position: astNode.position,
       });
       break;
     }

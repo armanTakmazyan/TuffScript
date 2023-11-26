@@ -21,8 +21,8 @@ import {
 } from '../types';
 
 export interface FunctionDeclarationNodeArgs {
-  name: string;
-  arguments: string[];
+  name: Identifier;
+  arguments: Identifier[];
   body: Expressions;
   position: Position;
 }
@@ -32,7 +32,7 @@ export type FunctionDeclarationNode = (
 ) => FunctionDeclaration;
 
 export interface AssignmentExpressionNodeArgs {
-  assigne: string;
+  assigne: Identifier;
   value: PrimitiveExpression;
   position: Position;
 }
@@ -127,7 +127,7 @@ export interface NilLiteralNodeArgs {
 export type NilLiteralNode = (args: NilLiteralNodeArgs) => NilLiteral;
 
 export interface CreatePropertyArgs {
-  key: string;
+  token: Token;
   value?: PrimitiveExpression;
 }
 

@@ -37,13 +37,13 @@ export interface BaseExpression {
 // HIGH-LEVEL/COMPLEX EXPRESSIONS
 export interface FunctionDeclaration extends BaseExpression {
   type: ExpressionNodeType.FunctionDeclaration;
-  arguments: string[];
-  name: string;
+  arguments: Identifier[];
+  name: Identifier;
   body: Expressions;
 }
 export interface AssignmentExpression extends BaseExpression {
   type: ExpressionNodeType.AssignmentExpression;
-  assigne: string;
+  assigne: Identifier;
   value: PrimitiveExpression;
 }
 
@@ -114,6 +114,7 @@ export interface NilLiteral extends BaseExpression {
 export interface Property {
   type: 'Property';
   key: string;
+  position: Position;
   value?: PrimitiveExpression;
 }
 
