@@ -58,9 +58,9 @@ export function formatAssignmentExpression(
 ): void {
   this.stringBuilder.append({ value: `${KeywordValues.Store} ` });
   astNode.value.accept(this);
-  this.stringBuilder.append({
-    value: ` ${astNode.assigne.symbol} ${KeywordValues.ContainmentSuffix}`,
-  });
+  this.stringBuilder.append({ value: ' ' });
+  astNode.assignee.accept(this);
+  this.stringBuilder.append({ value: ` ${KeywordValues.ContainmentSuffix}` });
 }
 
 function formatIfExpression(

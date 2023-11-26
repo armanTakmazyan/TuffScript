@@ -50,14 +50,18 @@ export function analyzeAssignmentExpression(
   { astNode }: AnalyzeAssignmentExpressionArgs,
 ): void {
   astNode.value.accept(this);
-  const assigneSymbol = new Symbol({
-    name: astNode.assigne.symbol,
-    type: SymbolEntityTypes.Variable,
-    references: [],
-    scope: this.currentScope,
-    position: astNode.position,
-  });
-  this.currentScope.insert({ symbol: assigneSymbol });
+  if (astNode.assignee.type === ExpressionNodeType.Identifier) {
+    const assigneeSymbol = new Symbol({
+      name: astNode.assignee.symbol,
+      type: SymbolEntityTypes.Variable,
+      references: [],
+      scope: this.currentScope,
+      position: astNode.position,
+    });
+    this.currentScope.insert({ symbol: assigneeSymbol });
+  } else {
+    astNode.assignee.accept(this);
+  }
 }
 
 export function analyzeIfExpression(
@@ -105,10 +109,8 @@ export function analyzeMemberExpression(
   { astNode }: AnalyzeMemberExpressionArgs,
 ): void {
   astNode.object.accept(this);
-  // Skip further checks if 'property' is an Identifier, as it's part of the object structure, not a separate entity
-  if (astNode.property.type !== ExpressionNodeType.Identifier) {
-    astNode.property.accept(this);
-  }
+  // No need to analyze 'property' in MemberExpression as it's inherently part of the object structure
+  // astNode.property.accept(this);
 }
 
 export function analyzeCallExpression(

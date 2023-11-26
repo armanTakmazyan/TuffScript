@@ -41,9 +41,10 @@ export interface FunctionDeclaration extends BaseExpression {
   name: Identifier;
   body: Expressions;
 }
+
 export interface AssignmentExpression extends BaseExpression {
   type: ExpressionNodeType.AssignmentExpression;
-  assigne: Identifier;
+  assignee: Identifier | MemberExpression;
   value: PrimitiveExpression;
 }
 

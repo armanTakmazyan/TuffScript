@@ -38,6 +38,15 @@ export interface EvaluateFunctionDeclarationArgs {
   declaration: FunctionDeclaration;
 }
 
+export interface PropertyAssignmentExpression extends AssignmentExpression {
+  assignee: MemberExpression;
+}
+
+export interface EvaluatePropertyAssignmentArgs {
+  environment: Environment;
+  assignment: PropertyAssignmentExpression;
+}
+
 export interface EvaluateAssignmentArgs {
   environment: Environment;
   assignment: AssignmentExpression;

@@ -7,7 +7,7 @@ import {
 } from './types';
 import { evaluate } from './index';
 
-function getMemberExpressionObject({
+export function getMemberExpressionObject({
   environment,
   memberObject,
 }: GetMemberExpressionObjectArgs): ObjectValue {
@@ -27,7 +27,7 @@ function getMemberExpressionObject({
   return evaluatedObject;
 }
 
-function getMemberExpressionProperty({
+export function getMemberExpressionProperty({
   environment,
   property,
 }: GetMemberExpressionProperty): string {

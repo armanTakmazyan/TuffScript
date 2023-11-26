@@ -179,11 +179,16 @@ export class Parser {
   parseAssignmentExpression(): AssignmentExpression {
     const storeKeyword = this.eat(); // eat Store keyword
     const primitiveExpression = this.parsePrimitiveExpression();
+    const assignee = this.parseMemberExpression();
 
-    const assigne = this.require({
-      expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
-      message: 'Incorrect Assignment Format',
-    });
+    if (
+      assignee.type !== ExpressionNodeType.Identifier &&
+      assignee.type !== ExpressionNodeType.MemberExpression
+    ) {
+      this.throwError(
+        'Invalid assignment target. Expecting an identifier or member expression',
+      );
+    }
 
     const containmentSuffix = this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.ContainmentSuffix],
@@ -192,7 +197,7 @@ export class Parser {
     });
 
     const declaration: AssignmentExpression = assignmentExpressionNode({
-      assigne: identifierNode({ token: assigne }),
+      assignee: assignee,
       value: primitiveExpression,
       position: ExpressionPosition.from({
         start: storeKeyword,

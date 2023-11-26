@@ -32,10 +32,11 @@ export type FunctionDeclarationNode = (
 ) => FunctionDeclaration;
 
 export interface AssignmentExpressionNodeArgs {
-  assigne: Identifier;
+  assignee: Identifier | MemberExpression;
   value: PrimitiveExpression;
   position: Position;
 }
+
 export type AssignmentExpressionNode = (
   args: AssignmentExpressionNodeArgs,
 ) => AssignmentExpression;
