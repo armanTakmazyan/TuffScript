@@ -4,6 +4,7 @@
 // -----------------------------------------------------------
 
 import { LiteralValues } from '../lexer/token/constants';
+import { Position } from '../lexer/token/types';
 
 export enum ExpressionNodeType {
   // High-level, complex expressions
@@ -29,19 +30,21 @@ export enum ExpressionNodeType {
 
 export interface BaseExpression {
   type: ExpressionNodeType;
+  position: Position;
   accept(visitor: ASTNodeVisitor): void;
 }
 
 // HIGH-LEVEL/COMPLEX EXPRESSIONS
 export interface FunctionDeclaration extends BaseExpression {
   type: ExpressionNodeType.FunctionDeclaration;
-  arguments: string[];
-  name: string;
+  arguments: Identifier[];
+  name: Identifier;
   body: Expressions;
 }
+
 export interface AssignmentExpression extends BaseExpression {
   type: ExpressionNodeType.AssignmentExpression;
-  assigne: string;
+  assignee: Identifier | MemberExpression;
   value: PrimitiveExpression;
 }
 
@@ -112,6 +115,7 @@ export interface NilLiteral extends BaseExpression {
 export interface Property {
   type: 'Property';
   key: string;
+  position: Position;
   value?: PrimitiveExpression;
 }
 

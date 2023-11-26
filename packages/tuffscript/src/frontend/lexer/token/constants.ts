@@ -10,7 +10,7 @@ export enum LiteralValues {
 export const LITERAL_TOKEN_PATTERNS = {
   [TokenKind.Number]: new TokenType({
     name: TokenKind.Number,
-    regex: '[0-9]+',
+    regex: '\\d+(\\.\\d+)?',
   }),
   [TokenKind.String]: new TokenType({
     name: TokenKind.String,

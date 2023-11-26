@@ -1,3 +1,5 @@
+import { Position } from '../../lexer/token/types';
+import { Token } from '../../lexer/token/token';
 import {
   Expressions,
   FunctionDeclaration,
@@ -19,9 +21,10 @@ import {
 } from '../types';
 
 export interface FunctionDeclarationNodeArgs {
-  name: string;
-  arguments: string[];
+  name: Identifier;
+  arguments: Identifier[];
   body: Expressions;
+  position: Position;
 }
 
 export type FunctionDeclarationNode = (
@@ -29,9 +32,11 @@ export type FunctionDeclarationNode = (
 ) => FunctionDeclaration;
 
 export interface AssignmentExpressionNodeArgs {
-  assigne: string;
+  assignee: Identifier | MemberExpression;
   value: PrimitiveExpression;
+  position: Position;
 }
+
 export type AssignmentExpressionNode = (
   args: AssignmentExpressionNodeArgs,
 ) => AssignmentExpression;
@@ -40,6 +45,7 @@ export interface IfExpressionsNodeArgs {
   condition: PrimitiveExpression;
   thenBody: Expressions;
   elseBody: Expressions;
+  position: Position;
 }
 
 export type IfExpressionNode = (args: IfExpressionsNodeArgs) => IfExpression;
@@ -48,6 +54,7 @@ export interface BinaryExpressionNodeArgs {
   left: PrimitiveExpression;
   right: PrimitiveExpression;
   operator: string; // needs to be of type BinaryOperator
+  position: Position;
 }
 
 export type BinaryExpressionNode = (
@@ -57,6 +64,7 @@ export type BinaryExpressionNode = (
 export interface UnaryExpressionNodeArgs {
   operator: string;
   argument: PrimitiveExpression;
+  position: Position;
 }
 
 export type UnaryExpressionNode = (
@@ -66,6 +74,7 @@ export type UnaryExpressionNode = (
 export interface MemberExpressionNodeArgs {
   object: PrimitiveExpression;
   property: PrimitiveExpression;
+  position: Position;
 }
 
 export type MemberExpressionNode = (
@@ -75,6 +84,7 @@ export type MemberExpressionNode = (
 export interface CallExpressionNodeArgs {
   arguments: PrimitiveExpression[];
   caller: PrimitiveExpression;
+  position: Position;
 }
 
 export type CallExpressionNode = (
@@ -82,31 +92,43 @@ export type CallExpressionNode = (
 ) => CallExpression;
 
 export interface IdentifierNodeArgs {
-  symbol: string;
+  token: Token;
 }
 
 export type IdentifierNode = (args: IdentifierNodeArgs) => Identifier;
 
 export interface NumberLiteralNodeArgs {
-  value: number;
+  token: Token;
 }
 
 export type NumberLiteralNode = (args: NumberLiteralNodeArgs) => NumberLiteral;
 
 export interface StringLiteralNodeArgs {
-  value: string;
+  token: Token;
 }
 
 export type StringLiteralNode = (args: StringLiteralNodeArgs) => StringLiteral;
 
-export type TrueLiteralNode = () => TrueLiteral;
+export interface TrueLiteralNodeArgs {
+  token: Token;
+}
 
-export type FalseLiteralNode = () => FalseLiteral;
+export type TrueLiteralNode = (args: TrueLiteralNodeArgs) => TrueLiteral;
 
-export type NilLiteralNode = () => NilLiteral;
+export interface FalseLiteralNodeArgs {
+  token: Token;
+}
+
+export type FalseLiteralNode = (args: FalseLiteralNodeArgs) => FalseLiteral;
+
+export interface NilLiteralNodeArgs {
+  token: Token;
+}
+
+export type NilLiteralNode = (args: NilLiteralNodeArgs) => NilLiteral;
 
 export interface CreatePropertyArgs {
-  key: string;
+  token: Token;
   value?: PrimitiveExpression;
 }
 
@@ -114,6 +136,7 @@ export type CreateProperty = (args: CreatePropertyArgs) => Property;
 
 export interface ObjectLiteralNodeArgs {
   properties: Property[];
+  position: Position;
 }
 
 export type ObjectLiteralNode = (args: ObjectLiteralNodeArgs) => ObjectLiteral;

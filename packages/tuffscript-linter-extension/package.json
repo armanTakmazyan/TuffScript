@@ -1,7 +1,7 @@
 {
-    "name": "tuffscript-formatter-extension",
-    "displayName": "TuffScript Formatter",
-    "description": "TuffScript Formatter for VS Code",
+    "name": "tuffscript-linter-extension",
+    "displayName": "TuffScript Linter",
+    "description": "TuffScript Linter for VS Code",
     "version": "1.0.0",
     "publisher": "ArmanTakmazyan",
     "icon": "./images/logo.png",
@@ -15,18 +15,18 @@
     },
     "categories": [
       "Programming Languages",
-      "Formatters"
+      "Linters"
     ],
     "activationEvents": [
       "onStartupFinished",
       "onLanguage:tuffscript",
-      "onCommand:tuffScriptFormatter.formatCode"
+      "onCommand:tuffScriptLinter.lintCode"
     ],
     "contributes": {
       "commands": [
         {
-          "command": "tuffScriptFormatter.formatCode",
-          "title": "TuffScript Formatter"
+          "command": "tuffScriptLinter.lintCode",
+          "title": "TuffScript Linter"
         }
       ]
     },
@@ -45,6 +45,6 @@
     },
     "peerDependencies": {
         "tuffscript": "^1.0.0",
-        "tuffscript-formatter": "^1.0.0"
+        "tuffscript-linter": "^1.0.0"
     }
   }

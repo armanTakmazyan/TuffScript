@@ -1,5 +1,6 @@
 import { RuntimeValue } from '../values/types';
 import {
+  IsNameDefinedInScopeArgs,
   CreateConstantArgs,
   SetVariableValueArgs,
   GetVariableValueArgs,
@@ -8,49 +9,54 @@ import {
 
 export class Environment {
   private parent?: Environment;
-  private constants: Set<string>;
+  private constants: Map<string, RuntimeValue>;
   private variables: Map<string, RuntimeValue>;
 
   constructor(parentENV?: Environment) {
     this.parent = parentENV;
     this.variables = new Map();
-    this.constants = new Set();
+    this.constants = new Map();
+  }
+
+  isNameDefinedInScope({ name }: IsNameDefinedInScopeArgs): boolean {
+    return this.variables.has(name) || this.constants.has(name);
   }
 
   createConstant({ name, value }: CreateConstantArgs): RuntimeValue {
-    if (this.variables.has(name) || this.constants.has(name)) {
+    if (this.isNameDefinedInScope({ name })) {
       throw `Cannot declare variable ${name}. As it already is defined.`;
     }
 
-    this.constants.add(name);
+    this.constants.set(name, value);
 
     return value;
   }
 
   setVariableValue({ name, value }: SetVariableValueArgs): RuntimeValue {
-    const environment = this.findVariableEnvironment({ name }) ?? this;
-
-    if (environment.constants.has(name)) {
+    if (this.constants.has(name)) {
       throw `Cannot reasign to variable ${name} as it was declared constant.`;
     }
 
-    environment.variables.set(name, value);
+    this.variables.set(name, value);
     return value;
   }
 
   getVariableValue({ name }: GetVariableValueArgs): RuntimeValue {
     const environment = this.findVariableEnvironment({ name });
-    const variableValue = environment?.variables?.get?.(name);
+    const variableValue =
+      environment?.variables.get(name) || environment?.constants.get(name);
+
     if (!variableValue) {
       throw `Cannot resolve '${name}' as it does not exist.`;
     }
+
     return variableValue;
   }
 
   findVariableEnvironment({
     name,
   }: FindVariableEnvironmentArgs): Environment | undefined {
-    if (this.variables.has(name)) {
+    if (this.isNameDefinedInScope({ name })) {
       return this;
     }
 
