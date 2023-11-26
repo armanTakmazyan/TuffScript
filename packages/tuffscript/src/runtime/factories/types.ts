@@ -1,4 +1,5 @@
 import {
+  UnassignedValue,
   NilValue,
   BooleanValue,
   StringValue,
@@ -6,6 +7,8 @@ import {
   FunctionCall,
   NativeFuctionValue,
 } from '../values/types';
+
+export type CreateUnassigned = () => UnassignedValue;
 
 export type CreateNil = () => NilValue;
 

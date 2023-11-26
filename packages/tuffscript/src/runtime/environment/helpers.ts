@@ -1,13 +1,79 @@
-import { createNil, createNumber, createNativeFunction } from '../factories';
+import {
+  createNil,
+  createNumber,
+  createNativeFunction,
+  createUnassigned,
+} from '../factories';
 import { globalFunctionNames } from '../constants/globalFunctionNames';
 import { RuntimeValue } from '../values/types';
 import { Environment } from './index';
+import {
+  ExpressionNodeType,
+  Expressions,
+  Program,
+} from '../../frontend/ast/types';
 
-// Initializes a global environment with built-in constants and native functions such
-export const createGlobalEnviornment = (): Environment => {
-  const env = new Environment();
+interface SetupExecutionContextArgs {
+  environment: Environment;
+  expressions: Expressions;
+}
 
-  env.createConstant({
+export type SetupExecutionContext = (
+  args: SetupExecutionContextArgs,
+) => Environment;
+
+export const setupExecutionContext: SetupExecutionContext = ({
+  environment,
+  expressions,
+}) => {
+  expressions.forEach(expression => {
+    switch (expression.type) {
+      case ExpressionNodeType.AssignmentExpression: {
+        if (expression.assignee.type === ExpressionNodeType.Identifier) {
+          environment.setVariableValue({
+            name: expression.assignee.symbol,
+            value: createUnassigned(),
+          });
+        }
+        // Other assignment types are not considered, as they don't introduce new variables in the current scope
+        break;
+      }
+      case ExpressionNodeType.FunctionDeclaration: {
+        environment.setVariableValue({
+          name: expression.name.symbol,
+          value: createUnassigned(),
+        });
+        break;
+      }
+      case ExpressionNodeType.IfExpression: {
+        setupExecutionContext({
+          environment,
+          expressions: expression.thenBody,
+        });
+        setupExecutionContext({
+          environment,
+          expressions: expression.elseBody,
+        });
+        break;
+      }
+      default: {
+        // Placeholder for handling other expression types, if needed in the future
+      }
+    }
+  });
+
+  return environment;
+};
+
+// Initializes a global environment with built-in constants and native functions
+export const createGlobalEnviornment = ({
+  program,
+}: {
+  program: Program;
+}): Environment => {
+  const globalEnvironment = new Environment();
+
+  globalEnvironment.createConstant({
     name: globalFunctionNames.print,
     value: createNativeFunction({
       execute: (args: RuntimeValue[]) => {
@@ -17,12 +83,17 @@ export const createGlobalEnviornment = (): Environment => {
     }),
   });
 
-  env.createConstant({
+  globalEnvironment.createConstant({
     name: globalFunctionNames.time,
     value: createNativeFunction({
       execute: () => createNumber({ numberValue: Date.now() }),
     }),
   });
 
-  return env;
+  setupExecutionContext({
+    environment: globalEnvironment,
+    expressions: program.body,
+  });
+
+  return globalEnvironment;
 };

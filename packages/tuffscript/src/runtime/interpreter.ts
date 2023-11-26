@@ -15,7 +15,7 @@ export class Interpreter {
   }
 
   evaluate(): RuntimeValue {
-    const environment = createGlobalEnviornment();
+    const environment = createGlobalEnviornment({ program: this.program });
 
     return evaluateProgram({
       environment,

@@ -86,25 +86,29 @@ export function formatObjectLiteral(
   this.stringBuilder.append({ value: '{\n' });
   const properties = astNode.properties;
 
-  properties.forEach((property, index) => {
-    const newIndentationLevel = createIndentation({
-      indentationLevel: this.indentationLevel + 1,
-    });
-
-    if (property.value) {
-      this.stringBuilder.append({
-        value: newIndentationLevel + property.key + ': ',
+  this.withIncreasedIndentation(() => {
+    properties.forEach((property, index) => {
+      const newIndentationLevel = createIndentation({
+        indentationLevel: this.indentationLevel + 1,
       });
-      property.value.accept(this);
-    } else {
-      this.stringBuilder.append({ value: newIndentationLevel + property.key });
-    }
-    // Add a comma if it's not the last property
-    if (index < properties.length - 1) {
-      this.stringBuilder.append({ value: ',' });
-    }
 
-    this.stringBuilder.append({ value: '\n' });
+      if (property.value) {
+        this.stringBuilder.append({
+          value: newIndentationLevel + property.key + ': ',
+        });
+        property.value.accept(this);
+      } else {
+        this.stringBuilder.append({
+          value: newIndentationLevel + property.key,
+        });
+      }
+      // Add a comma if it's not the last property
+      if (index < properties.length - 1) {
+        this.stringBuilder.append({ value: ',' });
+      }
+
+      this.stringBuilder.append({ value: '\n' });
+    });
   });
 
   this.stringBuilder.append({
