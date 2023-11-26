@@ -2,6 +2,7 @@ import { Environment } from '../environment';
 import { Expressions } from '../../frontend/ast/types';
 
 export enum Values {
+  Unassigned = 'Unassigned',
   Nil = 'Nil',
   Boolean = 'Boolean',
   Number = 'Number',
@@ -65,7 +66,12 @@ export interface FunctionValue extends BaseRuntimeValue {
   declarationEnvironment: Environment;
 }
 
+export interface UnassignedValue extends BaseRuntimeValue {
+  type: Values.Unassigned;
+}
+
 export type RuntimeValue =
+  | UnassignedValue
   | NilValue
   | BooleanValue
   | NumberValue

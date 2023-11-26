@@ -1,6 +1,27 @@
+// import util from 'util';
 export { Lexer } from './frontend/lexer';
 export { Parser } from './frontend/parser';
 export { Interpreter } from './runtime/interpreter';
+
+// import { Lexer } from './frontend/lexer';
+// import { Parser } from './frontend/parser';
+// import { Interpreter } from './runtime/interpreter';
+
+// const simpleFunction = `
+// պահել {բբբ: {աաաա: {աա: 'global arjeq'}}} բ ում
+// տպել('tpumenq b-n drsum')
+// տպել(բ)
+//     ֆունկցիա իմՖունկցիա() կատարել
+//     տպել(բ)
+//         պահել {աաաա: 'some_value'} բ ում
+//         տպել('tpumenq b-n nersum')
+//         տպել(բ)
+//     ավարտել
+//     իմՖունկցիա()
+//     տպել('tpumenq b-n drsum')
+// տպել(բ.բբբ['աաաա'])
+
+// `;
 
 // const lexer = new Lexer(simpleFunction);
 

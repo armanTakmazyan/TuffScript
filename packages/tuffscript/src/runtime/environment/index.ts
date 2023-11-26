@@ -1,4 +1,4 @@
-import { RuntimeValue } from '../values/types';
+import { Values, RuntimeValue } from '../values/types';
 import {
   IsNameDefinedInScopeArgs,
   CreateConstantArgs,
@@ -45,6 +45,12 @@ export class Environment {
     const environment = this.findVariableEnvironment({ name });
     const variableValue =
       environment?.variables.get(name) || environment?.constants.get(name);
+
+    if (variableValue?.type === Values.Unassigned) {
+      throw new Error(
+        `ReferenceError: local variable '${name}' referenced before assignment`,
+      );
+    }
 
     if (!variableValue) {
       throw `Cannot resolve '${name}' as it does not exist.`;

@@ -62,7 +62,9 @@ export function evaluateMemberExpression({
 
   if (!resultValue) {
     throw new Error(
-      `Property '${expressionPropertyValue}' does not exist on the specified object. Object details: ${expressionObject}`,
+      `Property '${expressionPropertyValue}' does not exist on the specified object. Object details: { ${[
+        ...expressionObject.properties.keys(),
+      ]} }`,
     );
   }
 

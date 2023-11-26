@@ -1,11 +1,16 @@
 import { Values } from '../values/types';
 import {
+  CreateUnassigned,
   CreateNil,
   CreateBoolean,
   CreateNumber,
   CreateString,
   CreateNativeFunction,
 } from './types';
+
+export const createUnassigned: CreateUnassigned = () => {
+  return { type: Values.Unassigned };
+};
 
 export const createNil: CreateNil = () => {
   return { type: Values.Nil, value: null };

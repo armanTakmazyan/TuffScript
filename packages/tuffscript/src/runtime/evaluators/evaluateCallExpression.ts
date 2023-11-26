@@ -3,6 +3,7 @@ import { Values, RuntimeValue } from '../values/types';
 import { evaluateNil } from './primitiveTypesEvaluators';
 import { EvaluateCallExpressionArgs } from './types';
 import { evaluate } from './index';
+import { setupExecutionContext } from '../environment/helpers';
 
 export function evaluateCallExpression({
   environment,
@@ -32,6 +33,8 @@ export function evaluateCallExpression({
       );
     }
 
+    // TODO: Execution context creation phase we need to check the assignments and function declarations, other things do not matter
+    // Handle Linter as well, when we're trying to get a variable value that is not declared yet
     const newEnvironment = new Environment(callable.declarationEnvironment);
 
     for (let i = 0; i < callable.arguments.length; i++) {
@@ -41,6 +44,11 @@ export function evaluateCallExpression({
         value: functionArguments[i],
       });
     }
+
+    setupExecutionContext({
+      environment: newEnvironment,
+      expressions: callable.body,
+    });
 
     let result: RuntimeValue = evaluateNil();
 

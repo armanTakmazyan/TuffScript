@@ -80,12 +80,13 @@ export function analyzeObjectLiteral(
   astNode.properties.forEach(property => {
     if (property.value) {
       property.value.accept(this);
+    } else {
+      // Resolves references for shorthand notations
+      this.currentScope.resolveReference({
+        identifier: property.key,
+        position: property.position,
+      });
     }
-    // Resolves references for shorthand notations
-    this.currentScope.resolveReference({
-      identifier: property.key,
-      position: property.position,
-    });
   });
 }
 
