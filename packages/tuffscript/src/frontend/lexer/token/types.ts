@@ -37,3 +37,8 @@ export enum TokenKind {
 }
 
 export type Keyword = (typeof KEYWORDS)[number];
+
+export interface Position {
+  start: number;
+  end: number;
+}

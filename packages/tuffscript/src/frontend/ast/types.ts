@@ -4,6 +4,7 @@
 // -----------------------------------------------------------
 
 import { LiteralValues } from '../lexer/token/constants';
+import { Position } from '../lexer/token/types';
 
 export enum ExpressionNodeType {
   // High-level, complex expressions
@@ -29,6 +30,7 @@ export enum ExpressionNodeType {
 
 export interface BaseExpression {
   type: ExpressionNodeType;
+  position: Position;
   accept(visitor: ASTNodeVisitor): void;
 }
 

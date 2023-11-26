@@ -78,52 +78,58 @@ export const callExpressionNode: CallExpressionNode = ({ ...rest }) => ({
   ...rest,
 });
 
-export const identifierNode: IdentifierNode = ({ ...rest }) => ({
+export const identifierNode: IdentifierNode = ({ token }) => ({
   type: ExpressionNodeType.Identifier,
+  symbol: token.value,
+  position: token.position,
   accept(visitor) {
     visitor.visitIdentifier(this);
   },
-  ...rest,
 });
 
-export const numberLiteralNode: NumberLiteralNode = ({ ...rest }) => ({
+export const numberLiteralNode: NumberLiteralNode = ({ token }) => ({
   type: ExpressionNodeType.NumberLiteral,
+  value: parseFloat(token.value),
+  position: token.position,
   accept(visitor) {
     visitor.visitNumberLiteral(this);
   },
-  ...rest,
 });
 
-export const stringLiteralNode: StringLiteralNode = ({ ...rest }) => ({
+export const stringLiteralNode: StringLiteralNode = ({ token }) => ({
   type: ExpressionNodeType.StringLiteral,
+  value: token.value,
+  position: token.position,
   accept(visitor) {
     visitor.visitStringLiteral(this);
   },
-  ...rest,
 });
 
-export const trueLiteralNode: TrueLiteralNode = () => ({
+export const trueLiteralNode: TrueLiteralNode = ({ token }) => ({
   type: ExpressionNodeType.TrueLiteral,
+  value: LiteralValues.True,
+  position: token.position,
   accept(visitor) {
     visitor.visitTrueLiteral(this);
   },
-  value: LiteralValues.True,
 });
 
-export const falseLiteralNode: FalseLiteralNode = () => ({
+export const falseLiteralNode: FalseLiteralNode = ({ token }) => ({
   type: ExpressionNodeType.FalseLiteral,
+  value: LiteralValues.False,
+  position: token.position,
   accept(visitor) {
     visitor.visitFalseLiteral(this);
   },
-  value: LiteralValues.False,
 });
 
-export const nilLiteralNode: NilLiteralNode = () => ({
+export const nilLiteralNode: NilLiteralNode = ({ token }) => ({
   type: ExpressionNodeType.NilLiteral,
+  value: LiteralValues.Nil,
+  position: token.position,
   accept(visitor) {
     visitor.visitNilLiteral(this);
   },
-  value: LiteralValues.Nil,
 });
 
 export const createProperty: CreateProperty = ({ ...rest }) => ({

@@ -1,6 +1,7 @@
 import { TokenType } from '../lexer/token/tokenType';
 import { TokenKind } from '../lexer/token/types';
 import { Token } from '../lexer/token/token';
+import { ExpressionPosition } from '../ast/expressionPosition';
 import {
   Program,
   Expressions,
@@ -130,7 +131,7 @@ export class Parser {
   }
 
   parseFunctionDeclaration(): FunctionDeclaration {
-    this.eat(); // eat Function keyword
+    const functionKeyword = this.eat(); // eat Function keyword
     const functionName = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
       message: 'Expected function name following "ֆունկցիա" keyword',
@@ -156,7 +157,7 @@ export class Parser {
       body.push(this.parseExpression());
     }
 
-    this.require({
+    const endKeyword = this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.End],
       message:
         'Closing keyword "ավարտել" expected at the end of the function declaration',
@@ -166,13 +167,17 @@ export class Parser {
       body,
       name: functionName,
       arguments: functionArguments,
+      position: ExpressionPosition.from({
+        start: functionKeyword,
+        end: endKeyword,
+      }),
     });
 
     return functionDeclaration;
   }
 
   parseAssignmentExpression(): AssignmentExpression {
-    this.eat(); // eat Store keyword
+    const storeKeyword = this.eat(); // eat Store keyword
     const primitiveExpression = this.parsePrimitiveExpression();
 
     const identifier = this.require({
@@ -180,22 +185,26 @@ export class Parser {
       message: 'Incorrect Assignment Format',
     }).value;
 
-    const declaration: AssignmentExpression = assignmentExpressionNode({
-      assigne: identifier,
-      value: primitiveExpression,
-    });
-
-    this.require({
+    const containmentSuffix = this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.ContainmentSuffix],
       message:
         'Incorrect Assignment Format. Ensure the format: պահել <primitive_expression> <variable_name> ում',
+    });
+
+    const declaration: AssignmentExpression = assignmentExpressionNode({
+      assigne: identifier,
+      value: primitiveExpression,
+      position: ExpressionPosition.from({
+        start: storeKeyword,
+        end: containmentSuffix,
+      }),
     });
 
     return declaration;
   }
 
   parseIfExpression(): IfExpression {
-    this.eat(); // eat If keyword
+    const ifKeyword = this.eat(); // eat If keyword
     const condition = this.parsePrimitiveExpression();
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.Do],
@@ -219,7 +228,7 @@ export class Parser {
       elseBody.push(this.parseExpression());
     }
 
-    this.require({
+    const endKeyword = this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.End],
       message: 'Incorrect If Expression',
     });
@@ -228,6 +237,10 @@ export class Parser {
       condition,
       thenBody,
       elseBody,
+      position: ExpressionPosition.from({
+        start: ifKeyword,
+        end: endKeyword,
+      }),
     });
 
     return ifExpression;
@@ -242,7 +255,7 @@ export class Parser {
       return this.parseLogicalOrExpression();
     }
 
-    this.eat(); // eat open brace
+    const openBrace = this.eat(); // eat open brace
     const properties: Property[] = [];
 
     while (!this.isEOF() && this.at().type.name !== TokenKind.CloseBrace) {
@@ -293,13 +306,17 @@ export class Parser {
       }
     }
 
-    this.require({
+    const closeBrace = this.require({
       expected: [PUNCTUATION_TOKEN_PATTERNS.CloseBrace],
       message: 'Object literal missing closing brace',
     });
 
     return objectLiteralNode({
       properties,
+      position: ExpressionPosition.from({
+        start: openBrace,
+        end: closeBrace,
+      }),
     });
   }
 
@@ -313,6 +330,10 @@ export class Parser {
         left,
         right,
         operator,
+        position: ExpressionPosition.from({
+          start: left,
+          end: right,
+        }),
       });
     }
 
@@ -329,6 +350,10 @@ export class Parser {
         left,
         right,
         operator,
+        position: ExpressionPosition.from({
+          start: left,
+          end: right,
+        }),
       });
     }
 
@@ -345,6 +370,10 @@ export class Parser {
         left,
         right,
         operator,
+        position: ExpressionPosition.from({
+          start: left,
+          end: right,
+        }),
       });
     }
 
@@ -364,6 +393,10 @@ export class Parser {
         left,
         right,
         operator,
+        position: ExpressionPosition.from({
+          start: left,
+          end: right,
+        }),
       });
     }
 
@@ -383,6 +416,10 @@ export class Parser {
         left,
         right,
         operator,
+        position: ExpressionPosition.from({
+          start: left,
+          end: right,
+        }),
       });
     }
 
@@ -403,6 +440,10 @@ export class Parser {
         left,
         right,
         operator,
+        position: ExpressionPosition.from({
+          start: left,
+          end: right,
+        }),
       });
     }
 
@@ -415,11 +456,15 @@ export class Parser {
       currentToken.value === UnaryOperators.Not ||
       currentToken.value === UnaryOperators.Minus
     ) {
-      const operator = this.eat().value;
+      const operator = this.eat();
       const unaryOperatorExpression = this.parseUnaryOperatorExpression();
       return unaryExpressionNode({
-        operator,
+        operator: operator.value,
         argument: unaryOperatorExpression,
+        position: ExpressionPosition.from({
+          start: operator,
+          end: unaryOperatorExpression,
+        }),
       });
     }
 
@@ -438,9 +483,15 @@ export class Parser {
   }
 
   parseCallExpression(caller: PrimitiveExpression): PrimitiveExpression {
+    const callExpressionArguments = this.parseArguments();
+
     let callExpression: PrimitiveExpression = callExpressionNode({
       caller,
-      arguments: this.parseArguments(),
+      arguments: callExpressionArguments,
+      position: ExpressionPosition.from({
+        start: caller,
+        end: this.at(),
+      }),
     });
 
     if (this.at().type.name === TokenKind.OpenParen) {
@@ -504,6 +555,10 @@ export class Parser {
       primaryExpression = memberExpressionNode({
         object: primaryExpression,
         property,
+        position: ExpressionPosition.from({
+          start: primaryExpression,
+          end: property,
+        }),
       });
     }
 
@@ -514,25 +569,22 @@ export class Parser {
     const token = this.at();
     switch (token.type.name) {
       case TokenKind.Identifier: {
-        return identifierNode({ symbol: this.eat().value });
+        return identifierNode({ token: this.eat() });
       }
       case TokenKind.Number: {
-        return numberLiteralNode({ value: parseFloat(this.eat().value) });
+        return numberLiteralNode({ token: this.eat() });
       }
       case TokenKind.String: {
-        return stringLiteralNode({ value: this.eat().value });
+        return stringLiteralNode({ token: this.eat() });
       }
       case TokenKind.True: {
-        this.eat();
-        return trueLiteralNode();
+        return trueLiteralNode({ token: this.eat() });
       }
       case TokenKind.False: {
-        this.eat();
-        return falseLiteralNode();
+        return falseLiteralNode({ token: this.eat() });
       }
       case TokenKind.Nil: {
-        this.eat();
-        return nilLiteralNode();
+        return nilLiteralNode({ token: this.eat() });
       }
       case TokenKind.OpenParen: {
         this.eat(); // eat opening parenthesis

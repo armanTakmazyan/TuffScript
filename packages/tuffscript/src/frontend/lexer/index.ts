@@ -8,7 +8,7 @@ import {
 
 export class Lexer {
   sourceCode: string;
-  pos: number = 0;
+  position: number = 0;
   tokenList: Token[] = [];
 
   constructor(sourceCode: string) {
@@ -16,7 +16,7 @@ export class Lexer {
   }
 
   public lexAnalysis(): Token[] {
-    while (this.pos < this.sourceCode.length) {
+    while (this.position < this.sourceCode.length) {
       const token = this.nextToken();
       if (this.includeToken(token)) {
         this.tokenList.push(token);
@@ -28,7 +28,10 @@ export class Lexer {
       new Token({
         type: PUNCTUATION_TOKEN_PATTERNS.EOF,
         value: '',
-        position: this.pos,
+        position: {
+          start: this.position,
+          end: this.position,
+        },
       }),
     );
 
@@ -37,31 +40,35 @@ export class Lexer {
 
   private nextToken(): Token | null {
     // EOF reached
-    if (this.pos >= this.sourceCode.length) return null;
+    if (this.position >= this.sourceCode.length) return null;
 
     for (const tokenType of TOKEN_PATTERNS_LIST) {
       const regex = new RegExp(`^${tokenType.regex}`);
-      const match = regex.exec(this.sourceCode.slice(this.pos));
+      const match = regex.exec(this.sourceCode.slice(this.position));
       const [matchedString] = match ?? [];
 
       if (matchedString) {
+        const tokenEndPosition = this.position + matchedString.length;
         const token = new Token({
           type: tokenType,
           value: processTokenValue({
             tokenValue: matchedString,
             tokenTypeName: tokenType.name,
           }),
-          position: this.pos,
+          position: {
+            start: this.position,
+            end: tokenEndPosition,
+          },
         });
 
-        this.pos += matchedString.length;
+        this.position = tokenEndPosition;
         return token;
       }
     }
 
-    const unexpectedCharacter = this.sourceCode[this.pos];
+    const unexpectedCharacter = this.sourceCode[this.position];
     throw new Error(
-      `Unexpected character ${unexpectedCharacter} at position ${this.pos}.`,
+      `Unexpected character ${unexpectedCharacter} at position ${this.position}.`,
     );
   }
 
