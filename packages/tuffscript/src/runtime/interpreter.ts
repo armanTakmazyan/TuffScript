@@ -1,5 +1,5 @@
 import { Program } from '../frontend/ast/types';
-import { createGlobalEnviornment } from './environment/helpers';
+import { createGlobalEnvironment } from './environment/helpers';
 import { evaluateProgram } from './evaluators';
 import { RuntimeValue } from './values/types';
 
@@ -15,7 +15,7 @@ export class Interpreter {
   }
 
   evaluate(): RuntimeValue {
-    const environment = createGlobalEnviornment({ program: this.program });
+    const environment = createGlobalEnvironment({ program: this.program });
 
     return evaluateProgram({
       environment,

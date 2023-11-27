@@ -7,7 +7,7 @@ import {
 import { ExpressionNodeType } from '../../frontend/ast/types';
 import { globalFunctionNames } from '../constants/globalFunctionNames';
 import { RuntimeValue } from '../values/types';
-import { SetupExecutionContext, CreateGlobalEnviornmentArgs } from './types';
+import { SetupExecutionContext, CreateGlobalEnvironmentArgs } from './types';
 import { Environment } from './index';
 
 export const setupExecutionContext: SetupExecutionContext = ({
@@ -54,9 +54,9 @@ export const setupExecutionContext: SetupExecutionContext = ({
 };
 
 // Initializes a global environment with built-in constants and native functions
-export const createGlobalEnviornment = ({
+export const createGlobalEnvironment = ({
   program,
-}: CreateGlobalEnviornmentArgs): Environment => {
+}: CreateGlobalEnvironmentArgs): Environment => {
   const globalEnvironment = new Environment();
 
   globalEnvironment.createConstant({

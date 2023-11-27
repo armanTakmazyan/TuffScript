@@ -33,6 +33,6 @@ export type SetupExecutionContext = (
   args: SetupExecutionContextArgs,
 ) => Environment;
 
-export interface CreateGlobalEnviornmentArgs {
+export interface CreateGlobalEnvironmentArgs {
   program: Program;
 }
