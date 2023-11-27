@@ -1,9 +1,72 @@
 import { Environment } from '../environment';
+import { setupExecutionContext } from '../environment/helpers';
 import { Values, RuntimeValue } from '../values/types';
 import { evaluateNil } from './primitiveTypesEvaluators';
-import { EvaluateCallExpressionArgs } from './types';
+import {
+  ValidateFunctionArgumentsArgs,
+  SetupFunctionExecutionContextArgs,
+  EvaluateFunctionCallArgs,
+  EvaluateCallExpressionArgs,
+} from './types';
 import { evaluate } from './index';
-import { setupExecutionContext } from '../environment/helpers';
+
+export function validateFunctionArguments({
+  expectedArguments,
+  actualArguments,
+}: ValidateFunctionArgumentsArgs): void {
+  if (expectedArguments.length !== actualArguments.length) {
+    throw new Error(
+      `Expected ${expectedArguments.length} arguments, but got ${actualArguments.length}`,
+    );
+  }
+}
+
+export function setupFunctionExecutionContext({
+  callable,
+  functionArguments,
+}: SetupFunctionExecutionContextArgs): Environment {
+  const newEnvironment = new Environment(callable.declarationEnvironment);
+
+  callable.arguments.forEach((argumentName, argumentIndex) => {
+    newEnvironment.setVariableValue({
+      name: argumentName,
+      value: functionArguments[argumentIndex],
+    });
+  });
+
+  setupExecutionContext({
+    environment: newEnvironment,
+    expressions: callable.body,
+  });
+
+  return newEnvironment;
+}
+
+export function evaluateFunctionCall({
+  callable,
+  functionArguments,
+}: EvaluateFunctionCallArgs): RuntimeValue {
+  validateFunctionArguments({
+    expectedArguments: callable.arguments,
+    actualArguments: functionArguments,
+  });
+
+  const newEnvironment = setupFunctionExecutionContext({
+    callable,
+    functionArguments,
+  });
+
+  let result: RuntimeValue = evaluateNil();
+
+  for (const expression of callable.body) {
+    result = evaluate({
+      astNode: expression,
+      environment: newEnvironment,
+    });
+  }
+
+  return result;
+}
 
 export function evaluateCallExpression({
   environment,
@@ -22,44 +85,14 @@ export function evaluateCallExpression({
   });
 
   if (callable.type === Values.NativeFunction) {
-    const result = callable.execute(functionArguments, environment);
-    return result;
+    return callable.execute(functionArguments, environment);
   }
 
   if (callable.type === Values.Function) {
-    if (callable.arguments.length !== functionArguments.length) {
-      throw new Error(
-        `Expected ${callable.arguments.length} arguments, but got ${functionArguments.length}`,
-      );
-    }
-
-    // TODO: Execution context creation phase we need to check the assignments and function declarations, other things do not matter
-    // Handle Linter as well, when we're trying to get a variable value that is not declared yet
-    const newEnvironment = new Environment(callable.declarationEnvironment);
-
-    for (let i = 0; i < callable.arguments.length; i++) {
-      const functionArgumentName = callable.arguments[i];
-      newEnvironment.setVariableValue({
-        name: functionArgumentName,
-        value: functionArguments[i],
-      });
-    }
-
-    setupExecutionContext({
-      environment: newEnvironment,
-      expressions: callable.body,
+    return evaluateFunctionCall({
+      callable,
+      functionArguments,
     });
-
-    let result: RuntimeValue = evaluateNil();
-
-    for (const expression of callable.body) {
-      result = evaluate({
-        astNode: expression,
-        environment: newEnvironment,
-      });
-    }
-
-    return result;
   }
 
   throw new Error(`Cannot call value that is not a function: ${callable}`);

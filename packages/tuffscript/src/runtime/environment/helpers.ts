@@ -1,26 +1,14 @@
 import {
+  createUnassigned,
   createNil,
   createNumber,
   createNativeFunction,
-  createUnassigned,
 } from '../factories';
+import { ExpressionNodeType } from '../../frontend/ast/types';
 import { globalFunctionNames } from '../constants/globalFunctionNames';
 import { RuntimeValue } from '../values/types';
+import { SetupExecutionContext, CreateGlobalEnvironmentArgs } from './types';
 import { Environment } from './index';
-import {
-  ExpressionNodeType,
-  Expressions,
-  Program,
-} from '../../frontend/ast/types';
-
-interface SetupExecutionContextArgs {
-  environment: Environment;
-  expressions: Expressions;
-}
-
-export type SetupExecutionContext = (
-  args: SetupExecutionContextArgs,
-) => Environment;
 
 export const setupExecutionContext: SetupExecutionContext = ({
   environment,
@@ -66,11 +54,9 @@ export const setupExecutionContext: SetupExecutionContext = ({
 };
 
 // Initializes a global environment with built-in constants and native functions
-export const createGlobalEnviornment = ({
+export const createGlobalEnvironment = ({
   program,
-}: {
-  program: Program;
-}): Environment => {
+}: CreateGlobalEnvironmentArgs): Environment => {
   const globalEnvironment = new Environment();
 
   globalEnvironment.createConstant({

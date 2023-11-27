@@ -16,7 +16,7 @@ import {
   PrimitiveExpression,
 } from '../../frontend/ast/types';
 import { Environment } from '../environment';
-import { RuntimeValue } from '../values/types';
+import { RuntimeValue, FunctionValue } from '../values/types';
 
 export interface EvaluateProgramArgs {
   program: Program;
@@ -136,6 +136,21 @@ export interface GetMemberExpressionProperty {
 export interface EvaluateMemberExpressionArgs {
   environment: Environment;
   memberExpression: MemberExpression;
+}
+
+export interface ValidateFunctionArgumentsArgs {
+  expectedArguments: string[];
+  actualArguments: RuntimeValue[];
+}
+
+export interface SetupFunctionExecutionContextArgs {
+  callable: FunctionValue;
+  functionArguments: RuntimeValue[];
+}
+
+export interface EvaluateFunctionCallArgs {
+  callable: FunctionValue;
+  functionArguments: RuntimeValue[];
 }
 
 export interface EvaluateCallExpressionArgs {
