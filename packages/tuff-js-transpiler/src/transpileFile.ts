@@ -23,7 +23,7 @@ async function transpileFile() {
     const jsCode = transpiler.transpile();
 
     // Change the file extension to .tuff
-    const newFilePath = filePath.replace(/\.[^/.]+$/, '') + '.tuff';
+    const newFilePath = filePath.replace(/\.[^/.]+$/, '') + '.js';
 
     // Write the transpiled code to the new file
     await fs.writeFile(newFilePath, jsCode, 'utf8');
