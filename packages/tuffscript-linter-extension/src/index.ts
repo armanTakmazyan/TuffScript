@@ -131,6 +131,7 @@ function lintDocument({
 
   const outputChannel = getOrCreateOutputChannel({ name: 'TuffScript Linter' });
 
+  // TODO: Refine diagnostic clearing strategy to preserve diagnostics for currently open and linted files
   diagnosticCollection.clear();
   const diagnostics: vscode.Diagnostic[] = [];
 
