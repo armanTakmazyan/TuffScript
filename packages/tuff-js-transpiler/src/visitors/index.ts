@@ -40,6 +40,50 @@ import {
   convertToJSUnaryOperator,
 } from './helpers';
 
+export function ensureLastExpressionIsReturned(statements: Statement[]): void {
+  if (statements.length > 0) {
+    const lastNode = statements[statements.length - 1];
+    if (t.isExpressionStatement(lastNode)) {
+      statements[statements.length - 1] = t.returnStatement(
+        lastNode.expression,
+      );
+    } else if (t.isExpression(lastNode)) {
+      statements[statements.length - 1] = t.returnStatement(lastNode);
+    } else if (t.isVariableDeclaration(lastNode)) {
+      const lastDeclarator =
+        lastNode.declarations[lastNode.declarations.length - 1];
+      if (
+        lastDeclarator &&
+        t.isIdentifier(lastDeclarator.id) &&
+        lastDeclarator.init
+      ) {
+        statements.push(t.returnStatement(t.cloneNode(lastDeclarator.id)));
+      }
+    } else if (t.isFunctionDeclaration(lastNode)) {
+      // Convert function declaration to function expression to return it
+      const functionExpression = t.functionExpression(
+        lastNode.id, // id (null for anonymous functions)
+        lastNode.params, // params
+        lastNode.body, // body
+        lastNode.generator, // generator flag
+        lastNode.async, // async flag
+      );
+
+      // Push the return statement with the function expression
+      statements[statements.length - 1] = t.returnStatement(functionExpression);
+    } else if (t.isBlockStatement(lastNode)) {
+      ensureLastExpressionIsReturned(lastNode.body);
+    } else if (t.isIfStatement(lastNode)) {
+      // WHAT IF HAVE BLOCK STATEMENT
+      ensureLastExpressionIsReturned([lastNode.consequent]);
+      if (lastNode.alternate) {
+        ensureLastExpressionIsReturned([lastNode.alternate]);
+      }
+    }
+    // If the last node is already a statement (like a return statement), do nothing
+  }
+}
+
 export function transformFunctionDeclaration(
   this: Transpiler,
   { astNode }: TransformFuntionDeclarationArgs,
@@ -50,15 +94,20 @@ export function transformFunctionDeclaration(
     return argument.accept<JSIdentifier | Pattern | RestElement>(this);
   });
 
-  const functionBody = t.blockStatement(
-    astNode.body.map(expression => {
-      const jsNode = expression.accept<Statement>(this);
-      if (t.isExpression(jsNode)) {
-        return t.expressionStatement(jsNode);
-      }
-      return jsNode;
-    }),
-  );
+  const functionBodyNodes = astNode.body.map(expression => {
+    const jsNode = expression.accept<Statement>(this);
+    if (t.isExpression(jsNode)) {
+      return t.expressionStatement(jsNode);
+    }
+    return jsNode;
+  });
+
+  // Check if the last node in the function body is an expression
+  // TODO: Check that this handles assignment expression as well
+  ensureLastExpressionIsReturned(functionBodyNodes);
+
+  const functionBody = t.blockStatement(functionBodyNodes);
+
   console.log('functionBody', functionBody);
   return t.functionDeclaration(functionName, functionParams, functionBody);
 }
