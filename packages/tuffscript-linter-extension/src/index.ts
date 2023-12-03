@@ -74,24 +74,27 @@ export async function activate(
         const { Lexer, Parser } = await loadModule('tuffscript');
         const { TuffScriptLinter } = await loadModule('tuffscript-linter');
 
-        vscode.workspace.onDidChangeTextDocument(event => {
+        const handleLinting = (document: vscode.TextDocument) => {
           lintDocument({
-            document: event.document,
+            document: document,
             Lexer,
             Parser,
             Linter: TuffScriptLinter,
           });
-        });
+        };
 
         // Perform initial linting of all open documents
-        vscode.workspace.textDocuments.forEach(doc =>
-          lintDocument({
-            document: doc,
-            Lexer,
-            Parser,
-            Linter: TuffScriptLinter,
-          }),
-        );
+        vscode.workspace.textDocuments.forEach(document => {
+          handleLinting(document);
+        });
+
+        vscode.workspace.onDidChangeTextDocument(event => {
+          handleLinting(event.document);
+        });
+
+        vscode.workspace.onDidOpenTextDocument(document => {
+          handleLinting(document);
+        });
       } catch (error) {
         vscode.window.showErrorMessage(
           `TuffScript or TuffScript Linter was not found. Please make sure to install one of them, either locally or globally.`,
@@ -127,9 +130,6 @@ function lintDocument({
   const lintingResults = tuffScriptLinter.lintProgram({ program: astTree });
 
   const outputChannel = getOrCreateOutputChannel({ name: 'TuffScript Linter' });
-  outputChannel.appendLine(
-    `TuffScript: Linting Completed for - ${document.uri}`,
-  );
 
   diagnosticCollection.clear();
   const diagnostics: vscode.Diagnostic[] = [];
@@ -176,4 +176,8 @@ function lintDocument({
   });
 
   diagnosticCollection.set(document.uri, diagnostics);
+
+  outputChannel.appendLine(
+    `TuffScript: Linting Completed for - ${document.uri}`,
+  );
 }
