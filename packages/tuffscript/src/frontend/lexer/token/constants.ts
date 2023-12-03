@@ -105,7 +105,7 @@ export const OPERATOR_TOKEN_PATTERNS = {
   }),
   [TokenKind.BinaryOperator]: new TokenType({
     name: TokenKind.BinaryOperator,
-    regex: '(\\+|-|\\*|\\/|հավասար է|փոքր է|մեծ է|և|կամ)',
+    regex: '(\\+|-|\\*|\\/|%|հավասար է|փոքր է|մեծ է|և|կամ)',
   }),
 };
 
