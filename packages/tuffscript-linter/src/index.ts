@@ -27,6 +27,10 @@ import {
   analyzeCallExpression,
   analyzePrimaryExpression,
 } from './visitors';
+import {
+  setupFunctionScope,
+  registerVariablesFromExpressions,
+} from './visitors/helpers';
 import { Symbol, SymbolTable } from './SymbolTable';
 import {
   SymbolEntity,
@@ -49,6 +53,7 @@ export class TuffScriptLinter implements LinterVisitor {
   currentScope: BaseSymbolTable;
   unusedSymbols: SymbolEntity[];
   unresolvedReferences: References;
+  referencesBeforeAssignment: References;
 
   constructor({ globalImmutableSymbols = [] }: LinterVisitorArgs = {}) {
     this.globalImmutableSymbols = [
@@ -59,13 +64,14 @@ export class TuffScriptLinter implements LinterVisitor {
     this.currentScope = this.createGlobalScope();
     this.unusedSymbols = [];
     this.unresolvedReferences = [];
+    this.referencesBeforeAssignment = [];
   }
 
   createGlobalScope(): BaseSymbolTable {
     this.currentScope = new SymbolTable({
       scopeName: SymbolTableScopeNames.Global,
       scopeLevel: 0,
-      references: new Map(),
+      references: [],
       symbols: new Map(),
       parentScope: undefined,
     });
@@ -99,7 +105,7 @@ export class TuffScriptLinter implements LinterVisitor {
     const newScope = new SymbolTable({
       scopeName: `${scopeName}_${newScopeLevel}`,
       scopeLevel: newScopeLevel,
-      references: new Map(),
+      references: [],
       symbols: new Map(),
       parentScope: this.currentScope,
     });
@@ -117,19 +123,29 @@ export class TuffScriptLinter implements LinterVisitor {
         this.unusedSymbols.push(symbol);
       }
     });
-    // Collect unresolved references
+    // Filter unresolved references and track usage before assignment in current scope
     this.currentScope.references.forEach(reference => {
       if (!reference.resolved) {
         this.unresolvedReferences.push(reference);
+      } else {
+        if (
+          reference.resolved.position.start !== -1 &&
+          reference.position.start < reference.resolved.position.start
+        ) {
+          this.referencesBeforeAssignment.push(reference);
+        }
       }
     });
-
     // Exit to parent scope if available, otherwise stay in the current (global) scope
     if (this.currentScope.parentScope) {
       this.currentScope = this.currentScope.parentScope;
     }
 
     return this.currentScope;
+  }
+
+  setupFunctionScope(node: FunctionDeclaration): void {
+    setupFunctionScope.call(this, { astNode: node });
   }
 
   visitFunctionDeclaration(node: FunctionDeclaration): void {
@@ -190,6 +206,10 @@ export class TuffScriptLinter implements LinterVisitor {
 
   lintProgram({ program }: LintProgramArgs): LintProgramResult {
     this.resetGlobalScope();
+    // TODO: Consider alternative invocation patterns for registerVariablesFromExpressions, possibly integrating into the visitor
+    registerVariablesFromExpressions.call(this, {
+      expressions: program.body,
+    });
     program.body.forEach(expression => {
       expression.accept(this);
     });
@@ -198,6 +218,7 @@ export class TuffScriptLinter implements LinterVisitor {
     return {
       unusedSymbols: this.unusedSymbols,
       unresolvedReferences: this.unresolvedReferences,
+      referencesBeforeAssignment: this.referencesBeforeAssignment,
     };
   }
 }

@@ -1,14 +1,19 @@
 import {
+  Expressions,
+  FunctionDeclaration,
   AssignmentExpression,
   BinaryExpression,
   CallExpression,
-  FunctionDeclaration,
   IfExpression,
   MemberExpression,
   ObjectLiteral,
   PrimaryExpression,
   UnaryExpression,
 } from 'tuffscript/ast/types';
+
+export interface RegisterVariablesFromExpressionsArgs {
+  expressions: Expressions;
+}
 
 export interface AnalyzeFuntionDeclarationArgs {
   astNode: FunctionDeclaration;

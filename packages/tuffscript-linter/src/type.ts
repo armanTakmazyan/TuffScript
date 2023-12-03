@@ -1,4 +1,8 @@
-import { ASTNodeVisitor, Program } from 'tuffscript/ast/types';
+import {
+  Program,
+  ASTNodeVisitor,
+  FunctionDeclaration,
+} from 'tuffscript/ast/types';
 import { SymbolTable } from './SymbolTable';
 import {
   References,
@@ -19,6 +23,7 @@ export interface LintProgramArgs {
 export interface LintProgramResult {
   unusedSymbols: SymbolEntities;
   unresolvedReferences: References;
+  referencesBeforeAssignment: References;
 }
 
 export interface LinterVisitorArgs {
@@ -30,6 +35,8 @@ export interface LinterVisitor extends ASTNodeVisitor {
   currentScope: BaseSymbolTable;
   unusedSymbols: SymbolEntities;
   unresolvedReferences: References;
+  referencesBeforeAssignment: References;
   enterScope(args: EnterScopeArgs): SymbolTable;
   exitScope(): SymbolTable;
+  setupFunctionScope(node: FunctionDeclaration): void;
 }

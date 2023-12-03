@@ -26,8 +26,8 @@ export interface SymbolEntity {
 export type SymbolEntities = SymbolEntity[];
 
 // TODO: Think about whether the identifier should be an AST node - Identifier.
-// Also, think about using an array for references.
 // Additionally, consider the read and write modes of these references.
+// Currently, we only save the first occurrence of each assignment expression.
 
 /**
  * Represents a single occurrence of an identifier in code
@@ -67,6 +67,11 @@ export interface InsertArgs {
   symbol: SymbolEntity;
 }
 
+export interface InsertVariableSymbolUnlessExistsArgs {
+  name: string;
+  position: Position;
+}
+
 export interface LookupArgs {
   name: string;
   currentScopeOnly?: boolean;
@@ -101,14 +106,18 @@ export interface BaseSymbolTableProperties {
   symbols: Map<string, SymbolEntity>;
 
   /**
-   * A map storing all references to identifiers
-   * @type {Map<string, References>}
+   * An array storing all references to identifiers
+   * @type {Reference[]}
    */
-  references: Map<string, Reference>;
+  references: References;
 }
 
 export interface BaseSymbolTable extends BaseSymbolTableProperties {
   insert(args: InsertArgs): SymbolEntity;
+  insertUnlessExists(args: InsertArgs): SymbolEntity;
+  insertVariableSymbolUnlessExists(
+    args: InsertVariableSymbolUnlessExistsArgs,
+  ): SymbolEntity;
   lookup(args: LookupArgs): LookupResult;
   resolveReference(args: ResolveReferenceArgs): ResolveReferenceResult;
 }

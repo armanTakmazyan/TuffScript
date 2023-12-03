@@ -3,6 +3,7 @@ import type {
   Lexer as TuffScriptLexer,
   Parser as TuffScriptParser,
 } from 'tuffscript';
+import { Position } from 'tuffscript/token/types';
 import type { TuffScriptLinter } from 'tuffscript-linter';
 
 // TODO: Create a seperate global helpers package for this
@@ -133,24 +134,45 @@ function lintDocument({
   diagnosticCollection.clear();
   const diagnostics: vscode.Diagnostic[] = [];
 
-  lintingResults.unresolvedReferences.forEach(unresolvedReference => {
-    const startPosition = document.positionAt(
-      unresolvedReference.position.start,
-    );
-    const endPosition = document.positionAt(unresolvedReference.position.end);
+  const createDiagnosticMessage = ({
+    position,
+    message,
+    severity,
+  }: {
+    message: string;
+    position: Position;
+    severity: vscode.DiagnosticSeverity;
+  }) => {
+    const startPosition = document.positionAt(position.start);
+    const endPosition = document.positionAt(position.end);
     const range = new vscode.Range(startPosition, endPosition);
-    const message = `Unresolved Reference: ${unresolvedReference.identifier}`;
-    const severity = vscode.DiagnosticSeverity.Error;
     diagnostics.push(new vscode.Diagnostic(range, message, severity));
+  };
+
+  lintingResults.unresolvedReferences.forEach(unresolvedReference => {
+    createDiagnosticMessage({
+      position: unresolvedReference.position,
+      severity: vscode.DiagnosticSeverity.Error,
+      message: `Unresolved Reference: ${unresolvedReference.identifier}`,
+    });
   });
 
+  lintingResults.referencesBeforeAssignment.forEach(
+    referenceBeforeAssignment => {
+      createDiagnosticMessage({
+        position: referenceBeforeAssignment.position,
+        severity: vscode.DiagnosticSeverity.Error,
+        message: `Referenced before assignment: ${referenceBeforeAssignment.identifier}`,
+      });
+    },
+  );
+
   lintingResults.unusedSymbols.forEach(unusedSymbol => {
-    const startPosition = document.positionAt(unusedSymbol.position.start);
-    const endPosition = document.positionAt(unusedSymbol.position.end);
-    const range = new vscode.Range(startPosition, endPosition);
-    const message = `Unused variable: ${unusedSymbol.name}`;
-    const severity = vscode.DiagnosticSeverity.Warning;
-    diagnostics.push(new vscode.Diagnostic(range, message, severity));
+    createDiagnosticMessage({
+      position: unusedSymbol.position,
+      severity: vscode.DiagnosticSeverity.Warning,
+      message: `Unused variable: ${unusedSymbol.name}`,
+    });
   });
 
   diagnosticCollection.set(document.uri, diagnostics);
