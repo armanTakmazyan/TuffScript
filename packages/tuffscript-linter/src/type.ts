@@ -3,12 +3,12 @@ import {
   ASTNodeVisitor,
   FunctionDeclaration,
 } from 'tuffscript/ast/types';
-import { SymbolTable } from './SymbolTable';
+import { SymbolTable } from 'tuffscript/symbolTable';
 import {
   References,
   SymbolEntities,
   BaseSymbolTable,
-} from './SymbolTable/types';
+} from 'tuffscript/symbolTable/types';
 
 export interface EnterScopeArgs {
   scopeName: string;
