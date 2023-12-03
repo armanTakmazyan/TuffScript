@@ -3,6 +3,7 @@ import type {
   Lexer as TuffScriptLexer,
   Parser as TuffScriptParser,
 } from 'tuffscript';
+import { Position } from 'tuffscript/token/types';
 import type { TuffScriptLinter } from 'tuffscript-linter';
 
 // TODO: Create a seperate global helpers package for this
@@ -73,24 +74,27 @@ export async function activate(
         const { Lexer, Parser } = await loadModule('tuffscript');
         const { TuffScriptLinter } = await loadModule('tuffscript-linter');
 
-        vscode.workspace.onDidChangeTextDocument(event => {
+        const handleLinting = (document: vscode.TextDocument) => {
           lintDocument({
-            document: event.document,
+            document: document,
             Lexer,
             Parser,
             Linter: TuffScriptLinter,
           });
-        });
+        };
 
         // Perform initial linting of all open documents
-        vscode.workspace.textDocuments.forEach(doc =>
-          lintDocument({
-            document: doc,
-            Lexer,
-            Parser,
-            Linter: TuffScriptLinter,
-          }),
-        );
+        vscode.workspace.textDocuments.forEach(document => {
+          handleLinting(document);
+        });
+
+        vscode.workspace.onDidChangeTextDocument(event => {
+          handleLinting(event.document);
+        });
+
+        vscode.workspace.onDidOpenTextDocument(document => {
+          handleLinting(document);
+        });
       } catch (error) {
         vscode.window.showErrorMessage(
           `TuffScript or TuffScript Linter was not found. Please make sure to install one of them, either locally or globally.`,
@@ -126,32 +130,55 @@ function lintDocument({
   const lintingResults = tuffScriptLinter.lintProgram({ program: astTree });
 
   const outputChannel = getOrCreateOutputChannel({ name: 'TuffScript Linter' });
-  outputChannel.appendLine(
-    `TuffScript: Linting Completed for - ${document.uri}`,
-  );
 
+  // TODO: Refine diagnostic clearing strategy to preserve diagnostics for currently open and linted files
   diagnosticCollection.clear();
   const diagnostics: vscode.Diagnostic[] = [];
 
-  lintingResults.unresolvedReferences.forEach(unresolvedReference => {
-    const startPosition = document.positionAt(
-      unresolvedReference.position.start,
-    );
-    const endPosition = document.positionAt(unresolvedReference.position.end);
+  const createDiagnosticMessage = ({
+    position,
+    message,
+    severity,
+  }: {
+    message: string;
+    position: Position;
+    severity: vscode.DiagnosticSeverity;
+  }) => {
+    const startPosition = document.positionAt(position.start);
+    const endPosition = document.positionAt(position.end);
     const range = new vscode.Range(startPosition, endPosition);
-    const message = `Unresolved Reference: ${unresolvedReference.identifier}`;
-    const severity = vscode.DiagnosticSeverity.Error;
     diagnostics.push(new vscode.Diagnostic(range, message, severity));
+  };
+
+  lintingResults.unresolvedReferences.forEach(unresolvedReference => {
+    createDiagnosticMessage({
+      position: unresolvedReference.position,
+      severity: vscode.DiagnosticSeverity.Error,
+      message: `Unresolved Reference: ${unresolvedReference.identifier}`,
+    });
   });
 
+  lintingResults.referencesBeforeAssignment.forEach(
+    referenceBeforeAssignment => {
+      createDiagnosticMessage({
+        position: referenceBeforeAssignment.position,
+        severity: vscode.DiagnosticSeverity.Error,
+        message: `Referenced before assignment: ${referenceBeforeAssignment.identifier}`,
+      });
+    },
+  );
+
   lintingResults.unusedSymbols.forEach(unusedSymbol => {
-    const startPosition = document.positionAt(unusedSymbol.position.start);
-    const endPosition = document.positionAt(unusedSymbol.position.end);
-    const range = new vscode.Range(startPosition, endPosition);
-    const message = `Unused variable: ${unusedSymbol.name}`;
-    const severity = vscode.DiagnosticSeverity.Warning;
-    diagnostics.push(new vscode.Diagnostic(range, message, severity));
+    createDiagnosticMessage({
+      position: unusedSymbol.position,
+      severity: vscode.DiagnosticSeverity.Warning,
+      message: `Unused variable: ${unusedSymbol.name}`,
+    });
   });
 
   diagnosticCollection.set(document.uri, diagnostics);
+
+  outputChannel.appendLine(
+    `TuffScript: Linting Completed for - ${document.uri}`,
+  );
 }

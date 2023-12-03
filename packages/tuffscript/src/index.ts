@@ -10,6 +10,7 @@ export { Interpreter } from './runtime/interpreter';
 // const simpleFunction = `
 // պահել {բբբ: {աաաա: {աա: 'global arjeq'}}} բ ում
 // տպել('tpumenq b-n drsum')
+// պահել 'im function-@ pahatsa' իմՖունկցիա ում
 // տպել(բ)
 //     ֆունկցիա իմՖունկցիա() կատարել
 //     տպել(բ)

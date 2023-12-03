@@ -11,6 +11,7 @@ import {
   ResolveReferenceResult,
   BaseSymbolTableProperties,
   BaseSymbolTable,
+  InsertVariableSymbolUnlessExistsArgs,
 } from './types';
 
 export class Symbol implements SymbolEntity {
@@ -34,7 +35,7 @@ export class SymbolTable implements BaseSymbolTable {
   scopeLevel: number;
   parentScope?: BaseSymbolTable;
   symbols: Map<string, SymbolEntity>;
-  references: Map<string, Reference>;
+  references: References;
 
   constructor({
     scopeName,
@@ -53,6 +54,30 @@ export class SymbolTable implements BaseSymbolTable {
   insert({ symbol }: InsertArgs): SymbolEntity {
     this.symbols.set(symbol.name, symbol);
     return symbol;
+  }
+
+  insertUnlessExists({ symbol }: InsertArgs): SymbolEntity {
+    const existingSymbol = this.symbols.get(symbol.name);
+
+    if (existingSymbol) {
+      return existingSymbol;
+    }
+
+    return this.insert({ symbol });
+  }
+
+  insertVariableSymbolUnlessExists({
+    name,
+    position,
+  }: InsertVariableSymbolUnlessExistsArgs): SymbolEntity {
+    const newSymbol = new Symbol({
+      name,
+      type: SymbolEntityTypes.Variable,
+      references: [],
+      scope: this,
+      position: position,
+    });
+    return this.insertUnlessExists({ symbol: newSymbol });
   }
 
   lookup({ name, currentScopeOnly = false }: LookupArgs): LookupResult {
@@ -86,10 +111,10 @@ export class SymbolTable implements BaseSymbolTable {
     if (lookupResult) {
       reference.resolved = lookupResult.symbol;
       lookupResult.symbol.references.push(reference);
-      this.references.set(identifier, reference);
+      this.references.push(reference);
       return reference;
     }
-    this.references.set(identifier, reference);
+    this.references.push(reference);
     return reference;
   }
 }

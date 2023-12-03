@@ -1,0 +1,12 @@
+պահել 'this is a value of the global variable - իմՖունկցիա' իմՖունկցիա ում
+
+տպել(իմՖունկցիա)
+
+տպել('reassigning variable to hold a function')
+
+ֆունկցիա իմՖունկցիա() կատարել
+  տպել('logging function - իմՖունկցիա')
+ավարտել
+
+իմՖունկցիա()
+

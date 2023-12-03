@@ -1,6 +1,4 @@
 import { ExpressionNodeType } from 'tuffscript/ast/types';
-import { Symbol } from '../SymbolTable';
-import { SymbolEntityTypes } from '../SymbolTable/types';
 import { LinterVisitor } from '../type';
 import {
   AnalyzeFuntionDeclarationArgs,
@@ -18,28 +16,15 @@ export function analyzeFunctionDeclaration(
   this: LinterVisitor,
   { astNode }: AnalyzeFuntionDeclarationArgs,
 ): void {
-  const functionSymbol = new Symbol({
+  const functionSymbol = this.currentScope.insertVariableSymbolUnlessExists({
     name: astNode.name.symbol,
-    type: SymbolEntityTypes.Variable,
-    references: [],
-    scope: this.currentScope,
     position: astNode.position,
   });
 
-  this.currentScope.symbols.set(functionSymbol.name, functionSymbol);
-
   this.enterScope({ scopeName: functionSymbol.name });
 
-  astNode.arguments.forEach(argument => {
-    const argumentSymbol = new Symbol({
-      name: argument.symbol,
-      type: SymbolEntityTypes.Variable,
-      references: [],
-      scope: this.currentScope,
-      position: argument.position,
-    });
-    this.currentScope.symbols.set(argument.symbol, argumentSymbol);
-  });
+  this.setupFunctionScope(astNode);
+
   astNode.body.forEach(expression => expression.accept(this));
 
   this.exitScope();
@@ -51,14 +36,11 @@ export function analyzeAssignmentExpression(
 ): void {
   astNode.value.accept(this);
   if (astNode.assignee.type === ExpressionNodeType.Identifier) {
-    const assigneeSymbol = new Symbol({
+    // TODO: Currently, this only saves the first occurrence of each assignment expression
+    this.currentScope.insertVariableSymbolUnlessExists({
       name: astNode.assignee.symbol,
-      type: SymbolEntityTypes.Variable,
-      references: [],
-      scope: this.currentScope,
       position: astNode.position,
     });
-    this.currentScope.insert({ symbol: assigneeSymbol });
   } else {
     astNode.assignee.accept(this);
   }
