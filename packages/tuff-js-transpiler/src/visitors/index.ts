@@ -18,21 +18,21 @@ import {
   TransformFuntionDeclarationArgs,
   TransformFunctionDeclarationResult,
   TransformAssignmentExpressionArgs,
+  TransformAssignmentExpressionResult,
+  TransformIfExpressionArgs,
+  TransformIfExpressionResult,
+  TransformObjectLiteralArgs,
+  TransformObjectLiteralResult,
   TransformBinaryExpressionArgs,
+  TransformBinaryExpressionResult,
+  TransformUnaryExpressionArgs,
+  TransformUnaryExpressionResult,
+  TransformMemberExpressionArgs,
+  TransformMemberExpressionResult,
   TransformCallExpressionArgs,
   TransformCallExpressionResult,
-  TransformIfExpressionArgs,
-  TransformMemberExpressionArgs,
-  TransformObjectLiteralArgs,
   TransformPrimaryExpressionArgs,
   TransformPrimaryExpressionResult,
-  TransformUnaryExpressionArgs,
-  TransformMemberExpressionResult,
-  TransformUnaryExpressionResult,
-  TransformBinaryExpressionResult,
-  TransformObjectLiteralResult,
-  TransformIfExpressionResult,
-  TransformAssignmentExpressionResult,
 } from './types';
 import {
   convertToJSBinaryOperator,
@@ -136,6 +136,10 @@ export function transformAssignmentExpression(
   this: Transpiler,
   { astNode }: TransformAssignmentExpressionArgs,
 ): TransformAssignmentExpressionResult {
+  // TODO: User the symbol table here
+  // if we the assigne type is Identifier, and we do not have this variable in the current scope yet, then
+  // use variable declaration statement
+  // if the above condition is not true, then we need to use the assignment expression
   const leftNode =
     astNode.assignee.type === ExpressionNodeType.Identifier
       ? t.identifier(astNode.assignee.symbol)
