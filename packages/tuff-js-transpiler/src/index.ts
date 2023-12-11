@@ -42,6 +42,7 @@ import {
   TranspilerConstructorArgs,
 } from './types';
 import {
+  TransformResult,
   IdentifierAssignment,
   TransformVariableDeclarationResult,
   TransformAssignmentExpressionResult,
@@ -52,7 +53,6 @@ import {
   TransformMemberExpressionResult,
   TransformObjectLiteralResult,
   TransformPrimaryExpressionResult,
-  TransformResult,
   TransformUnaryExpressionResult,
 } from './visitors/types';
 
