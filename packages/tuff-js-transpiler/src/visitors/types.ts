@@ -1,19 +1,19 @@
 import {
-  NullLiteral,
-  BooleanLiteral,
-  StringLiteral,
-  NumericLiteral,
-  Identifier,
+  NullLiteral as JSNullLiteral,
+  BooleanLiteral as JSBooleanLiteral,
+  StringLiteral as JSStringLiteral,
+  NumericLiteral as JSNumericLiteral,
+  Identifier as JSIdentifier,
   FunctionDeclaration as JSFunctionDeclaration,
-  // AssignmentExpression as JSAssignmentExpression,
+  VariableDeclaration as JSVariableDeclaration,
+  ExpressionStatement as JSExpressionStatement,
+  IfStatement as JSIfStatement,
   BinaryExpression as JSBinaryExpression,
   CallExpression as JSCallExpression,
   MemberExpression as JSMemberExpression,
+  ObjectExpression as JSObjectExpression,
   UnaryExpression as JSUnaryExpression,
   LogicalExpression as JSLogicalExpression,
-  ObjectExpression,
-  IfStatement,
-  ExpressionStatement,
 } from '@babel/types';
 import {
   FunctionDeclaration,
@@ -25,6 +25,7 @@ import {
   ObjectLiteral,
   PrimaryExpression,
   UnaryExpression,
+  Identifier,
 } from 'tuffscript/ast/types';
 
 export type JSUnaryOperator = JSUnaryExpression['operator'];
@@ -39,25 +40,38 @@ export interface TransformFuntionDeclarationArgs {
 
 export type TransformFunctionDeclarationResult = JSFunctionDeclaration;
 
+export type CreateAssignmentExpressionResult = JSExpressionStatement;
+
+export interface IdentifierAssignment
+  extends Omit<AssignmentExpression, 'assignee'> {
+  assignee: Identifier;
+}
+
+export interface TransformVariableDeclarationArgs {
+  astNode: IdentifierAssignment;
+}
+
+export type TransformVariableDeclarationResult = JSVariableDeclaration;
+
 export interface TransformAssignmentExpressionArgs {
   astNode: AssignmentExpression;
 }
 
-// export type TransformAssignmentExpressionResult = JSAssignmentExpression;
-
-export type TransformAssignmentExpressionResult = ExpressionStatement;
+export type TransformAssignmentExpressionResult =
+  | JSExpressionStatement
+  | JSVariableDeclaration;
 
 export interface TransformIfExpressionArgs {
   astNode: IfExpression;
 }
 
-export type TransformIfExpressionResult = IfStatement;
+export type TransformIfExpressionResult = JSIfStatement;
 
 export interface TransformObjectLiteralArgs {
   astNode: ObjectLiteral;
 }
 
-export type TransformObjectLiteralResult = ObjectExpression;
+export type TransformObjectLiteralResult = JSObjectExpression;
 
 export interface TransformBinaryExpressionArgs {
   astNode: BinaryExpression;
@@ -90,11 +104,11 @@ export interface TransformPrimaryExpressionArgs {
 }
 
 export type TransformPrimaryExpressionResult =
-  | NullLiteral
-  | BooleanLiteral
-  | StringLiteral
-  | NumericLiteral
-  | Identifier;
+  | JSNullLiteral
+  | JSBooleanLiteral
+  | JSStringLiteral
+  | JSNumericLiteral
+  | JSIdentifier;
 
 export type TransformResult =
   | TransformFunctionDeclarationResult

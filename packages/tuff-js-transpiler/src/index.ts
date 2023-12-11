@@ -2,6 +2,11 @@ import * as t from '@babel/types';
 import { Statement } from '@babel/types';
 import * as parser from '@babel/parser';
 import generate from '@babel/generator';
+import { SymbolTable } from 'tuffscript/symbolTable';
+import {
+  BaseSymbolTable,
+  SymbolTableScopeNames,
+} from 'tuffscript/symbolTable/types';
 import {
   AssignmentExpression,
   BinaryExpression,
@@ -20,6 +25,7 @@ import {
   UnaryExpression,
 } from 'tuffscript/ast/types';
 import {
+  transformVariableDeclaration,
   transformAssignmentExpression,
   transformBinaryExpression,
   transformCallExpression,
@@ -30,8 +36,14 @@ import {
   transformPrimaryExpression,
   transformUnaryExpression,
 } from './visitors';
-import { TranspilerConstructorArgs, TuffScriptToJSTranspiler } from './types';
 import {
+  EnterScopeArgs,
+  TuffScriptToJSTranspiler,
+  TranspilerConstructorArgs,
+} from './types';
+import {
+  IdentifierAssignment,
+  TransformVariableDeclarationResult,
   TransformAssignmentExpressionResult,
   TransformBinaryExpressionResult,
   TransformCallExpressionResult,
@@ -47,13 +59,56 @@ import {
 export class Transpiler implements TuffScriptToJSTranspiler {
   program: Program;
   jsCode: string;
+  currentScope: BaseSymbolTable;
 
   constructor({ program }: TranspilerConstructorArgs) {
     this.program = program;
     this.jsCode = '';
+    this.currentScope = this.createGlobalScope();
+  }
+
+  createGlobalScope(): BaseSymbolTable {
+    this.currentScope = new SymbolTable({
+      scopeName: SymbolTableScopeNames.Global,
+      scopeLevel: 0,
+      references: [],
+      symbols: new Map(),
+      parentScope: undefined,
+    });
+
+    return this.currentScope;
+  }
+
+  resetGlobalScope(): BaseSymbolTable {
+    this.jsCode = '';
+    this.currentScope = this.createGlobalScope();
+    return this.currentScope;
+  }
+
+  enterScope({ scopeName }: EnterScopeArgs): SymbolTable {
+    const newScopeLevel = this.currentScope.scopeLevel + 1;
+    const newScope = new SymbolTable({
+      scopeName: `${scopeName}_${newScopeLevel}`,
+      scopeLevel: newScopeLevel,
+      references: [],
+      symbols: new Map(),
+      parentScope: this.currentScope,
+    });
+    this.currentScope = newScope;
+    return this.currentScope;
+  }
+
+  exitScope(): SymbolTable {
+    // Exit to parent scope if available, otherwise stay in the current (global) scope
+    if (this.currentScope.parentScope) {
+      this.currentScope = this.currentScope.parentScope;
+    }
+
+    return this.currentScope;
   }
 
   transpile(): string {
+    this.resetGlobalScope();
     const body: Statement[] = [];
 
     this.program.body.forEach(expression => {
@@ -68,7 +123,7 @@ export class Transpiler implements TuffScriptToJSTranspiler {
       }
     });
 
-    const ast = parser.parse(''); // Parsing empty string creates AST with File and Program nodes.
+    const ast = parser.parse(''); // Parsing empty string creates AST with File and Program nodes
 
     ast.program.body = body;
 
@@ -81,6 +136,12 @@ export class Transpiler implements TuffScriptToJSTranspiler {
     node: FunctionDeclaration,
   ): TransformFunctionDeclarationResult {
     return transformFunctionDeclaration.call(this, { astNode: node });
+  }
+
+  visitVariableDeclaration(
+    node: IdentifierAssignment,
+  ): TransformVariableDeclarationResult {
+    return transformVariableDeclaration.call(this, { astNode: node });
   }
 
   visitAssignmentExpression(
@@ -194,6 +255,7 @@ const simpleFunction = `
   -ա.բ հավասար է 5
 ավարտել
 ավարտել
+պահել սահմանված չէ աաաա ում
 ավարտել
 
 իմՖունկցիա(1,2)

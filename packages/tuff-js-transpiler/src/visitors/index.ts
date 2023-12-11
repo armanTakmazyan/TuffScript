@@ -1,55 +1,64 @@
 import * as t from '@babel/types';
 import {
+  Node as JSNode,
+  Statement as JSStatement,
   Expression as JSExpression,
-  JSXNamespacedName,
-  SpreadElement,
-  StringLiteral,
-  ArgumentPlaceholder,
-  ObjectProperty,
-  Statement,
-  OptionalMemberExpression,
-  Pattern,
-  RestElement,
   Identifier as JSIdentifier,
+  StringLiteral as JSStringLiteral,
+  ObjectProperty as JSObjectProperty,
+  OptionalMemberExpression as JSOptionalMemberExpression,
 } from '@babel/types';
-import { ExpressionNodeType } from 'tuffscript/ast/types';
-import { Transpiler } from '../index';
+import { Symbol } from 'tuffscript/symbolTable';
+import { SymbolEntityTypes } from 'tuffscript/symbolTable/types';
+import { AssignmentExpression, ExpressionNodeType } from 'tuffscript/ast/types';
 import {
+  TransformResult,
   TransformFuntionDeclarationArgs,
   TransformFunctionDeclarationResult,
+  TransformVariableDeclarationArgs,
+  TransformVariableDeclarationResult,
+  CreateAssignmentExpressionResult,
   TransformAssignmentExpressionArgs,
   TransformAssignmentExpressionResult,
-  TransformIfExpressionArgs,
-  TransformIfExpressionResult,
-  TransformObjectLiteralArgs,
-  TransformObjectLiteralResult,
   TransformBinaryExpressionArgs,
   TransformBinaryExpressionResult,
-  TransformUnaryExpressionArgs,
-  TransformUnaryExpressionResult,
-  TransformMemberExpressionArgs,
-  TransformMemberExpressionResult,
   TransformCallExpressionArgs,
   TransformCallExpressionResult,
+  TransformIfExpressionArgs,
+  TransformIfExpressionResult,
+  TransformMemberExpressionArgs,
+  TransformMemberExpressionResult,
+  TransformObjectLiteralArgs,
+  TransformObjectLiteralResult,
   TransformPrimaryExpressionArgs,
   TransformPrimaryExpressionResult,
+  TransformUnaryExpressionArgs,
+  TransformUnaryExpressionResult,
 } from './types';
 import {
+  isIdentifierAssignment,
+  convertToJSUnaryOperator,
   convertToJSBinaryOperator,
   convertToJSLogicalOperator,
-  convertToJSUnaryOperator,
 } from './helpers';
+import { Transpiler } from '../index';
 
-export function ensureLastExpressionIsReturned(statements: Statement[]): void {
-  if (statements.length > 0) {
-    const lastNode = statements[statements.length - 1];
-    if (t.isExpressionStatement(lastNode)) {
+// In the assignment expression, we return the value
+export function ensureLastExpressionIsReturned(statements: JSNode[]): void {
+  if (statements.length <= 0) {
+    return;
+  }
+
+  const lastNode = statements[statements.length - 1];
+
+  switch (lastNode.type) {
+    case 'ExpressionStatement': {
       statements[statements.length - 1] = t.returnStatement(
         lastNode.expression,
       );
-    } else if (t.isExpression(lastNode)) {
-      statements[statements.length - 1] = t.returnStatement(lastNode);
-    } else if (t.isVariableDeclaration(lastNode)) {
+      break;
+    }
+    case 'VariableDeclaration': {
       const lastDeclarator =
         lastNode.declarations[lastNode.declarations.length - 1];
       if (
@@ -59,28 +68,35 @@ export function ensureLastExpressionIsReturned(statements: Statement[]): void {
       ) {
         statements.push(t.returnStatement(t.cloneNode(lastDeclarator.id)));
       }
-    } else if (t.isFunctionDeclaration(lastNode)) {
+      break;
+    }
+    case 'FunctionDeclaration': {
       // Convert function declaration to function expression to return it
       const functionExpression = t.functionExpression(
-        lastNode.id, // id (null for anonymous functions)
-        lastNode.params, // params
-        lastNode.body, // body
-        lastNode.generator, // generator flag
-        lastNode.async, // async flag
+        lastNode.id, // null for anonymous functions
+        lastNode.params,
+        lastNode.body,
+        lastNode.generator,
+        lastNode.async,
       );
 
-      // Push the return statement with the function expression
       statements[statements.length - 1] = t.returnStatement(functionExpression);
-    } else if (t.isBlockStatement(lastNode)) {
+      break;
+    }
+    case 'BlockStatement': {
       ensureLastExpressionIsReturned(lastNode.body);
-    } else if (t.isIfStatement(lastNode)) {
-      // WHAT IF HAVE BLOCK STATEMENT
+      break;
+    }
+    case 'IfStatement': {
       ensureLastExpressionIsReturned([lastNode.consequent]);
       if (lastNode.alternate) {
         ensureLastExpressionIsReturned([lastNode.alternate]);
       }
+      break;
     }
-    // If the last node is already a statement (like a return statement), do nothing
+    default: {
+      break;
+    }
   }
 }
 
@@ -90,65 +106,91 @@ export function transformFunctionDeclaration(
 ): TransformFunctionDeclarationResult {
   const functionName = t.identifier(astNode.name.symbol);
 
+  const functionSymbol = this.currentScope.insertVariableSymbolUnlessExists({
+    name: astNode.name.symbol,
+    position: astNode.position,
+  });
+
+  this.enterScope({ scopeName: functionSymbol.name });
+
+  astNode.arguments.forEach(argument => {
+    this.currentScope.insertVariableSymbolUnlessExists({
+      name: argument.symbol,
+      position: argument.position,
+    });
+  });
+
   const functionParams = astNode.arguments.map(argument => {
-    return argument.accept<JSIdentifier | Pattern | RestElement>(this);
+    return argument.accept<JSIdentifier>(this);
   });
 
   const functionBodyNodes = astNode.body.map(expression => {
-    const jsNode = expression.accept<Statement>(this);
+    const jsNode = expression.accept<TransformResult>(this);
     if (t.isExpression(jsNode)) {
       return t.expressionStatement(jsNode);
     }
     return jsNode;
   });
 
-  // Check if the last node in the function body is an expression
-  // TODO: Check that this handles assignment expression as well
   ensureLastExpressionIsReturned(functionBodyNodes);
 
   const functionBody = t.blockStatement(functionBodyNodes);
 
-  console.log('functionBody', functionBody);
+  this.exitScope();
+
   return t.functionDeclaration(functionName, functionParams, functionBody);
 }
 
-// export function transformVariableDeclaration(
-//   this: Transpiler,
-//   { astNode }: TransformAssignmentExpressionArgs,
-// ): t.VariableDeclaration {
-//   // Assuming astNode.assignee is the variable name and astNode.value is the value being assigned.
+export function transformVariableDeclaration(
+  this: Transpiler,
+  { astNode }: TransformVariableDeclarationArgs,
+): TransformVariableDeclarationResult {
+  const variableName = t.identifier(astNode.assignee.symbol);
 
-//   // Create an Identifier for the variable name
-//   const id = t.identifier(astNode.assignee.symbol);
+  const variableValue = astNode.value.accept<JSExpression>(this);
 
-//   // Transform the right-hand side expression
-//   const init = astNode.value.accept<JSExpression>(this);
+  const declarator = t.variableDeclarator(variableName, variableValue);
 
-//   // Create a VariableDeclarator (part of a VariableDeclaration)
-//   const declarator = t.variableDeclarator(id, init);
+  return t.variableDeclaration('var', [declarator]);
+}
 
-//   // Create and return the VariableDeclaration
-//   // The kind can be 'var', 'let', or 'const' depending on your language's semantics
-//   return t.variableDeclaration('var', [declarator]);
-// }
+export function createAssignmentExpression(
+  this: Transpiler,
+  { assignee, value }: AssignmentExpression,
+): CreateAssignmentExpressionResult {
+  const leftNode = assignee.accept<JSOptionalMemberExpression>(this);
+  const rightNode = value.accept<JSExpression>(this);
+  const assignmentExpression = t.assignmentExpression('=', leftNode, rightNode);
+
+  return t.expressionStatement(assignmentExpression);
+}
 
 export function transformAssignmentExpression(
   this: Transpiler,
   { astNode }: TransformAssignmentExpressionArgs,
 ): TransformAssignmentExpressionResult {
-  // TODO: User the symbol table here
-  // if we the assigne type is Identifier, and we do not have this variable in the current scope yet, then
-  // use variable declaration statement
-  // if the above condition is not true, then we need to use the assignment expression
-  const leftNode =
-    astNode.assignee.type === ExpressionNodeType.Identifier
-      ? t.identifier(astNode.assignee.symbol)
-      : astNode.value.accept<OptionalMemberExpression>(this);
+  if (isIdentifierAssignment(astNode)) {
+    const identifier = this.currentScope.lookup({
+      name: astNode.assignee.symbol,
+      currentScopeOnly: true,
+    });
 
-  const rightNode = astNode.value.accept<JSExpression>(this);
-  const assignmentExpression = t.assignmentExpression('=', leftNode, rightNode);
-
-  return t.expressionStatement(assignmentExpression);
+    if (identifier) {
+      return createAssignmentExpression.call(this, astNode);
+    } else {
+      const newSymbol = new Symbol({
+        name: astNode.assignee.symbol,
+        references: [],
+        scope: this.currentScope,
+        type: SymbolEntityTypes.Variable,
+        position: astNode.assignee.position,
+      });
+      this.currentScope.insertUnlessExists({ symbol: newSymbol });
+      return this.visitVariableDeclaration(astNode);
+    }
+  } else {
+    return createAssignmentExpression.call(this, astNode);
+  }
 }
 
 export function transformIfExpression(
@@ -158,8 +200,8 @@ export function transformIfExpression(
   const conditionNode = astNode.condition.accept<JSExpression>(this);
 
   const thenBodyStatements = t.blockStatement(
-    astNode.thenBody.map<Statement>(expression => {
-      const jsNode = expression.accept<Statement>(this);
+    astNode.thenBody.map<JSStatement>(expression => {
+      const jsNode = expression.accept<TransformResult>(this);
       if (t.isExpression(jsNode)) {
         return t.expressionStatement(jsNode);
       }
@@ -167,8 +209,8 @@ export function transformIfExpression(
     }),
   );
   const elseBodyStatements = t.blockStatement(
-    astNode.elseBody.map<Statement>(expression => {
-      const jsNode = expression.accept<Statement>(this);
+    astNode.elseBody.map<JSStatement>(expression => {
+      const jsNode = expression.accept<TransformResult>(this);
       if (t.isExpression(jsNode)) {
         return t.expressionStatement(jsNode);
       }
@@ -188,7 +230,7 @@ export function transformObjectLiteral(
 
     // If valueNode is undefined, use keyNode for both key and value (shorthand property)
     const valueNode = prop.value
-      ? prop.value?.accept<ObjectProperty['value']>(this)
+      ? prop.value?.accept<JSObjectProperty['value']>(this)
       : keyNode;
 
     const isShorthand = keyNode === valueNode;
@@ -250,10 +292,10 @@ export function transformCallExpression(
   this: Transpiler,
   { astNode }: TransformCallExpressionArgs,
 ): TransformCallExpressionResult {
-  const callee = astNode.caller.accept<StringLiteral>(this);
-  const argumentsValues = astNode.arguments.map<
-    JSExpression | SpreadElement | JSXNamespacedName | ArgumentPlaceholder
-  >(argument => argument.accept(this));
+  const callee = astNode.caller.accept<JSStringLiteral>(this);
+  const argumentsValues = astNode.arguments.map<JSExpression>(argument =>
+    argument.accept(this),
+  );
 
   return t.callExpression(callee, argumentsValues);
 }

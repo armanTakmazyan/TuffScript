@@ -1,12 +1,18 @@
-import { JSUnaryOperator, JSBinaryOperator, JSLogicalOperator } from './types';
+import {
+  JSBinaryOperator,
+  JSUnaryOperator,
+  JSLogicalOperator,
+  IdentifierAssignment,
+} from './types';
 import {
   BinaryOperatorMappingDictionaryKeys,
   LogicalOperatorMappingDictionaryKeys,
-  UnaryOperatorMappingDictionaryKeys,
   binaryOperatorMappingDictionary,
+  UnaryOperatorMappingDictionaryKeys,
   logicalOperatorMappingDictionary,
   unaryOperatorMappingDictionary,
 } from './constants';
+import { AssignmentExpression, ExpressionNodeType } from 'tuffscript/ast/types';
 
 export function convertToJSUnaryOperator(
   operator: string,
@@ -36,4 +42,10 @@ export function convertToJSLogicalOperator(
       operator as LogicalOperatorMappingDictionaryKeys
     ] ?? null
   );
+}
+
+export function isIdentifierAssignment(
+  node: AssignmentExpression,
+): node is IdentifierAssignment {
+  return node.assignee.type === ExpressionNodeType.Identifier;
 }
