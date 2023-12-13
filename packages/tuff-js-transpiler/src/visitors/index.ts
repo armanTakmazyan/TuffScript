@@ -6,10 +6,12 @@ import {
   Identifier as JSIdentifier,
   StringLiteral as JSStringLiteral,
   ObjectProperty as JSObjectProperty,
+  MemberExpression as JSMemberExpression,
   OptionalMemberExpression as JSOptionalMemberExpression,
 } from '@babel/types';
 import { Symbol } from 'tuffscript/symbolTable';
 import { SymbolEntityTypes } from 'tuffscript/symbolTable/types';
+import { globalFunctionNames } from 'tuffscript/runtime/constants';
 import { AssignmentExpression, ExpressionNodeType } from 'tuffscript/ast/types';
 import {
   TransformResult,
@@ -34,6 +36,8 @@ import {
   TransformPrimaryExpressionResult,
   TransformUnaryExpressionArgs,
   TransformUnaryExpressionResult,
+  TransformIdentifierArgs,
+  TransformIdentifierResult,
 } from './types';
 import {
   isIdentifierAssignment,
@@ -42,6 +46,18 @@ import {
   convertToJSLogicalOperator,
 } from './helpers';
 import { Transpiler } from '../index';
+
+export function createConsoleLogExpression(): JSMemberExpression {
+  const consoleId = t.identifier('console');
+  const logId = t.identifier('log');
+  return t.memberExpression(consoleId, logId);
+}
+
+export function createDateNowExpression(): JSMemberExpression {
+  const dateId = t.identifier('Date');
+  const nowId = t.identifier('now');
+  return t.memberExpression(dateId, nowId);
+}
 
 // In the assignment expression, we return the value
 export function ensureLastExpressionIsReturned(statements: JSNode[]): void {
@@ -300,6 +316,27 @@ export function transformCallExpression(
   return t.callExpression(callee, argumentsValues);
 }
 
+export function transformIdentifier(
+  this: Transpiler,
+  { astNode }: TransformIdentifierArgs,
+): TransformIdentifierResult {
+  if (this.identifierTransformers[astNode.symbol]) {
+    return this.identifierTransformers[astNode.symbol].call(this, {
+      astNode,
+    });
+  }
+
+  if (astNode.symbol === globalFunctionNames.print) {
+    return createConsoleLogExpression();
+  }
+
+  if (astNode.symbol === globalFunctionNames.time) {
+    return createDateNowExpression();
+  }
+
+  return t.identifier(astNode.symbol);
+}
+
 export function transformPrimaryExpression(
   this: Transpiler,
   { astNode }: TransformPrimaryExpressionArgs,
@@ -321,7 +358,7 @@ export function transformPrimaryExpression(
       return t.nullLiteral();
     }
     case ExpressionNodeType.Identifier: {
-      return t.identifier(astNode.symbol);
+      return transformIdentifier.call(this, { astNode });
     }
     default: {
       throw new Error(`Unsupported expression type: ${astNode}`);

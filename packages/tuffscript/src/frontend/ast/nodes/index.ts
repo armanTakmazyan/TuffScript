@@ -23,7 +23,7 @@ export const functionDeclarationNode: FunctionDeclarationNode = ({
 }) => ({
   type: ExpressionNodeType.FunctionDeclaration,
   accept(visitor) {
-    visitor.visitFunctionDeclaration(this);
+    return visitor.visitFunctionDeclaration(this);
   },
   ...rest,
 });
@@ -33,7 +33,7 @@ export const assignmentExpressionNode: AssignmentExpressionNode = ({
 }) => ({
   type: ExpressionNodeType.AssignmentExpression,
   accept(visitor) {
-    visitor.visitAssignmentExpression(this);
+    return visitor.visitAssignmentExpression(this);
   },
   ...rest,
 });
@@ -41,7 +41,7 @@ export const assignmentExpressionNode: AssignmentExpressionNode = ({
 export const ifExpressionNode: IfExpressionNode = ({ ...rest }) => ({
   type: ExpressionNodeType.IfExpression,
   accept(visitor) {
-    visitor.visitIfExpression(this);
+    return visitor.visitIfExpression(this);
   },
   ...rest,
 });
@@ -49,7 +49,7 @@ export const ifExpressionNode: IfExpressionNode = ({ ...rest }) => ({
 export const binaryExpressionNode: BinaryExpressionNode = ({ ...rest }) => ({
   type: ExpressionNodeType.BinaryExpression,
   accept(visitor) {
-    visitor.visitBinaryExpression(this);
+    return visitor.visitBinaryExpression(this);
   },
   ...rest,
 });
@@ -57,7 +57,7 @@ export const binaryExpressionNode: BinaryExpressionNode = ({ ...rest }) => ({
 export const unaryExpressionNode: UnaryExpressionNode = ({ ...rest }) => ({
   type: ExpressionNodeType.UnaryExpression,
   accept(visitor) {
-    visitor.visitUnaryExpression(this);
+    return visitor.visitUnaryExpression(this);
   },
   ...rest,
 });
@@ -65,7 +65,7 @@ export const unaryExpressionNode: UnaryExpressionNode = ({ ...rest }) => ({
 export const memberExpressionNode: MemberExpressionNode = ({ ...rest }) => ({
   type: ExpressionNodeType.MemberExpression,
   accept(visitor) {
-    visitor.visitMemberExpression(this);
+    return visitor.visitMemberExpression(this);
   },
   ...rest,
 });
@@ -73,7 +73,7 @@ export const memberExpressionNode: MemberExpressionNode = ({ ...rest }) => ({
 export const callExpressionNode: CallExpressionNode = ({ ...rest }) => ({
   type: ExpressionNodeType.CallExpression,
   accept(visitor) {
-    visitor.visitCallExpression(this);
+    return visitor.visitCallExpression(this);
   },
   ...rest,
 });
@@ -83,7 +83,7 @@ export const identifierNode: IdentifierNode = ({ token }) => ({
   symbol: token.value,
   position: token.position,
   accept(visitor) {
-    visitor.visitIdentifier(this);
+    return visitor.visitIdentifier(this);
   },
 });
 
@@ -92,7 +92,7 @@ export const numberLiteralNode: NumberLiteralNode = ({ token }) => ({
   value: parseFloat(token.value),
   position: token.position,
   accept(visitor) {
-    visitor.visitNumberLiteral(this);
+    return visitor.visitNumberLiteral(this);
   },
 });
 
@@ -101,7 +101,7 @@ export const stringLiteralNode: StringLiteralNode = ({ token }) => ({
   value: token.value,
   position: token.position,
   accept(visitor) {
-    visitor.visitStringLiteral(this);
+    return visitor.visitStringLiteral(this);
   },
 });
 
@@ -110,7 +110,7 @@ export const trueLiteralNode: TrueLiteralNode = ({ token }) => ({
   value: LiteralValues.True,
   position: token.position,
   accept(visitor) {
-    visitor.visitTrueLiteral(this);
+    return visitor.visitTrueLiteral(this);
   },
 });
 
@@ -119,7 +119,7 @@ export const falseLiteralNode: FalseLiteralNode = ({ token }) => ({
   value: LiteralValues.False,
   position: token.position,
   accept(visitor) {
-    visitor.visitFalseLiteral(this);
+    return visitor.visitFalseLiteral(this);
   },
 });
 
@@ -128,7 +128,7 @@ export const nilLiteralNode: NilLiteralNode = ({ token }) => ({
   value: LiteralValues.Nil,
   position: token.position,
   accept(visitor) {
-    visitor.visitNilLiteral(this);
+    return visitor.visitNilLiteral(this);
   },
 });
 
@@ -142,7 +142,7 @@ export const createProperty: CreateProperty = ({ token, value }) => ({
 export const objectLiteralNode: ObjectLiteralNode = ({ ...rest }) => ({
   type: ExpressionNodeType.ObjectLiteral,
   accept(visitor) {
-    visitor.visitObjectLiteral(this);
+    return visitor.visitObjectLiteral(this);
   },
   ...rest,
 });

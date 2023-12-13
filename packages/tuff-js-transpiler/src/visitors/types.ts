@@ -99,6 +99,18 @@ export interface TransformCallExpressionArgs {
 
 export type TransformCallExpressionResult = JSCallExpression;
 
+export interface TransformIdentifierArgs {
+  astNode: Identifier;
+}
+
+export type TransformIdentifierResult =
+  | JSIdentifier
+  | TransformMemberExpressionResult;
+
+export type TransformIdentifier = (
+  args: TransformIdentifierArgs,
+) => TransformIdentifierResult;
+
 export interface TransformPrimaryExpressionArgs {
   astNode: PrimaryExpression;
 }
@@ -108,7 +120,7 @@ export type TransformPrimaryExpressionResult =
   | JSBooleanLiteral
   | JSStringLiteral
   | JSNumericLiteral
-  | JSIdentifier;
+  | TransformIdentifierResult;
 
 export type TransformResult =
   | TransformFunctionDeclarationResult

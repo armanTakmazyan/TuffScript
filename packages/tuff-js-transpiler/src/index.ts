@@ -38,6 +38,7 @@ import {
 } from './visitors';
 import {
   EnterScopeArgs,
+  IdentifierTransformers,
   TuffScriptToJSTranspiler,
   TranspilerConstructorArgs,
 } from './types';
@@ -60,10 +61,15 @@ export class Transpiler implements TuffScriptToJSTranspiler {
   program: Program;
   jsCode: string;
   currentScope: BaseSymbolTable;
+  identifierTransformers: IdentifierTransformers;
 
-  constructor({ program }: TranspilerConstructorArgs) {
+  constructor({
+    program,
+    identifierTransformers = {},
+  }: TranspilerConstructorArgs) {
     this.program = program;
     this.jsCode = '';
+    this.identifierTransformers = identifierTransformers;
     this.currentScope = this.createGlobalScope();
   }
 
@@ -202,74 +208,3 @@ export class Transpiler implements TuffScriptToJSTranspiler {
     return transformPrimaryExpression.call(this, { astNode: node });
   }
 }
-
-import { Lexer, Parser as TuffScriptParser } from 'tuffscript';
-
-const simpleFunction = `
-տպել(5 փոքր է 5)
-տպել(5 մեծ է 5)
-տպել(5 հավասար է 5)
-տպել(5 հավասար է 5)
-տպել(ոչ 5 հավասար է 5)
-տպել(5 հավասար է 5 և 5 մեծ է 4)
-տպել(5 փոքր է 5 կամ 5 մեծ է 4)
-
-տպել(5+5+5)
-տպել(5-5+18)
-տպել(5/5)
-տպել(5*5)
-տպել(5%5)   
-
-
-
-պահել 9 ա ում
-պահել -5 բ ում
-տպել(ա - բ)
-
-պահել սահմանված չէ ա ում
-
-եթե ա կատարել
-  3
-հակառակ դեպքում 
-  4
-ավարտել
-
-տպել(5)
-տպել('myString')
-տպել(ճշմարտություն)
-տպել(կեղծիք)
-տպել(սահմանված չէ)
-
-պահել {բ: 'my_property'} ա ում
-տպել(ա)
-տպել(ա.բ)
-
-
-ֆունկցիա իմՖունկցիա(ա, բ) կատարել
-  տպել(ա, բ)
-  ֆունկցիա իմՖունկցիաիմՖունկցիա(ա, բ) կատարել
-  տպել(ա, բ)
-  եթե ա կատարել
-  3
-հակառակ դեպքում 
-  -ա.բ հավասար է 5
-ավարտել
-ավարտել
-պահել սահմանված չէ աաաա ում
-ավարտել
-
-իմՖունկցիա(1,2)
-
-
-
-
-`;
-
-const lexer = new Lexer(simpleFunction);
-const tokens = lexer.lexAnalysis();
-const tuffscriptParser = new TuffScriptParser({ tokens });
-const astTree = tuffscriptParser.produceAST();
-
-const transpiler = new Transpiler({ program: astTree });
-
-console.log(transpiler.transpile());
