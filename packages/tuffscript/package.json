@@ -7,7 +7,10 @@
     "./ast/types": "./lib/frontend/ast/types.js",
     "./token/constants": "./lib/frontend/lexer/token/constants.js",
     "./token/types": "./lib/frontend/lexer/token/types.js",
-    "./runtime/constants": "./lib/runtime/constants/globalFunctionNames.js"
+    "./runtime/constants": "./lib/runtime/constants/globalFunctionNames.js",
+    "./symbolTable": "./lib/symbolTable/index.js",
+    "./symbolTable/constants": "./lib/symbolTable/constants.js",
+    "./symbolTable/types": "./lib/symbolTable/types.js"
   },
   "typesVersions": {
     "*": {
@@ -16,7 +19,9 @@
         ],
         "token/constants": ["./lib/frontend/lexer/token/constants.d.ts"],
         "token/types": ["./lib/frontend/lexer/token/types.d.ts"],
-        "runtime/constants": ["./lib/runtime/constants/globalFunctionNames.d.ts"]
+        "runtime/constants": ["./lib/runtime/constants/globalFunctionNames.d.ts"],
+        "symbolTable/constants": ["./lib/symbolTable/constants.d.ts"],
+        "symbolTable/types": ["./lib/symbolTable/types.d.ts"]
     }
 },
   "files": [

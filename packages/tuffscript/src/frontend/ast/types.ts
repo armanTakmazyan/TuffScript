@@ -31,7 +31,7 @@ export enum ExpressionNodeType {
 export interface BaseExpression {
   type: ExpressionNodeType;
   position: Position;
-  accept(visitor: ASTNodeVisitor): void;
+  accept<T>(visitor: ASTNodeVisitor): T;
 }
 
 // HIGH-LEVEL/COMPLEX EXPRESSIONS
@@ -152,19 +152,21 @@ export interface Program {
   type: 'Program';
   body: Expressions;
 }
-export interface ASTNodeVisitor {
-  visitFunctionDeclaration(node: FunctionDeclaration): void;
-  visitAssignmentExpression(node: AssignmentExpression): void;
-  visitIfExpression(node: IfExpression): void;
-  visitObjectLiteral(node: ObjectLiteral): void;
-  visitBinaryExpression(node: BinaryExpression): void;
-  visitUnaryExpression(node: UnaryExpression): void;
-  visitMemberExpression(node: MemberExpression): void;
-  visitCallExpression(node: CallExpression): void;
-  visitIdentifier(node: Identifier): void;
-  visitNumberLiteral(node: NumberLiteral): void;
-  visitStringLiteral(node: StringLiteral): void;
-  visitTrueLiteral(node: TrueLiteral): void;
-  visitFalseLiteral(node: FalseLiteral): void;
-  visitNilLiteral(node: NilLiteral): void;
+
+// TODO: The type declarations need to be improved
+export interface ASTNodeVisitor<T = any> {
+  visitFunctionDeclaration(node: FunctionDeclaration): T;
+  visitAssignmentExpression(node: AssignmentExpression): T;
+  visitIfExpression(node: IfExpression): T;
+  visitObjectLiteral(node: ObjectLiteral): T;
+  visitBinaryExpression(node: BinaryExpression): T;
+  visitUnaryExpression(node: UnaryExpression): T;
+  visitMemberExpression(node: MemberExpression): T;
+  visitCallExpression(node: CallExpression): T;
+  visitIdentifier(node: Identifier): T;
+  visitNumberLiteral(node: NumberLiteral): T;
+  visitStringLiteral(node: StringLiteral): T;
+  visitTrueLiteral(node: TrueLiteral): T;
+  visitFalseLiteral(node: FalseLiteral): T;
+  visitNilLiteral(node: NilLiteral): T;
 }

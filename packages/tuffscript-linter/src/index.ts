@@ -1,4 +1,13 @@
 import { globalFunctionNames } from 'tuffscript/runtime/constants';
+import { GLOBAL_IMMUTABLE_SYMBOL_POSITION } from 'tuffscript/symbolTable/constants';
+import { Symbol, SymbolTable } from 'tuffscript/symbolTable';
+import {
+  SymbolEntity,
+  SymbolEntityTypes,
+  BaseSymbolTable,
+  References,
+  SymbolTableScopeNames,
+} from 'tuffscript/symbolTable/types';
 import {
   FunctionDeclaration,
   AssignmentExpression,
@@ -15,7 +24,6 @@ import {
   FalseLiteral,
   NilLiteral,
 } from 'tuffscript/ast/types';
-import { GLOBAL_IMMUTABLE_SYMBOL_POSITION } from './SymbolTable/constants';
 import {
   analyzeFunctionDeclaration,
   analyzeAssignmentExpression,
@@ -31,14 +39,6 @@ import {
   setupFunctionScope,
   registerVariablesFromExpressions,
 } from './visitors/helpers';
-import { Symbol, SymbolTable } from './SymbolTable';
-import {
-  SymbolEntity,
-  SymbolEntityTypes,
-  BaseSymbolTable,
-  References,
-  SymbolTableScopeNames,
-} from './SymbolTable/types';
 import {
   GlobalImmutableSymbols,
   EnterScopeArgs,
