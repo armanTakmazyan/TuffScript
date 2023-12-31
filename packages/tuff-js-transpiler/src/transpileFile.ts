@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+import path from 'path';
 import fs from 'fs/promises';
 import { Lexer, Parser } from 'tuffscript';
 import { Transpiler } from './index';
@@ -9,6 +11,7 @@ if (process.argv.length < 3) {
 }
 
 const filePath = process.argv[2];
+const fileOutputDirectory = process.argv[3] || '.';
 
 async function transpileFile() {
   try {
@@ -22,8 +25,17 @@ async function transpileFile() {
     const transpiler = new Transpiler({ program: astTree });
     const jsCode = transpiler.transpile();
 
-    // Change the file extension to .tuff
-    const newFilePath = filePath.replace(/\.[^/.]+$/, '') + '.js';
+    // Change the file extension to .js
+    const fileName = path.basename(filePath).replace(/\.[^/.]+$/, '') + '.js';
+
+    // Ensure output directory exists or create it
+    await fs.mkdir(fileOutputDirectory, { recursive: true });
+
+    // Construct the new file path with the output directory
+    const newFilePath = path.join(fileOutputDirectory, fileName);
+
+    // Write the transpiled code to the new file
+    await fs.writeFile(newFilePath, jsCode, 'utf8');
 
     // Write the transpiled code to the new file
     await fs.writeFile(newFilePath, jsCode, 'utf8');
