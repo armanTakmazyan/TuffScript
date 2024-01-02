@@ -1,35 +1,39 @@
 {
-  "name": "tuff-js-transpiler",
+  "name": "create-tuff-web-starter",
   "version": "1.0.0",
   "main": "./lib/index.js",
   "files": [
     "lib/**/*"
   ],
   "license": "MIT",
-  "description": "Transpiler for converting TuffScript code to JavaScript",
+  "description": "A script for generating a starter template for web applications using TuffScript",
   "author": "Arman Takmazyan",
   "sideEffects": false,
   "scripts": {
-    "transpile-tuff-to-js": "node lib/transpileFile.js",
+    "create-project": "cross-env NODE_ENV=development node lib/index.js",
     "build": "yarn rimraf ./lib && tsc --declaration",
     "watch": "npx tsc -w",
     "start": "yarn run build:live",
     "build:live": "nodemon"
   },
   "dependencies": {
-    "@babel/generator": "^7.23.5",
-    "@babel/parser": "^7.23.5",
-    "@babel/types": "^7.23.5",
+    "commander": "^11.1.0",
+    "cross-env": "^7.0.3",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^9.2.12",
+    "pacote": "^17.0.5",
     "tuffscript": "^1.0.0"
   },
   "devDependencies": {
-    "@types/babel__generator": "^7.6.7",
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.7",
     "@types/node": "^20.8.10",
+    "@types/pacote": "^11.1.8",
     "nodemon": "^3.0.1",
     "rimraf": "^5.0.5",
     "typescript": "^5.2.2"
   },
   "bin": {
-    "transpile-tuff-to-js": "./lib/transpileFile.js"
+    "create-tuff-web-starter": "./lib/index.js"
   }
 }
