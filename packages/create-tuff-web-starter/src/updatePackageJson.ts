@@ -14,7 +14,6 @@ export async function updatePackageJson({
     packageJson.description = `${projectName} project`;
     delete packageJson.author;
 
-    // Write the updated package.json back to the project directory
     await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
 
     console.log('Updated package.json successfully');

@@ -16,10 +16,8 @@
     "start": "yarn clear:dist && yarn copy:public && yarn build:live",
     "build": "yarn clear:dist && yarn copy:public && yarn transpile-tuff-to-js"
   },
-  "dependencies": {
-    "tuff-js-transpiler": "^1.0.0"
-  },
   "devDependencies": {
+    "tuff-js-transpiler": "^1.0.0",
     "@atao60/fse-cli": "^0.1.9",
     "@babel/types": "^7.23.5",
     "fs-extra": "^11.2.0",

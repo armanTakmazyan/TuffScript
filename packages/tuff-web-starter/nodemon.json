@@ -1,5 +1,5 @@
 {
-    "ext": "*.tuff",
-    "exec": "yarn transpile-tuff-to-js"
-  }
+  "ext": "*.tuff",
+  "exec": "yarn transpile-tuff-to-js"
+}
   

@@ -58,9 +58,6 @@ async function transpileFile() {
     // Write the transpiled code to the new file
     await fs.writeFile(newFilePath, jsCode, 'utf8');
 
-    // Write the transpiled code to the new file
-    await fs.writeFile(newFilePath, jsCode, 'utf8');
-
     console.log(
       `File "${newFilePath}" has been successfully created with the transpiled code.`,
     );
