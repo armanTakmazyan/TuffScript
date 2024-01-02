@@ -1,3 +1,5 @@
+import * as path from 'path';
+import * as fs from 'fs/promises';
 import * as vscode from 'vscode';
 import type {
   Lexer as TuffScriptLexer,
@@ -6,6 +8,47 @@ import type {
 import { Position } from 'tuffscript/token/types';
 import type { TuffScriptLinter } from 'tuffscript-linter';
 
+const configFileName = 'tuff-linter.config.json';
+
+async function findLinterConfig(documentPath: string): Promise<any | null> {
+  // Retrieve the first workspace folder as the root; this can be adjusted as needed for multi-root workspaces
+  const workspaceRoot = vscode.workspace.workspaceFolders
+    ? vscode.workspace.workspaceFolders[0].uri.fsPath
+    : null;
+
+  if (!workspaceRoot) {
+    // No workspace is open
+    return null;
+  }
+
+  let currentDirectory = path.dirname(documentPath);
+
+  while (currentDirectory) {
+    const potentialConfigPath = path.join(currentDirectory, configFileName);
+
+    try {
+      const fileContent = await fs.readFile(potentialConfigPath, 'utf8');
+      const config = JSON.parse(fileContent);
+      return config;
+    } catch (error) {
+      // If error occurs (file not found, can't open, or parsing issue), continue looking
+    }
+
+    // If reached the root of the workspace or system root, stop
+    if (
+      path.dirname(currentDirectory) === workspaceRoot ||
+      currentDirectory === path.dirname(currentDirectory)
+    ) {
+      break;
+    }
+
+    // Move up one directory
+    currentDirectory = path.dirname(currentDirectory);
+  }
+
+  return null;
+}
+
 // TODO: Create a seperate global helpers package for this
 async function loadModule(moduleName: string) {
   const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -13,25 +56,25 @@ async function loadModule(moduleName: string) {
     throw new Error('No workspace folder is open.');
   }
 
-  let tuffScriptModule;
+  let module;
   for (const folder of workspaceFolders) {
     try {
       const workspaceFolderPath = folder.uri.fsPath;
       const localModulePath = require.resolve(moduleName, {
         paths: [workspaceFolderPath],
       });
-      tuffScriptModule = require(localModulePath);
+      module = require(localModulePath);
       break; // Stop if module is found
     } catch (error) {
       // Continue checking next folder
     }
   }
 
-  if (!tuffScriptModule) {
+  if (!module) {
     throw new Error(`${moduleName} module not found in any workspace folder`);
   }
 
-  return tuffScriptModule;
+  return module;
 }
 
 let diagnosticCollection: vscode.DiagnosticCollection;
@@ -107,7 +150,8 @@ export async function activate(
   vscode.commands.executeCommand('tuffScriptLinter.lintCode');
 }
 
-function lintDocument({
+// TODO: Display errors that may arise during tokenization and parsing stages
+async function lintDocument({
   document,
   Lexer,
   Parser,
@@ -126,7 +170,13 @@ function lintDocument({
   const parser = new Parser({ tokens });
   const astTree = parser.produceAST();
 
-  const tuffScriptLinter = new Linter();
+  const documentPath = document.uri.fsPath;
+  const linterConfig = await findLinterConfig(documentPath);
+
+  const tuffScriptLinter = new Linter({
+    globalImmutableSymbols: linterConfig?.globalImmutableSymbols ?? [],
+  });
+
   const lintingResults = tuffScriptLinter.lintProgram({ program: astTree });
 
   const outputChannel = getOrCreateOutputChannel({ name: 'TuffScript Linter' });

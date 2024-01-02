@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@atao60/fse-cli": "^0.1.9",
+    "@babel/types": "^7.23.5",
     "fs-extra": "^11.2.0",
     "nodemon": "^3.0.1",
     "rimraf": "^5.0.5"

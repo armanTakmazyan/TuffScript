@@ -1,3 +1,5 @@
+import * as t from '@babel/types';
+import { Identifier as JSIdentifier } from '@babel/types';
 import {
   JSBinaryOperator,
   JSUnaryOperator,
@@ -11,8 +13,22 @@ import {
   UnaryOperatorMappingDictionaryKeys,
   logicalOperatorMappingDictionary,
   unaryOperatorMappingDictionary,
+  armenianAlphabetTranslit,
+  ArmenianAlphabetTranslitKeys,
 } from './constants';
 import { AssignmentExpression, ExpressionNodeType } from 'tuffscript/ast/types';
+
+export function isIdentifierAssignment(
+  node: AssignmentExpression,
+): node is IdentifierAssignment {
+  return node.assignee.type === ExpressionNodeType.Identifier;
+}
+
+export function isArmenianAlphabetTranslitKey(
+  key: string,
+): key is ArmenianAlphabetTranslitKeys {
+  return Object.prototype.hasOwnProperty.call(armenianAlphabetTranslit, key);
+}
 
 export function convertToJSUnaryOperator(
   operator: string,
@@ -44,8 +60,18 @@ export function convertToJSLogicalOperator(
   );
 }
 
-export function isIdentifierAssignment(
-  node: AssignmentExpression,
-): node is IdentifierAssignment {
-  return node.assignee.type === ExpressionNodeType.Identifier;
+export function transliterateArmenianToEnglish(armenianText: string): string {
+  return armenianText
+    .split('')
+    .map(char =>
+      isArmenianAlphabetTranslitKey(char)
+        ? armenianAlphabetTranslit[char]
+        : char,
+    )
+    .join('');
+}
+
+export function createTransliteratedIdentifier(symbol: string): JSIdentifier {
+  const transliteratedSymbol = transliterateArmenianToEnglish(symbol);
+  return t.identifier(transliteratedSymbol);
 }

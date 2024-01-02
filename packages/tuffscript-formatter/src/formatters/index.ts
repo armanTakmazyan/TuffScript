@@ -76,6 +76,9 @@ function formatIfExpression(
   });
   this.stringBuilder.append({ value: `${KeywordValues.Else}\n` });
   this.formatBlock({ block: astNode.elseBody });
+  this.stringBuilder.append({
+    value: createIndentation({ indentationLevel: this.indentationLevel }),
+  });
   this.stringBuilder.append({ value: `${KeywordValues.End}` });
 }
 

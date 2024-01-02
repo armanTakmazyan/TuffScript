@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import path from 'path';
 import fs from 'fs/promises';
+import { pathToFileURL } from 'url';
 import { Lexer, Parser } from 'tuffscript';
 import { Transpiler } from './index';
 
@@ -13,6 +14,19 @@ if (process.argv.length < 3) {
 const filePath = process.argv[2];
 const fileOutputDirectory = process.argv[3] || '.';
 
+const configFileName = 'tuff-to-js.config.js';
+const configFilePath = path.join(process.cwd(), configFileName);
+
+async function loadConfig() {
+  try {
+    const config = await import(pathToFileURL(configFilePath).href);
+    return config.default || {};
+  } catch (error) {
+    console.error(`Could not load the configuration file: ${error}`);
+    return {};
+  }
+}
+
 async function transpileFile() {
   try {
     const code = await fs.readFile(filePath, 'utf8');
@@ -22,7 +36,14 @@ async function transpileFile() {
     const parser = new Parser({ tokens });
     const astTree = parser.produceAST();
 
-    const transpiler = new Transpiler({ program: astTree });
+    const config = await loadConfig();
+    const identifierTransformers = config.identifierTransformers || [];
+
+    const transpiler = new Transpiler({
+      program: astTree,
+      identifierTransformers: identifierTransformers,
+    });
+
     const jsCode = transpiler.transpile();
 
     // Change the file extension to .js

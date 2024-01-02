@@ -6,25 +6,25 @@ async function loadModule(moduleName: string) {
     throw new Error('No workspace folder is open.');
   }
 
-  let tuffScriptModule;
+  let module;
   for (const folder of workspaceFolders) {
     try {
       const workspaceFolderPath = folder.uri.fsPath;
       const localModulePath = require.resolve(moduleName, {
         paths: [workspaceFolderPath],
       });
-      tuffScriptModule = require(localModulePath);
+      module = require(localModulePath);
       break; // Stop if module is found
     } catch (error) {
       // Continue checking next folder
     }
   }
 
-  if (!tuffScriptModule) {
+  if (!module) {
     throw new Error(`${moduleName} module not found in any workspace folder`);
   }
 
-  return tuffScriptModule;
+  return module;
 }
 
 let outputChannel: vscode.OutputChannel;

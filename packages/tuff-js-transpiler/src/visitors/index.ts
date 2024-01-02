@@ -44,6 +44,7 @@ import {
   convertToJSUnaryOperator,
   convertToJSBinaryOperator,
   convertToJSLogicalOperator,
+  createTransliteratedIdentifier,
 } from './helpers';
 import { Transpiler } from '../index';
 
@@ -120,7 +121,7 @@ export function transformFunctionDeclaration(
   this: Transpiler,
   { astNode }: TransformFuntionDeclarationArgs,
 ): TransformFunctionDeclarationResult {
-  const functionName = t.identifier(astNode.name.symbol);
+  const functionName = createTransliteratedIdentifier(astNode.name.symbol);
 
   const functionSymbol = this.currentScope.insertVariableSymbolUnlessExists({
     name: astNode.name.symbol,
@@ -161,7 +162,7 @@ export function transformVariableDeclaration(
   this: Transpiler,
   { astNode }: TransformVariableDeclarationArgs,
 ): TransformVariableDeclarationResult {
-  const variableName = t.identifier(astNode.assignee.symbol);
+  const variableName = createTransliteratedIdentifier(astNode.assignee.symbol);
 
   const variableValue = astNode.value.accept<JSExpression>(this);
 
@@ -242,7 +243,7 @@ export function transformObjectLiteral(
   { astNode }: TransformObjectLiteralArgs,
 ): TransformObjectLiteralResult {
   const properties = astNode.properties.map(prop => {
-    const keyNode = t.identifier(prop.key);
+    const keyNode = createTransliteratedIdentifier(prop.key);
 
     // If valueNode is undefined, use keyNode for both key and value (shorthand property)
     const valueNode = prop.value
@@ -334,7 +335,7 @@ export function transformIdentifier(
     return createDateNowExpression();
   }
 
-  return t.identifier(astNode.symbol);
+  return createTransliteratedIdentifier(astNode.symbol);
 }
 
 export function transformPrimaryExpression(

@@ -38,8 +38,12 @@ export async function configureTemplate({
       projectDirectory,
     });
 
-    const exampleScriptPath = path.join(projectDirectory, 'exampleScript.js');
-    await fs.remove(exampleScriptPath);
+    const nodeModulesPath = path.join(projectDirectory, 'node_modules');
+    const examplesPath = path.join(projectDirectory, 'examples');
+    const distPath = path.join(projectDirectory, 'dist');
+    await fs.remove(nodeModulesPath);
+    await fs.remove(examplesPath);
+    await fs.remove(distPath);
   } catch (error) {
     console.error('Failed to configure template:', error);
   }
