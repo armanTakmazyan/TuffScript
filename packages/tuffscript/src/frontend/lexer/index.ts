@@ -1,3 +1,4 @@
+import { TuffScriptError } from '../../tuffScriptError';
 import { Token } from './token/token';
 import { TokenKind } from './token/types';
 import { processTokenValue } from './token/helpers';
@@ -67,9 +68,10 @@ export class Lexer {
     }
 
     const unexpectedCharacter = this.sourceCode[this.position];
-    throw new Error(
-      `Unexpected character ${unexpectedCharacter} at position ${this.position}.`,
-    );
+    throw new TuffScriptError({
+      message: `Unexpected character ${unexpectedCharacter} at position ${this.position}`,
+      position: { start: this.position },
+    });
   }
 
   private includeToken(token: Token | null): token is Token {

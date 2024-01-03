@@ -16,8 +16,12 @@ export interface EnterScopeArgs {
 
 export type GlobalImmutableSymbols = string[];
 
-export interface LintProgramArgs {
+export interface LintASTArgs {
   program: Program;
+}
+
+export interface LintCodeArgs {
+  code: string;
 }
 
 export interface LintProgramResult {

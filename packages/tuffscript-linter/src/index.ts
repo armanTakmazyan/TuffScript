@@ -1,3 +1,5 @@
+import { Lexer, Parser } from 'tuffscript';
+import { TuffScriptError } from 'tuffscript/tuffScriptError';
 import { globalFunctionNames } from 'tuffscript/runtime/constants';
 import { GLOBAL_IMMUTABLE_SYMBOL_POSITION } from 'tuffscript/symbolTable/constants';
 import { Symbol, SymbolTable } from 'tuffscript/symbolTable';
@@ -42,9 +44,10 @@ import {
 import {
   GlobalImmutableSymbols,
   EnterScopeArgs,
-  LintProgramArgs,
   LinterVisitor,
   LinterVisitorArgs,
+  LintASTArgs,
+  LintCodeArgs,
   LintProgramResult,
 } from './type';
 
@@ -204,7 +207,7 @@ export class TuffScriptLinter implements LinterVisitor {
     analyzePrimaryExpression.call(this, { astNode: node });
   }
 
-  lintProgram({ program }: LintProgramArgs): LintProgramResult {
+  lintAST({ program }: LintASTArgs): LintProgramResult {
     this.resetGlobalScope();
     // TODO: Consider alternative invocation patterns for registerVariablesFromExpressions, possibly integrating into the visitor
     registerVariablesFromExpressions.call(this, {
@@ -220,5 +223,29 @@ export class TuffScriptLinter implements LinterVisitor {
       unresolvedReferences: this.unresolvedReferences,
       referencesBeforeAssignment: this.referencesBeforeAssignment,
     };
+  }
+
+  lintCode({ code }: LintCodeArgs): LintProgramResult {
+    const lexer = new Lexer(code);
+    const tokens = lexer.lexAnalysis();
+
+    const parser = new Parser({ tokens });
+    const astTree = parser.produceAST();
+
+    return this.lintAST({ program: astTree });
+  }
+
+  lintCodeSafely({ code }: LintCodeArgs): LintProgramResult | TuffScriptError {
+    try {
+      return this.lintCode({ code });
+    } catch (error) {
+      if (error instanceof TuffScriptError) {
+        return error;
+      }
+      return new TuffScriptError({
+        message: "There's a problem with your code file",
+        position: { start: 0 },
+      });
+    }
   }
 }

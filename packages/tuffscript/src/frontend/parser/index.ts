@@ -1,3 +1,5 @@
+import { TuffScriptError } from '../../tuffScriptError';
+import { TuffScriptErrorProperties } from '../../tuffScriptError/types';
 import { TokenType } from '../lexer/token/tokenType';
 import { TokenKind } from '../lexer/token/types';
 import { Token } from '../lexer/token/token';
@@ -31,9 +33,11 @@ import {
   createProperty,
 } from '../ast/nodes';
 import {
+  KeywordValues,
   UnaryOperators,
   BinaryOperators,
   IDENTIFIER_TOKEN_PATTERNS,
+  LITERAL_TOKEN_PATTERNS,
   KEYWORD_TOKEN_PATTERNS,
   PUNCTUATION_TOKEN_PATTERNS,
 } from '../lexer/token/constants';
@@ -91,17 +95,18 @@ export class Parser {
     const currentToken = this.at();
 
     if (!token) {
-      this.throwError(
-        `${message ? `${message}. ` : ''}At position ${
+      this.throwError({
+        message: `${message ? `${message}. ` : ''}At position ${
           this.position
         }, expected ${expected[0].name}. But got ${currentToken.value}`,
-      );
+        position: currentToken.position,
+      });
     }
     return token;
   }
 
-  throwError(message: string): never {
-    throw new Error(message);
+  throwError({ message, position }: TuffScriptErrorProperties): never {
+    throw new TuffScriptError({ message, position });
   }
 
   produceAST(): Program {
@@ -134,14 +139,15 @@ export class Parser {
     const functionKeyword = this.eat(); // eat Function keyword
     const functionName = this.require({
       expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
-      message: 'Expected function name following "ֆունկցիա" keyword',
+      message: `Expected a function name following the "${KeywordValues.Function}" keyword`,
     });
 
     const functionArguments = this.parseArguments().map(argument => {
       if (argument.type !== ExpressionNodeType.Identifier) {
-        this.throwError(
-          `Function parameter must be an identifier, found '${argument.type}' instead.`,
-        );
+        this.throwError({
+          message: `Function parameter must be an identifier, found '${argument.type}' instead`,
+          position: argument.position,
+        });
       }
       return argument;
     });
@@ -159,8 +165,7 @@ export class Parser {
 
     const endKeyword = this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.End],
-      message:
-        'Closing keyword "ավարտել" expected at the end of the function declaration',
+      message: `Closing keyword "${KeywordValues.End}" expected at the end of the function declaration`,
     });
 
     const functionDeclaration = functionDeclarationNode({
@@ -185,15 +190,16 @@ export class Parser {
       assignee.type !== ExpressionNodeType.Identifier &&
       assignee.type !== ExpressionNodeType.MemberExpression
     ) {
-      this.throwError(
-        'Invalid assignment target. Expecting an identifier or member expression',
-      );
+      this.throwError({
+        message:
+          'Invalid assignment target. Expecting an identifier or member expression',
+        position: assignee.position,
+      });
     }
 
     const containmentSuffix = this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.ContainmentSuffix],
-      message:
-        'Incorrect Assignment Format. Ensure the format: պահել <primitive_expression> <variable_name> ում',
+      message: `Incorrect Assignment Format. Ensure the format: ${KeywordValues.Store} <primitive_expression> <variable_name> ${KeywordValues.ContainmentSuffix}`,
     });
 
     const declaration: AssignmentExpression = assignmentExpressionNode({
@@ -213,7 +219,7 @@ export class Parser {
     const condition = this.parsePrimitiveExpression();
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.Do],
-      message: 'Incorrect If Expression',
+      message: `Expected the "${KeywordValues.Do}" keyword for a correct if expression`,
     });
 
     const thenBody: Expressions = [];
@@ -224,7 +230,7 @@ export class Parser {
 
     this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.Else],
-      message: 'Incorrect If Expression',
+      message: `Expected the "${KeywordValues.Else}" keyword for a correct if expression`,
     });
 
     const elseBody: Expressions = [];
@@ -235,7 +241,7 @@ export class Parser {
 
     const endKeyword = this.require({
       expected: [KEYWORD_TOKEN_PATTERNS.End],
-      message: 'Incorrect If Expression',
+      message: `Expected the "${KeywordValues.End}" keyword for a correct if expression`,
     });
 
     const ifExpression = ifExpressionNode({
@@ -265,33 +271,42 @@ export class Parser {
 
     while (!this.isEOF() && this.at().type.name !== TokenKind.CloseBrace) {
       const key = this.require({
-        expected: [IDENTIFIER_TOKEN_PATTERNS.Identifier],
+        expected: [
+          IDENTIFIER_TOKEN_PATTERNS.Identifier,
+          LITERAL_TOKEN_PATTERNS.String,
+        ],
         message: 'Object literal key expected',
       });
 
       // Handle shorthand property notation in object literals (e.g., { key, })
-      if (this.at().type.name === TokenKind.Comma) {
-        this.eat(); // eat comma token
+      if (key.type.name === TokenKind.Identifier) {
+        properties.push(
+          createProperty({
+            token: key,
+          }),
+        );
 
-        properties.push(
-          createProperty({
-            token: key,
-          }),
-        );
-        continue;
-      } else if (this.at().type.name === TokenKind.CloseBrace) {
-        properties.push(
-          createProperty({
-            token: key,
-          }),
-        );
+        const currentToken = this.at();
+        if (
+          currentToken.type.name !== TokenKind.Comma &&
+          currentToken.type.name !== TokenKind.CloseBrace
+        ) {
+          this.throwError({
+            message:
+              'Expected a comma (,) or a closing brace (}) after an identifier in shorthand property notation within the object literal',
+            position: currentToken.position,
+          });
+        }
+        if (currentToken.type.name === TokenKind.Comma) {
+          this.eat();
+        }
         continue;
       }
 
       // Expect a colon after property key in object literal (e.g., { key: value })
       this.require({
         expected: [PUNCTUATION_TOKEN_PATTERNS.Colon],
-        message: 'Missing colon following identifier in ObjectExpr',
+        message: 'Missing colon following identifier in ObjectExpression',
       });
 
       const value = this.parsePrimitiveExpression();
@@ -509,7 +524,9 @@ export class Parser {
   parseArguments(): PrimitiveExpression[] {
     this.require({
       expected: [PUNCTUATION_TOKEN_PATTERNS.OpenParen],
+      message: 'Expected an opening parenthesis "(" to start the argument list',
     });
+
     const args =
       this.at().type.name === TokenKind.CloseParen
         ? []
@@ -547,14 +564,20 @@ export class Parser {
         // Parse RHS as identifier for dot notation
         property = this.parsePrimaryExpression();
         if (property.type !== ExpressionNodeType.Identifier) {
-          this.throwError(
-            'Cannonot use dot operator without right hand side being an identifier',
-          );
+          this.throwError({
+            message:
+              'Cannonot use dot operator without right hand side being an identifier',
+            position: property.position,
+          });
         }
       } else {
         // Handle computed property access (e.g., obj[expr])
         property = this.parsePrimitiveExpression();
-        this.require({ expected: [PUNCTUATION_TOKEN_PATTERNS.CloseBracket] });
+        this.require({
+          expected: [PUNCTUATION_TOKEN_PATTERNS.CloseBracket],
+          message:
+            'Expected a closing bracket "]" to complete the computed property access',
+        });
       }
 
       primaryExpression = memberExpressionNode({
@@ -594,11 +617,18 @@ export class Parser {
       case TokenKind.OpenParen: {
         this.eat(); // eat opening parenthesis
         const value = this.parsePrimitiveExpression();
-        this.require({ expected: [PUNCTUATION_TOKEN_PATTERNS.CloseParen] });
+        this.require({
+          expected: [PUNCTUATION_TOKEN_PATTERNS.CloseParen],
+          message:
+            'Expected a closing parenthesis ")" to match the opening parenthesis "("',
+        });
         return value;
       }
       default: {
-        this.throwError('Unexpected token found during parsing!');
+        this.throwError({
+          message: 'Unexpected token found during parsing!',
+          position: token.position,
+        });
       }
     }
   }

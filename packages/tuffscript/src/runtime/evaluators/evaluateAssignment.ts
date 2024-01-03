@@ -24,7 +24,7 @@ export function evaluatePropertyAssignment({
     property: assignment.assignee.property,
   });
 
-  const newValue = evaluate({ environment, astNode: assignment.value });
+  const newValue = evaluate({ astNode: assignment.value, environment });
   targetObject.properties.set(propertyKey, newValue);
 
   return targetObject;

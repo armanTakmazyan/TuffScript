@@ -1,13 +1,9 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import * as vscode from 'vscode';
-import type {
-  Lexer as TuffScriptLexer,
-  Parser as TuffScriptParser,
-} from 'tuffscript';
-import { Position } from 'tuffscript/token/types';
+import type { Position } from 'tuffscript/token/types';
+import type { TuffScriptError as TuffScriptErrorType } from 'tuffscript/tuffScriptError';
 import type { TuffScriptLinter } from 'tuffscript-linter';
-
 const configFileName = 'tuff-linter.config.json';
 
 async function findLinterConfig(documentPath: string): Promise<any | null> {
@@ -114,14 +110,15 @@ export async function activate(
 
       try {
         // Load the necessary modules for linting
-        const { Lexer, Parser } = await loadModule('tuffscript');
+        const { TuffScriptError } = await loadModule(
+          'tuffscript/tuffScriptError',
+        );
         const { TuffScriptLinter } = await loadModule('tuffscript-linter');
 
         const handleLinting = (document: vscode.TextDocument) => {
           lintDocument({
-            document: document,
-            Lexer,
-            Parser,
+            document,
+            TuffScriptError,
             Linter: TuffScriptLinter,
           });
         };
@@ -150,25 +147,16 @@ export async function activate(
   vscode.commands.executeCommand('tuffScriptLinter.lintCode');
 }
 
-// TODO: Display errors that may arise during tokenization and parsing stages
 async function lintDocument({
   document,
-  Lexer,
-  Parser,
   Linter,
+  TuffScriptError,
 }: {
   document: vscode.TextDocument;
-  Lexer: typeof TuffScriptLexer;
-  Parser: typeof TuffScriptParser;
   Linter: typeof TuffScriptLinter;
+  TuffScriptError: typeof TuffScriptErrorType;
 }) {
   if (document.languageId !== 'tuffscript') return;
-
-  const lexer = new Lexer(document.getText());
-  const tokens = lexer.lexAnalysis();
-
-  const parser = new Parser({ tokens });
-  const astTree = parser.produceAST();
 
   const documentPath = document.uri.fsPath;
   const linterConfig = await findLinterConfig(documentPath);
@@ -177,7 +165,9 @@ async function lintDocument({
     globalImmutableSymbols: linterConfig?.globalImmutableSymbols ?? [],
   });
 
-  const lintingResults = tuffScriptLinter.lintProgram({ program: astTree });
+  const lintingResults = tuffScriptLinter.lintCodeSafely({
+    code: document.getText(),
+  });
 
   const outputChannel = getOrCreateOutputChannel({ name: 'TuffScript Linter' });
 
@@ -200,31 +190,42 @@ async function lintDocument({
     diagnostics.push(new vscode.Diagnostic(range, message, severity));
   };
 
-  lintingResults.unresolvedReferences.forEach(unresolvedReference => {
+  if (lintingResults instanceof TuffScriptError) {
     createDiagnosticMessage({
-      position: unresolvedReference.position,
+      position: {
+        start: lintingResults.position.start,
+        end: lintingResults.position.start + 1,
+      },
       severity: vscode.DiagnosticSeverity.Error,
-      message: `Unresolved Reference: ${unresolvedReference.identifier}`,
+      message: lintingResults.message,
     });
-  });
-
-  lintingResults.referencesBeforeAssignment.forEach(
-    referenceBeforeAssignment => {
+  } else {
+    lintingResults.unresolvedReferences.forEach(unresolvedReference => {
       createDiagnosticMessage({
-        position: referenceBeforeAssignment.position,
+        position: unresolvedReference.position,
         severity: vscode.DiagnosticSeverity.Error,
-        message: `Referenced before assignment: ${referenceBeforeAssignment.identifier}`,
+        message: `Unresolved Reference: ${unresolvedReference.identifier}`,
       });
-    },
-  );
-
-  lintingResults.unusedSymbols.forEach(unusedSymbol => {
-    createDiagnosticMessage({
-      position: unusedSymbol.position,
-      severity: vscode.DiagnosticSeverity.Warning,
-      message: `Unused variable: ${unusedSymbol.name}`,
     });
-  });
+
+    lintingResults.referencesBeforeAssignment.forEach(
+      referenceBeforeAssignment => {
+        createDiagnosticMessage({
+          position: referenceBeforeAssignment.position,
+          severity: vscode.DiagnosticSeverity.Error,
+          message: `Referenced before assignment: ${referenceBeforeAssignment.identifier}`,
+        });
+      },
+    );
+
+    lintingResults.unusedSymbols.forEach(unusedSymbol => {
+      createDiagnosticMessage({
+        position: unusedSymbol.position,
+        severity: vscode.DiagnosticSeverity.Warning,
+        message: `Unused variable: ${unusedSymbol.name}`,
+      });
+    });
+  }
 
   diagnosticCollection.set(document.uri, diagnostics);
 

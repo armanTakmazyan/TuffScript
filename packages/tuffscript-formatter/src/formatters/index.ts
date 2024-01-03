@@ -92,12 +92,12 @@ export function formatObjectLiteral(
   this.withIncreasedIndentation(() => {
     properties.forEach((property, index) => {
       const newIndentationLevel = createIndentation({
-        indentationLevel: this.indentationLevel + 1,
+        indentationLevel: this.indentationLevel,
       });
 
       if (property.value) {
         this.stringBuilder.append({
-          value: newIndentationLevel + property.key + ': ',
+          value: newIndentationLevel + `'${property.key}'` + ': ',
         });
         property.value.accept(this);
       } else {

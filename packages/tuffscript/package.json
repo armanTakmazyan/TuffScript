@@ -10,7 +10,8 @@
     "./runtime/constants": "./lib/runtime/constants/globalFunctionNames.js",
     "./symbolTable": "./lib/symbolTable/index.js",
     "./symbolTable/constants": "./lib/symbolTable/constants.js",
-    "./symbolTable/types": "./lib/symbolTable/types.js"
+    "./symbolTable/types": "./lib/symbolTable/types.js",
+    "./tuffScriptError": "./lib/tuffScriptError/index.js"
   },
   "typesVersions": {
     "*": {
@@ -23,7 +24,7 @@
         "symbolTable/constants": ["./lib/symbolTable/constants.d.ts"],
         "symbolTable/types": ["./lib/symbolTable/types.d.ts"]
     }
-},
+  },
   "files": [
     "lib/**/*"
   ],
@@ -32,6 +33,7 @@
   "author": "Arman Takmazyan",
   "sideEffects": false,
   "scripts": {
+    "evaluateTuffScript": "node ./lib/evaluateTuffScript.js",
     "build": "yarn rimraf ./lib && tsc --declaration",
     "watch": "npx tsc -w",
     "start": "yarn run build:live",

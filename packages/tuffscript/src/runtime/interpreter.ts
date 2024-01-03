@@ -7,6 +7,7 @@ interface InterpreterArgs {
   program: Program;
 }
 
+// TODO: Improve error messages
 export class Interpreter {
   program: Program;
 
