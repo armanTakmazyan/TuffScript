@@ -20,6 +20,7 @@ export interface FormatterVisitorConstructorArgs {
 
 export interface FormatBlockArgs {
   block: Expressions;
+  lineEnding?: string;
 }
 
 export interface FormatterVisitor extends ASTNodeVisitor {

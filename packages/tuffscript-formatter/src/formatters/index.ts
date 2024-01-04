@@ -44,7 +44,7 @@ export function formatFunctionDeclaration(
     value: astNode.arguments.map(argument => argument.symbol).join(', '),
   });
   this.stringBuilder.append({ value: `) ${KeywordValues.Do}\n` });
-  this.formatBlock({ block: astNode.body });
+  this.formatBlock({ block: astNode.body, lineEnding: '\n\n' });
   this.stringBuilder.append({
     value:
       createIndentation({ indentationLevel: this.indentationLevel }) +
@@ -167,7 +167,7 @@ export function formatCallExpression(
   for (const [argumentIndex, argument] of astNode.arguments.entries()) {
     argument.accept(this);
     if (argumentIndex < astNode.arguments.length - 1) {
-      this.stringBuilder.append({ value: ',' });
+      this.stringBuilder.append({ value: ', ' });
     }
   }
   this.stringBuilder.append({ value: ')' });
@@ -218,15 +218,21 @@ export class Formatter implements FormatterVisitor {
     this.indentationLevel--;
   }
 
-  formatBlock(this: FormatterVisitor, { block }: FormatBlockArgs): void {
+  formatBlock(
+    this: FormatterVisitor,
+    { block, lineEnding = '\n' }: FormatBlockArgs,
+  ): void {
     this.withIncreasedIndentation(function (this: FormatterVisitor) {
-      for (const expression of block) {
+      for (const [index, expression] of block.entries()) {
         this.stringBuilder.append({
           value: createIndentation({ indentationLevel: this.indentationLevel }),
         });
         expression.accept(this);
-        this.stringBuilder.append({ value: '\n' });
+        if (index !== block.length - 1) {
+          this.stringBuilder.append({ value: lineEnding });
+        }
       }
+      this.stringBuilder.append({ value: '\n' });
     });
   }
 
