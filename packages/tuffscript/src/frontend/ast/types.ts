@@ -69,11 +69,24 @@ export interface UnaryExpression extends BaseExpression {
   argument: PrimitiveExpression;
 }
 
-export interface MemberExpression extends BaseExpression {
+interface BaseMemberExpression extends BaseExpression {
   type: ExpressionNodeType.MemberExpression;
   object: PrimitiveExpression;
+}
+
+interface NonComputedMemberExpression extends BaseMemberExpression {
+  computed: false;
+  property: Identifier;
+}
+
+interface ComputedMemberExpression extends BaseMemberExpression {
+  computed: true;
   property: PrimitiveExpression;
 }
+
+export type MemberExpression =
+  | NonComputedMemberExpression
+  | ComputedMemberExpression;
 
 export interface CallExpression extends BaseExpression {
   type: ExpressionNodeType.CallExpression;

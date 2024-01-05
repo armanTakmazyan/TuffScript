@@ -145,15 +145,13 @@ export function formatMemberExpression(
   { astNode }: FormatMemberExpressionArgs,
 ): void {
   astNode.object.accept(this);
-
-  if (astNode.property.type === ExpressionNodeType.Identifier) {
-    this.stringBuilder.append({ value: '.' });
-    astNode.property.accept(this);
-  }
-  if (astNode.property.type !== ExpressionNodeType.Identifier) {
+  if (astNode.computed) {
     this.stringBuilder.append({ value: '[' });
     astNode.property.accept(this);
     this.stringBuilder.append({ value: ']' });
+  } else {
+    this.stringBuilder.append({ value: '.' });
+    astNode.property.accept(this);
   }
 }
 

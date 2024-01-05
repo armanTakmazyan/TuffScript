@@ -92,8 +92,10 @@ export function analyzeMemberExpression(
   { astNode }: AnalyzeMemberExpressionArgs,
 ): void {
   astNode.object.accept(this);
-  // No need to analyze 'property' in MemberExpression as it's inherently part of the object structure
-  // astNode.property.accept(this);
+  // Analyze the property if it is a computed property
+  if (astNode.computed) {
+    astNode.property.accept(this);
+  }
 }
 
 export function analyzeCallExpression(

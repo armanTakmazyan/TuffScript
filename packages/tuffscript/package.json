@@ -15,14 +15,24 @@
   },
   "typesVersions": {
     "*": {
-        "ast/types": [
-            "./lib/frontend/ast/types.d.ts"
-        ],
-        "token/constants": ["./lib/frontend/lexer/token/constants.d.ts"],
-        "token/types": ["./lib/frontend/lexer/token/types.d.ts"],
-        "runtime/constants": ["./lib/runtime/constants/globalFunctionNames.d.ts"],
-        "symbolTable/constants": ["./lib/symbolTable/constants.d.ts"],
-        "symbolTable/types": ["./lib/symbolTable/types.d.ts"]
+      "ast/types": [
+        "./lib/frontend/ast/types.d.ts"
+      ],
+      "token/constants": [
+        "./lib/frontend/lexer/token/constants.d.ts"
+      ],
+      "token/types": [
+        "./lib/frontend/lexer/token/types.d.ts"
+      ],
+      "runtime/constants": [
+        "./lib/runtime/constants/globalFunctionNames.d.ts"
+      ],
+      "symbolTable/constants": [
+        "./lib/symbolTable/constants.d.ts"
+      ],
+      "symbolTable/types": [
+        "./lib/symbolTable/types.d.ts"
+      ]
     }
   },
   "files": [
@@ -41,8 +51,13 @@
   },
   "devDependencies": {
     "@types/node": "^20.8.10",
+    "@types/prompt-sync": "^4.2.3",
     "nodemon": "^3.0.1",
+    "prompt-sync": "^4.2.0",
     "rimraf": "^5.0.5",
     "typescript": "^5.2.2"
+  },
+  "bin": {
+    "tuffscript": "./lib/evaluateTuffScript.js"
   }
 }

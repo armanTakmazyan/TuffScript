@@ -21,7 +21,7 @@ export function evaluatePropertyAssignment({
 
   const propertyKey = getMemberExpressionProperty({
     environment,
-    property: assignment.assignee.property,
+    ...assignment.assignee,
   });
 
   const newValue = evaluate({ astNode: assignment.value, environment });

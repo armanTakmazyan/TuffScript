@@ -71,11 +71,26 @@ export type UnaryExpressionNode = (
   args: UnaryExpressionNodeArgs,
 ) => UnaryExpression;
 
-export interface MemberExpressionNodeArgs {
-  object: PrimitiveExpression;
-  property: PrimitiveExpression;
+interface BaseMemberExpressionNodeArgs {
   position: Position;
+  object: PrimitiveExpression;
 }
+
+interface NonComputedMemberExpressionNodeArgs
+  extends BaseMemberExpressionNodeArgs {
+  computed: false;
+  property: Identifier;
+}
+
+interface ComputedMemberExpressionNodeArgs
+  extends BaseMemberExpressionNodeArgs {
+  computed: true;
+  property: PrimitiveExpression;
+}
+
+export type MemberExpressionNodeArgs =
+  | NonComputedMemberExpressionNodeArgs
+  | ComputedMemberExpressionNodeArgs;
 
 export type MemberExpressionNode = (
   args: MemberExpressionNodeArgs,

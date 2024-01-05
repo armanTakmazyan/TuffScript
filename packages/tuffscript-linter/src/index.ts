@@ -118,6 +118,8 @@ export class TuffScriptLinter implements LinterVisitor {
 
   exitScope(): SymbolTable {
     // Identify and store unused variables
+    // TODO: This does not detect if an identifier is referencing an enclosing function name
+    // Refer to the ESLint solution for implementation details: https://github.com/eslint/eslint/blob/95075251fb3ce35aaf7eadbd1d0a737106c13ec6/lib/rules/no-unused-vars.js#L258
     this.currentScope.symbols.forEach(symbol => {
       if (
         !this.globalImmutableSymbols.includes(symbol.name) &&

@@ -1,9 +1,9 @@
 import { ExpressionNodeType } from '../../frontend/ast/types';
 import { Values, ObjectValue, RuntimeValue } from '../values/types';
 import {
-  GetMemberExpressionProperty,
-  GetMemberExpressionObjectArgs,
   EvaluateMemberExpressionArgs,
+  GetMemberExpressionObjectArgs,
+  GetMemberExpressionPropertyArgs,
 } from './types';
 import { evaluate } from './index';
 
@@ -29,19 +29,22 @@ export function getMemberExpressionObject({
 
 export function getMemberExpressionProperty({
   environment,
-  property,
-}: GetMemberExpressionProperty): string {
-  if (property.type === ExpressionNodeType.Identifier) {
-    return property.symbol;
+  ...memberExpressionProperty
+}: GetMemberExpressionPropertyArgs): string {
+  if (memberExpressionProperty.computed) {
+    const evaluatedProperty = evaluate({
+      astNode: memberExpressionProperty.property,
+      environment,
+    });
+
+    if (evaluatedProperty.type !== Values.String) {
+      throw new Error('Incorrect property type computed');
+    }
+
+    return evaluatedProperty.value;
   }
 
-  const evaluatedProperty = evaluate({ astNode: property, environment });
-
-  if (evaluatedProperty.type !== Values.String) {
-    throw new Error('Incorrect property type computed');
-  }
-
-  return evaluatedProperty.value;
+  return memberExpressionProperty.property.symbol;
 }
 
 export function evaluateMemberExpression({
@@ -55,7 +58,7 @@ export function evaluateMemberExpression({
 
   const expressionPropertyValue = getMemberExpressionProperty({
     environment,
-    property: memberExpression.property,
+    ...memberExpression,
   });
 
   const resultValue = expressionObject.properties.get(expressionPropertyValue);

@@ -570,6 +570,15 @@ export class Parser {
             position: property.position,
           });
         }
+        primaryExpression = memberExpressionNode({
+          object: primaryExpression,
+          computed: false,
+          property,
+          position: ExpressionPosition.from({
+            start: primaryExpression,
+            end: property,
+          }),
+        });
       } else {
         // Handle computed property access (e.g., obj[expr])
         property = this.parsePrimitiveExpression();
@@ -578,16 +587,16 @@ export class Parser {
           message:
             'Expected a closing bracket "]" to complete the computed property access',
         });
+        primaryExpression = memberExpressionNode({
+          object: primaryExpression,
+          computed: true,
+          property,
+          position: ExpressionPosition.from({
+            start: primaryExpression,
+            end: property,
+          }),
+        });
       }
-
-      primaryExpression = memberExpressionNode({
-        object: primaryExpression,
-        property,
-        position: ExpressionPosition.from({
-          start: primaryExpression,
-          end: property,
-        }),
-      });
     }
 
     return primaryExpression;

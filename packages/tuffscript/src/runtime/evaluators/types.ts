@@ -128,10 +128,25 @@ export interface GetMemberExpressionObjectArgs {
   memberObject: PrimitiveExpression;
 }
 
-export interface GetMemberExpressionProperty {
+interface BaseGetMemberExpressionPropertyArgs {
   environment: Environment;
+}
+
+interface NonComputedGetMemberExpressionPropertyArgs
+  extends BaseGetMemberExpressionPropertyArgs {
+  computed: false;
+  property: Identifier;
+}
+
+interface ComputedGetMemberExpressionPropertyArgs
+  extends BaseGetMemberExpressionPropertyArgs {
+  computed: true;
   property: PrimitiveExpression;
 }
+
+export type GetMemberExpressionPropertyArgs =
+  | NonComputedGetMemberExpressionPropertyArgs
+  | ComputedGetMemberExpressionPropertyArgs;
 
 export interface EvaluateMemberExpressionArgs {
   environment: Environment;
