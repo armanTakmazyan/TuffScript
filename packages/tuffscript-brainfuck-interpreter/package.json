@@ -10,8 +10,13 @@
   "author": "Arman Takmazyan",
   "sideEffects": false,
   "scripts": {
+    "copy-node-executable": "node -e \"require('fs').copyFileSync(process.execPath, 'brainFuck.exe')\"",
     "transpile-tuff-to-js": "transpile-tuff-to-js ./src/index.tuff ./lib",
+    "bundle:build": "rollup -c",
+    "generate:blob": "node --experimental-sea-config sea-config.json ",
+    "build:executable": "npx postject brainFuck.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2",
     "build": "yarn rimraf ./lib && yarn transpile-tuff-to-js",
+    "build-with-executable": "yarn build && yarn bundle:build && yarn generate:blob && yarn copy-node-executable && yarn build:executable",
     "start:dev": "tuffscript ./src/index.tuff",
     "start": "node ./lib/index.js"
   },
@@ -19,9 +24,13 @@
     "tuffscript": "^1.0.0"
   },
   "devDependencies": {
-    "rimraf": "^5.0.5",
-    "tuff-js-transpiler": "^1.0.0",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "@types/node": "^20.8.10",
-    "@types/prompt-sync": "^4.2.3"
+    "@types/prompt-sync": "^4.2.3",
+    "postject": "^1.0.0-alpha.6",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.9.4",
+    "tuff-js-transpiler": "^1.0.0"
   }
 }
