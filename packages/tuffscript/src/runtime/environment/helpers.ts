@@ -68,7 +68,9 @@ export const createGlobalEnvironment = ({
     value: createNativeFunction({
       execute: ([exitNumber]) => {
         const exitNumberValue =
-          exitNumber.type === Values.Number ? exitNumber.value : 0;
+          !exitNumber || exitNumber.type !== Values.Number
+            ? 0
+            : exitNumber.value;
 
         return process.exit(exitNumberValue);
       },
@@ -90,7 +92,7 @@ export const createGlobalEnvironment = ({
     value: createNativeFunction({
       execute: ([option]) => {
         if (option.type === Values.String) {
-          const result = promptSync(option);
+          const result = promptSync(option.value);
           return createString({ stringValue: result });
         }
         throw new Error(
@@ -110,8 +112,8 @@ export const createGlobalEnvironment = ({
   globalEnvironment.createConstant({
     name: globalFunctionNames.take,
     value: createNativeFunction({
-      execute: ([number, list]) => {
-        if (number.type === Values.Number && list.type === Values.String) {
+      execute: ([list, number]) => {
+        if (list.type === Values.String && number.type === Values.Number) {
           return createString({ stringValue: list.value[number.value] });
         }
         throw new Error(
