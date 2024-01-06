@@ -12,6 +12,9 @@ A Brainfuck Interpreter written in TuffScript.
 
     `++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.`
 
+3.  To transpile the interpreter to Node.js, run the following command:
+    `yarn build`
+
 ### Limitations
 
 Currently, the interpreter has some limitations due to recursion usage. TuffScript under the hood does not optimize recursion, which may affect performance and stack size for complex Brainfuck programs.

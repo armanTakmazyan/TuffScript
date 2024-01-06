@@ -283,7 +283,7 @@ export function transformObjectLiteral(
     const keyNode = t.stringLiteral(prop.key);
     const transliteratedIdentifier = createTransliteratedIdentifier(prop.key);
 
-    // If prop.value is undefined, use transliteratedIdentifier for value (shorthand property)
+    // If prop.value is undefined, use transliteratedIdentifier for the TuffScript shorthand property
     const valueNode = prop.value
       ? prop.value?.accept<JSObjectProperty['value']>(this)
       : transliteratedIdentifier;
