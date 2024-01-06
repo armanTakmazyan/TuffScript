@@ -10,13 +10,18 @@
   "author": "Arman Takmazyan",
   "sideEffects": false,
   "scripts": {
-    "build": "yarn rimraf ./lib && tsc --declaration",
-    "start": "npx tuffscript ./src/index.tuff"
+    "transpile-tuff-to-js": "transpile-tuff-to-js ./src/index.tuff ./lib",
+    "build": "yarn rimraf ./lib && yarn transpile-tuff-to-js",
+    "start:dev": "tuffscript ./src/index.tuff",
+    "start": "node ./lib/index.js"
   },
   "dependencies": {
     "tuffscript": "^1.0.0"
   },
   "devDependencies": {
-    "rimraf": "^5.0.5"
+    "rimraf": "^5.0.5",
+    "tuff-js-transpiler": "^1.0.0",
+    "@types/node": "^20.8.10",
+    "@types/prompt-sync": "^4.2.3"
   }
 }

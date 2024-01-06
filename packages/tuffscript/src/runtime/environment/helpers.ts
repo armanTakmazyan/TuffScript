@@ -173,9 +173,13 @@ export const createGlobalEnvironment = ({
   globalEnvironment.createConstant({
     name: globalFunctionNames.charCodeAt,
     value: createNativeFunction({
-      execute: ([character]) => {
+      execute: ([character, index]) => {
         if (character.type === Values.String) {
-          return createNumber({ numberValue: character.value.charCodeAt(0) });
+          return createNumber({
+            numberValue: character.value.charCodeAt(
+              index.type === Values.Number ? index.value : 0,
+            ),
+          });
         }
 
         throw new Error(
@@ -186,7 +190,7 @@ export const createGlobalEnvironment = ({
   });
 
   globalEnvironment.createConstant({
-    name: globalFunctionNames.createFromCharCode,
+    name: globalFunctionNames.fromCharCode,
     value: createNativeFunction({
       execute: ([code]) =>
         createString({

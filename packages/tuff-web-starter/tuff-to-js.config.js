@@ -14,6 +14,8 @@ const identifierMappings = {
   թիրախ: 'target'
 };
 
+const preset = 'web';
+
 const identifierTransformers = Object.entries(identifierMappings).reduce(
   (result, [key, value]) => {
     result[key] = () => t.identifier(value);
@@ -23,5 +25,6 @@ const identifierTransformers = Object.entries(identifierMappings).reduce(
 );
 
 module.exports = {
+  preset,
   identifierTransformers,
 };

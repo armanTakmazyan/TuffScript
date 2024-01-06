@@ -7,6 +7,7 @@ import {
   FunctionDeclaration as JSFunctionDeclaration,
   VariableDeclaration as JSVariableDeclaration,
   ExpressionStatement as JSExpressionStatement,
+  Statement as JSStatement,
   IfStatement as JSIfStatement,
   BinaryExpression as JSBinaryExpression,
   CallExpression as JSCallExpression,
@@ -33,6 +34,16 @@ export type JSUnaryOperator = JSUnaryExpression['operator'];
 export type JSBinaryOperator = JSBinaryExpression['operator'];
 
 export type JSLogicalOperator = JSLogicalExpression['operator'];
+
+export interface CreateIIFEArgs {
+  body: JSStatement[];
+  options?: {
+    name?: string;
+    isGenerator?: boolean;
+    isAsync?: boolean;
+    arguments?: JSIdentifier[];
+  };
+}
 
 export interface TransformFuntionDeclarationArgs {
   astNode: FunctionDeclaration;

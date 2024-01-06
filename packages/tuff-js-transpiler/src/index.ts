@@ -24,6 +24,8 @@ import {
   TrueLiteral,
   UnaryExpression,
 } from 'tuffscript/ast/types';
+import { utilityFunctions } from './visitors/utilityFunctions';
+import { createIIFE } from './visitors/helpers';
 import {
   transformVariableDeclaration,
   transformAssignmentExpression,
@@ -38,6 +40,7 @@ import {
 } from './visitors';
 import {
   EnterScopeArgs,
+  TranspilerPreset,
   IdentifierTransformers,
   TuffScriptToJSTranspiler,
   TranspilerConstructorArgs,
@@ -58,17 +61,20 @@ import {
 } from './visitors/types';
 
 export class Transpiler implements TuffScriptToJSTranspiler {
-  program: Program;
   jsCode: string;
+  program: Program;
+  preset: TranspilerPreset;
   currentScope: BaseSymbolTable;
   identifierTransformers: IdentifierTransformers;
 
   constructor({
+    preset,
     program,
     identifierTransformers = {},
   }: TranspilerConstructorArgs) {
-    this.program = program;
     this.jsCode = '';
+    this.program = program;
+    this.preset = preset ?? 'node';
     this.identifierTransformers = identifierTransformers;
     this.currentScope = this.createGlobalScope();
   }
@@ -115,7 +121,10 @@ export class Transpiler implements TuffScriptToJSTranspiler {
 
   transpile(): string {
     this.resetGlobalScope();
-    const body: Statement[] = [];
+    const presetUtilities =
+      this.preset === 'web' ? utilityFunctions.web : utilityFunctions.node;
+
+    const body: Statement[] = [...presetUtilities];
 
     this.program.body.forEach(expression => {
       const jsNode = expression.accept<TransformResult>(this);
@@ -131,7 +140,7 @@ export class Transpiler implements TuffScriptToJSTranspiler {
 
     const ast = parser.parse(''); // Parsing empty string creates AST with File and Program nodes
 
-    ast.program.body = body;
+    ast.program.body = [createIIFE({ body })];
 
     this.jsCode = generate(ast).code;
 

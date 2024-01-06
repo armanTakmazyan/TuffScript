@@ -7,12 +7,15 @@ import {
   TransformVariableDeclarationResult,
 } from './visitors/types';
 
+export type TranspilerPreset = 'web' | 'node';
+
 export interface IdentifierTransformers {
   [key: string]: TransformIdentifier;
 }
 
 export interface TranspilerConstructorArgs {
   program: Program;
+  preset?: TranspilerPreset;
   identifierTransformers?: IdentifierTransformers;
 }
 
@@ -22,6 +25,7 @@ export interface EnterScopeArgs {
 
 export interface TuffScriptToJSTranspiler extends ASTNodeVisitor {
   program: Program;
+  preset: TranspilerPreset;
   currentScope: BaseSymbolTable;
   identifierTransformers: IdentifierTransformers;
   transpile: () => string;

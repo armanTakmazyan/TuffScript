@@ -53,9 +53,11 @@
     "@types/node": "^20.8.10",
     "@types/prompt-sync": "^4.2.3",
     "nodemon": "^3.0.1",
-    "prompt-sync": "^4.2.0",
     "rimraf": "^5.0.5",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "prompt-sync": "^4.2.0"
   },
   "bin": {
     "tuffscript": "./lib/evaluateTuffScript.js"

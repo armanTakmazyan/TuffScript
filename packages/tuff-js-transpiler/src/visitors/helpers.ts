@@ -1,6 +1,10 @@
 import * as t from '@babel/types';
-import { Identifier as JSIdentifier } from '@babel/types';
 import {
+  Identifier as JSIdentifier,
+  ExpressionStatement as JSExpressionStatement,
+} from '@babel/types';
+import {
+  CreateIIFEArgs,
   JSBinaryOperator,
   JSUnaryOperator,
   JSLogicalOperator,
@@ -17,6 +21,31 @@ import {
   ArmenianAlphabetTranslitKeys,
 } from './constants';
 import { AssignmentExpression, ExpressionNodeType } from 'tuffscript/ast/types';
+
+export function createIIFE({
+  body,
+  options = {},
+}: CreateIIFEArgs): JSExpressionStatement {
+  const {
+    name,
+    isGenerator = false,
+    isAsync = false,
+    arguments: args = [],
+  } = options;
+
+  const iifeFunctionExpression = t.functionExpression(
+    name ? t.identifier(name) : null,
+    args,
+    t.blockStatement(body),
+    isGenerator,
+    isAsync,
+  );
+
+  const callArguments = args.map(arg => t.identifier(arg.name));
+
+  const iife = t.callExpression(iifeFunctionExpression, callArguments);
+  return t.expressionStatement(iife);
+}
 
 export function isIdentifierAssignment(
   node: AssignmentExpression,

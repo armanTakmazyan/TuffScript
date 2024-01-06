@@ -7,5 +7,5 @@ export const globalFunctionNames = {
   slice: 'կտրել',
   len: 'երկարությունը',
   charCodeAt: 'ստանալՆիշիկոդը',
-  createFromCharCode: 'ստեղծելՆիշիկոդից',
+  fromCharCode: 'ստեղծելՆիշիկոդից',
 } as const;

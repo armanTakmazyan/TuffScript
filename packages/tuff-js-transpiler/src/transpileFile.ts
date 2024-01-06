@@ -37,11 +37,13 @@ async function transpileFile() {
     const astTree = parser.produceAST();
 
     const config = await loadConfig();
+    const preset = config.preset ?? 'node';
     const identifierTransformers = config.identifierTransformers || [];
 
     const transpiler = new Transpiler({
+      preset,
       program: astTree,
-      identifierTransformers: identifierTransformers,
+      identifierTransformers,
     });
 
     const jsCode = transpiler.transpile();

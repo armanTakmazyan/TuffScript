@@ -48,16 +48,53 @@ import {
 } from './helpers';
 import { Transpiler } from '../index';
 
+export function createProcessExitExpression(): JSMemberExpression {
+  const processId = t.identifier('process');
+  const exitId = t.identifier('exit');
+  return t.memberExpression(processId, exitId);
+}
+
 export function createConsoleLogExpression(): JSMemberExpression {
   const consoleId = t.identifier('console');
   const logId = t.identifier('log');
   return t.memberExpression(consoleId, logId);
 }
 
+export function createPromptIdentifier(): JSIdentifier {
+  const promptSyncId = t.identifier('prompt');
+  return promptSyncId;
+}
+
 export function createDateNowExpression(): JSMemberExpression {
   const dateId = t.identifier('Date');
   const nowId = t.identifier('now');
   return t.memberExpression(dateId, nowId);
+}
+
+export function createTakeIdentifier(): JSIdentifier {
+  const takeId = t.identifier('take');
+  return takeId;
+}
+
+export function createLenIdentifier(): JSIdentifier {
+  const lenId = t.identifier('len');
+  return lenId;
+}
+
+export function createTuffScriptSliceIdentifier(): JSIdentifier {
+  const tuffScriptSliceId = t.identifier('tuffScriptSlice');
+  return tuffScriptSliceId;
+}
+
+export function createTuffScriptCharCodeAtIdentifier(): JSIdentifier {
+  const tuffScriptCharCodeId = t.identifier('tuffScriptCharCode');
+  return tuffScriptCharCodeId;
+}
+
+export function createTuffScriptFromCharCodeExpression(): JSMemberExpression {
+  const StringId = t.identifier('String');
+  const fromCharCodeId = t.identifier('fromCharCode');
+  return t.memberExpression(StringId, fromCharCodeId);
 }
 
 // In the assignment expression, we return the value
@@ -243,16 +280,18 @@ export function transformObjectLiteral(
   { astNode }: TransformObjectLiteralArgs,
 ): TransformObjectLiteralResult {
   const properties = astNode.properties.map(prop => {
-    const keyNode = createTransliteratedIdentifier(prop.key);
+    const keyNode = t.stringLiteral(prop.key);
+    const transliteratedIdentifier = createTransliteratedIdentifier(prop.key);
 
-    // If valueNode is undefined, use keyNode for both key and value (shorthand property)
+    // If prop.value is undefined, use transliteratedIdentifier for value (shorthand property)
     const valueNode = prop.value
       ? prop.value?.accept<JSObjectProperty['value']>(this)
-      : keyNode;
+      : transliteratedIdentifier;
 
-    const isShorthand = keyNode === valueNode;
+    const isComputed = false;
+    const isShorthand = false;
 
-    return t.objectProperty(keyNode, valueNode, false, isShorthand);
+    return t.objectProperty(keyNode, valueNode, isComputed, isShorthand);
   });
 
   return t.objectExpression(properties);
@@ -298,9 +337,12 @@ export function transformMemberExpression(
   { astNode }: TransformMemberExpressionArgs,
 ): TransformMemberExpressionResult {
   const transformedObject = astNode.object.accept<JSExpression>(this);
-  const transformedProperty = astNode.property.accept<JSExpression>(this);
 
-  const isComputed = transformedProperty.type !== ExpressionNodeType.Identifier;
+  const transformedProperty: JSExpression = astNode.computed
+    ? astNode.property.accept<JSExpression>(this)
+    : t.stringLiteral(astNode.property.symbol);
+
+  const isComputed = true;
 
   return t.memberExpression(transformedObject, transformedProperty, isComputed);
 }
@@ -327,12 +369,40 @@ export function transformIdentifier(
     });
   }
 
+  if (astNode.symbol === globalFunctionNames.exit) {
+    return createProcessExitExpression();
+  }
+
   if (astNode.symbol === globalFunctionNames.print) {
     return createConsoleLogExpression();
   }
 
+  if (astNode.symbol === globalFunctionNames.prompt) {
+    return createPromptIdentifier();
+  }
+
   if (astNode.symbol === globalFunctionNames.time) {
     return createDateNowExpression();
+  }
+
+  if (astNode.symbol === globalFunctionNames.take) {
+    return createTakeIdentifier();
+  }
+
+  if (astNode.symbol === globalFunctionNames.len) {
+    return createLenIdentifier();
+  }
+
+  if (astNode.symbol === globalFunctionNames.slice) {
+    return createTuffScriptSliceIdentifier();
+  }
+
+  if (astNode.symbol === globalFunctionNames.charCodeAt) {
+    return createTuffScriptCharCodeAtIdentifier();
+  }
+
+  if (astNode.symbol === globalFunctionNames.fromCharCode) {
+    return createTuffScriptFromCharCodeExpression();
   }
 
   return createTransliteratedIdentifier(astNode.symbol);
